@@ -92,13 +92,12 @@ class OutputFile(Properties):
     def __init__(self, filepath):
         self._filepath = filepath
         molecules = self.get_coordinates()
-        self.faulty = False
 
         if not molecules:
+            super().__init__(filetype="Gaussian", filepath=filepath, geometries=None)
             self.faulty = True
-            molecules = None
-
-        super().__init__(filetype="Gaussian", filepath=filepath, geometries=molecules)
+        else:
+            super().__init__(filetype="Gaussian", filepath=filepath, geometries=molecules)
 
         # Where to get gaussian output value from line.split(int)
         # first key = Line to look for in output file

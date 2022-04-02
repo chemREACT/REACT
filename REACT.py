@@ -77,7 +77,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.button_open_project.clicked.connect(self.import_project)
         self.button_create_cluster.clicked.connect(self.create_cluster)
         self.button_plotter.clicked.connect(self.open_plotter)
-        self.button_power_off.clicked.connect(self.power_off_on)
+        # self.button_power_off.clicked.connect(self.power_off_on)
         self.button_pymol.clicked.connect(self.start_pymol)
         self.button_calc_setup.clicked.connect(self.open_calc_setup)
 
@@ -86,13 +86,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Print welcome
         self.append_text("Welcome to REACT", True)
 
-        # Set progressbar to full:
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_progressbar)
-        self.update_progressbar(100)
+        self.progressBar.hide()
 
-        # Threads for jobs take take time:
-        self.threadpool = QThreadPool()
+        # # Set progressbar to full:
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.update_progressbar)
+        # self.update_progressbar(100)
+
+        # # Threads for jobs take take time:
+        # self.threadpool = QThreadPool()
 
         # SPLASH
         self.splash = SplashScreen(self)
@@ -103,8 +105,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         window_size = self.geometry()
         self.move(int(((screen_size.width() - window_size.width())/2)), 50)
 
-        # TODO put this some place in the UI bottom ?
-        self.append_text("\nMultithreading with\nmaximum %d threads" % self.threadpool.maxThreadCount())
+        # # TODO put this some place in the UI bottom ?
+        # self.append_text("\nMultithreading with\nmaximum %d threads" % self.threadpool.maxThreadCount())
 
     def start_pymol(self, return_session=False):
         """
@@ -364,93 +366,147 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         files_path = [x for x in files_path if x.split(".")[-1] in accepted_files]
 
         # Where to start inserting files in project list:
-        items_insert_index = self.tabWidget.currentWidget().count()
+        #items_insert_index = self.tabWidget.currentWidget().count()
 
         # Start thread first:
-        worker = Worker(self.thread_add_files, files_path, items_insert_index)
-        worker.signals.finished.connect(self.thread_complete)
-        worker.signals.progress.connect(self.progress_fn)
-        self.threadpool.start(worker)
-        self.timer.start(10)
+        # worker = Worker(self.thread_add_files, files_path, items_insert_index)
+        # worker.signals.finished.connect(self.thread_complete)
+        # worker.signals.progress.connect(self.progress_fn)
+        # self.threadpool.start(worker)
+        # self.timer.start(10)
 
         # Insert files/filenames to project table:
         for file in files_path:
-            self.tabWidget.currentWidget().insertItem(items_insert_index, file)
-            self.tabWidget.currentWidget().item(items_insert_index).setForeground(QtGui.QColor(80, 80, 80))
-            items_insert_index += 1
+            self.add_file(file)
+            #self.tabWidget.currentWidget().insertItem(items_insert_index, file)
+            #items_insert_index += 1
 
         # Move horizontall scrollbar according to text
-        self.tabWidget.currentWidget().repaint()
-        scrollbar = self.tabWidget.currentWidget().horizontalScrollBar()
-        scrollbar.setValue(self.tabWidget.currentWidget().horizontalScrollBar().maximum())
+        # self.tabWidget.currentWidget().repaint()
+        # scrollbar = self.tabWidget.currentWidget().horizontalScrollBar()
+        # scrollbar.setValue(self.tabWidget.currentWidget().horizontalScrollBar().maximum())
 
-    def thread_add_files(self, file_paths, item_index, progress_callback, results_callback):
-        """
-        :param file_paths:
-        :param item_index: index where to start insertion of files in list
-        :param progress_callback:
-        :return:
-        """
-        # set progressbar to 1:
-        self.update_progressbar(1)
-        pymol_defaults = False
-        for n in range(len(file_paths)):
-            file = file_paths[n]
-            print(file)
-            self.states[self.state_index].add_file(file)
-            if n == len(file_paths) - 1:
-                pymol_defaults = True
-            progress_callback.emit({self.update_progressbar: ((int(n+1) * 100 / len(file_paths)),),
-                                    self.check_convergence: (file, item_index,
-                                    self.tabWidget.currentIndex()),
-                                    self.file_to_pymol: (file, self.get_current_state, pymol_defaults)})
-            item_index += 1
 
-        return "Done"
 
-    def progress_fn(self, progress_stuff):
-        """
-        :param progress_stuff: {function : arguments}
-        :return:
-        """
-        for func in progress_stuff.keys():
-            args = progress_stuff[func]
-            func(*args)
+    # def add_files_thread(self, paths=False):
+    #     """
+    #     Adds filenames via self.import_files (QFileDialog) to current QtabWidget tab QListWidget and selected state.
+    #     TODO: need to check if files exist in list from before! If file exist, 
+    #     delete old and add again, since the user might have edited the file
+    #     outside the app or using FileEditorWindow.
+    #     """
+    #     # Add state tab if not any exists...
+    #     if self.tabWidget.currentIndex() < 0:
+    #         self.append_text("No states exist - files must be assigned to a state.", True)
+    #         self.append_text("Auto-creating state 1 - files will be added there")
+    #         self.add_state()
 
-    def update_progressbar(self, val=None, reverse=False):
-        """
-        :param val:
-        :return:
-        """
-        with Lock():
-            if not val:
-                val = self.progressBar.value()
-                if reverse:
-                    val -= 1
-                else:
-                    val += 1
-                if val > 80:
-                    self.timer.setInterval(50)
-                else:
-                    self.timer.setInterval(10)
+    #     #path = os.getcwd()  # wordkdir TODO set this as global at some point
+    #     path = self.settings.workdir
+    #     filter_type = "Gaussian output files (*.out);; Gaussian input files (*.com *.inp);; " \
+    #                   "Geometry files (*.pdb *.xyz)"
+    #     title_ = "Import File"
 
-            if val < 100:
-                self.progressBar.setTextVisible(True)
+    #     if isinstance(paths, list):
+    #         files_path = paths
+    #     else:
+    #         files_path, type_ = self.import_files(title_, filter_type,path)
 
-            if not reverse and val > 99:
-                self.progressBar.setTextVisible(False)
-                self.timer.stop()
-            elif reverse and val < 1:
-                self.timer2.stop()
-                sys.exit()
+    #     if len(files_path) < 1:
+    #         return
 
-            self.progressBar.setValue(int(val))
+    #     # Remove file types not accepted by REACT
+    #     accepted_files = ["inp", "com", "out", "xyz", "pdb"]
+    #     files_path = [x for x in files_path if x.split(".")[-1] in accepted_files]
 
-    def thread_complete(self):
-        print("THREAD COMPLETE!")
+    #     # Where to start inserting files in project list:
+    #     items_insert_index = self.tabWidget.currentWidget().count()
 
-        #if self.pymol:
-        #    self.file_to_pymol(filepath=file, state=self.get_current_state, set_defaults=True)
+    #     # Start thread first:
+    #     # worker = Worker(self.thread_add_files, files_path, items_insert_index)
+    #     # worker.signals.finished.connect(self.thread_complete)
+    #     # worker.signals.progress.connect(self.progress_fn)
+    #     # self.threadpool.start(worker)
+    #     # self.timer.start(10)
+
+    #     # Insert files/filenames to project table:
+    #     for file in files_path:
+    #         self.tabWidget.currentWidget().insertItem(items_insert_index, file)
+    #         self.tabWidget.currentWidget().item(items_insert_index).setForeground(QtGui.QColor(80, 80, 80))
+    #         items_insert_index += 1
+
+    #     # Move horizontall scrollbar according to text
+    #     self.tabWidget.currentWidget().repaint()
+    #     scrollbar = self.tabWidget.currentWidget().horizontalScrollBar()
+    #     scrollbar.setValue(self.tabWidget.currentWidget().horizontalScrollBar().maximum())
+
+    # def thread_add_files(self, file_paths, item_index, progress_callback, results_callback):
+    #     """
+    #     :param file_paths:
+    #     :param item_index: index where to start insertion of files in list
+    #     :param progress_callback:
+    #     :return:
+    #     """
+    #     # set progressbar to 1:
+    #     self.update_progressbar(1)
+    #     pymol_defaults = False
+    #     for n in range(len(file_paths)):
+    #         file = file_paths[n]
+    #         print(file)
+    #         self.states[self.state_index].add_file(file)
+    #         if n == len(file_paths) - 1:
+    #             pymol_defaults = True
+    #         progress_callback.emit({self.update_progressbar: ((int(n+1) * 100 / len(file_paths)),),
+    #                                 self.check_convergence: (file, item_index,
+    #                                 self.tabWidget.currentIndex()),
+    #                                 self.file_to_pymol: (file, self.get_current_state, pymol_defaults)})
+    #         item_index += 1
+
+    #     return "Done"
+
+    #def progress_fn(self, progress_stuff):
+    #    """
+    #    :param progress_stuff: {function : arguments}
+    #    :return:
+    #    """
+    #    for func in progress_stuff.keys():
+    #        args = progress_stuff[func]
+    #        func(*args)
+
+    # def update_progressbar(self, val=None, reverse=False):
+    #     """
+    #     :param val:
+    #     :return:
+    #     """
+    #     with Lock():
+    #         if not val:
+    #             val = self.progressBar.value()
+    #             if reverse:
+    #                 val -= 1
+    #             else:
+    #                 val += 1
+    #             if val > 80:
+    #                 self.timer.setInterval(50)
+    #             else:
+    #                 self.timer.setInterval(10)
+
+    #         if val < 100:
+    #             self.progressBar.setTextVisible(True)
+
+    #         if not reverse and val > 99:
+    #             self.progressBar.setTextVisible(False)
+    #             self.timer.stop()
+    #         elif reverse and val < 1:
+    #             self.timer2.stop()
+    #             sys.exit()
+
+    #         self.progressBar.setValue(int(val))
+
+    # def thread_complete(self):
+    #     print("THREAD COMPLETE!")
+
+    #     #if self.pymol:
+    #     #    self.file_to_pymol(filepath=file, state=self.get_current_state, set_defaults=True)
 
     def check_convergence(self, file_path, item_index, tab_index=None):
         if tab_index is None:
@@ -657,7 +713,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     # each state has to be completely loaded before moving on to text,
                     # to ensure the multithreading assigns files to correct state. 
-                    self.threadpool.waitForDone()
+                    # self.threadpool.waitForDone()
             if key == 'included files':
                     self.included_files = proj_item
             if key == 'log':
@@ -911,28 +967,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.setup_window = CalcSetupWindow(self, self.current_file)
             self.setup_window.show()
 
-    def power_off_on(self):
-        """
-        power down when power button is clicked
-        :return:
-        """
-        if self.power:
-            self.button_power_off.setIcon(QtGui.QIcon('resources/icons/power_off.png'))
-            self.append_text("Powering down...", date_time=True)
-            if self.pymol:
-                self.pymol.close()
-            self.power = False
-            self.timer2 = QTimer()
-            self.timer2.timeout.connect(lambda: self.update_progressbar(reverse=True))
-            self.timer2.start(5)
+    # def power_off_on(self):
+    #     """
+    #     power down when power button is clicked
+    #     :return:
+    #     """
+    #     if self.power:
+    #         self.button_power_off.setIcon(QtGui.QIcon('resources/icons/power_off.png'))
+    #         self.append_text("Powering down...", date_time=True)
+    #         if self.pymol:
+    #             self.pymol.close()
+    #         self.power = False
+    #         self.timer2 = QTimer()
+    #         self.timer2.timeout.connect(lambda: self.update_progressbar(reverse=True))
+    #         self.timer2.start(5)
 
-        else:
-            self.button_power_off.setIcon(QtGui.QIcon('resources/icons/power_on.png'))
-            self.append_text("Powering down cancelled.")
-            self.power = True
+    #     else:
+    #         self.button_power_off.setIcon(QtGui.QIcon('resources/icons/power_on.png'))
+    #         self.append_text("Powering down cancelled.")
+    #         self.power = True
 
-            self.timer2.stop()
-            self.timer.start(5)
+    #         self.timer2.stop()
+    #         self.timer.start(5)
 
     @property
     def get_selected_filepath(self):

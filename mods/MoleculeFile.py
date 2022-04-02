@@ -17,6 +17,7 @@ class Molecule:
                 self.make_molecule()
 
         self._filepath = filepath
+        self.faulty = False
 
         # Properties
         self._charge = None
