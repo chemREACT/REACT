@@ -323,7 +323,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_file(self, filepath):
         """
         Adds only one file.
-        """
+        """        
         self.states[self.state_index].add_file(filepath)
 
         items_insert_index = self.tabWidget.currentWidget().count()
@@ -819,8 +819,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         :return:
         """
+        
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            self.append_text("ERROR: something is wrong")
+            return
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
         
         if mol_obj.faulty:
             self.append_text("ERROR: Analyse not possible for broken file!")
@@ -841,7 +846,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            self.append_text("ERROR: please select the geometry file to create a cluster from.")
+            return
+
         
         if mol_obj.faulty:
             self.append_text("ERROR: Create cluster not possible for broken file!")

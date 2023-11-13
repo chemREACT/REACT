@@ -116,6 +116,7 @@ class Geometries(Molecule):
         # [[Atoms], [Atoms],... iterations SCF]
         self._molecules = molecules
         self._iteration = -1
+        self.faulty = False
 
         # Init with final molecule / geometry optimization
         super().__init__(atoms=molecules[-1], filepath=filepath)
