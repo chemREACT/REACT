@@ -44,9 +44,12 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         self.pymol = self.react.pymol
 
         state = self.react.get_current_state
-        if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
-            self.init_included_files()
-        self.update_state_included_files()
+        try:
+            if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
+                self.init_included_files()
+            self.update_state_included_files()
+        except KeyError:
+            pass
 
         self.ui.calctype.setCurrentRow(0)
 
@@ -363,8 +366,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         if "big" in rel_ene[1].keys():
             big = True
             header += "  %1sE(big)" % D
-
-        header += " %1sE(main)" % D
+        else:
+            header += " %1sE(main)" % D
 
         # Include solvation correction?
         solvation = False
@@ -376,7 +379,9 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         freq = False
         if "dG" in rel_ene[1].keys():
             freq = True
-            header += "%8s %8s %8s %8s %8s %8s" % (Dd + "G", Dd + "H", Dd + "E", D + "G", D + "H", D + "E")
+            # only printing out Gibbs, to simplify table 
+            #header += "%8s %8s %8s %8s %8s %8s" % (Dd + "G", Dd + "H", Dd + "E", D + "G", D + "H", D + "E")
+            header += "%8s %8s" % (Dd + "G", D + "G")
 
         self.ui.text_relative_values.appendPlainText(header)
 
@@ -390,12 +395,12 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                 if "big" in rel_ene[state].keys():
                     dbig = rel_ene[state]["big"] * self.unit
                 energies += "%9.2f" % dbig
-
             # Electronic energies of main file:
-            d_el = 0
-            if "main" in rel_ene[state].keys():
-                d_el = rel_ene[state]["main"] * self.unit
-            energies += "%9.2f" % d_el
+            else:
+                d_el = 0
+                if "main" in rel_ene[state].keys():
+                    d_el = rel_ene[state]["main"] * self.unit
+                energies += "%9.2f" % d_el
 
             # Change in solvation energy:
             dd_solv = 0
@@ -421,7 +426,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     de = rel_ene[state]["dE"] * self.unit
                     dh = rel_ene[state]["dH"] * self.unit
 
-                energies += "%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f" % (ddg, ddh, dde, dg, dh, de)
+                #energies += "%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f" % (ddg, ddh, dde, dg, dh, de)
+                energies += "%8.2f %8.2f" % (ddg, dg)
 
             self.ui.text_relative_values.appendPlainText(energies)
 

@@ -281,9 +281,25 @@ class Plotter(QMainWindow, Ui_AnyPlotter):
         y_title = self.ui.lineEdit_ytitle.text()
         x_title = self.ui.lineEdit_xtitle.text()
 
+        if self.ui.checkBox_customnames.isChecked():
+            custom_names = self.ui.lineEdit_customnames.text().split(",")
+        else:
+            custom_names = None
+
+        if self.ui.checkBox_activation.isChecked():
+            activation = True
+        else:
+            activation = False
+        
+        if self.ui.checkBox_reaction.isChecked():
+            reaction = True
+        else:
+            reaction = False
+
         if not self.plot:
             self.plot = PlotEnergyDiagram(ene_array=plots, parent=self, legends=titles, line_colors=colors,
-                                          y_title=y_title, x_title=x_title, plot_legend=True, react_style=react_style)
+                                          y_title=y_title, x_title=x_title, plot_legend=True, react_style=react_style, custom_names=custom_names,
+                                          activation=activation, reaction=reaction)
             self.read_plot_settings()
 
             self.plot.plot_energy_diagram()

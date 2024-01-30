@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QProcess, Qt, pyqtSignal, pyqtSlot, QObject
+from PyQt5.QtCore import QProcess, Qt, pyqtSignal, pyqtSlot, QObject, QTimer
 import os
 
 
@@ -11,6 +11,9 @@ class PymolSession(QObject):
     countAtomsSignal = pyqtSignal(dict)
     importSavedPDB = pyqtSignal(str)
     # atomClickedSignal = pyqtSignal(list)
+    overallChargeSignal = pyqtSignal(str)
+
+
 
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
@@ -33,6 +36,8 @@ class PymolSession(QObject):
         self.atoms_selected = list()
         self.atom_count = dict()
         self.unbonded = 0
+        self.neg_charge = None
+        self.pos_charge = None
 
         self.stdout_handler = {"iterate sele, ID": {"collect": False,
                                                     "process": self.collect_iterate,
@@ -62,7 +67,13 @@ class PymolSession(QObject):
                                                  "process": self.pdb_written,
                                                  "return": "Save: wrote",
                                                  "signal": None
-                                                }
+                                                },
+                                "Selector": {"collect": False,
+                                                 "process": self.print_selector,
+                                                 "return": "Selector",
+                                                 "signal": None
+                                                },
+                                
                                }
 
         self.start_pymol()
@@ -231,6 +242,13 @@ class PymolSession(QObject):
     def set_dihedral(self, a1, a2, a3, a4, dihedral):
         self.pymol_cmd("set_dihedral %s, %s, %s, %s, %s" % (a1, a2, a3, a4, dihedral))
         self.pymol_cmd("unpick")
+
+    def set_overall_charge(self):
+
+        self.pymol_cmd("select negative_charge, visible and formal_charge < 0")
+        QTimer.singleShot(500, lambda: None)
+        self.pymol_cmd("select positive_charge, visible and formal_charge > 0")
+        QTimer.singleShot(500, lambda: None)
 
     def add_fragment(self, attach_to, fragment):
         """
@@ -418,4 +436,16 @@ class PymolSession(QObject):
         self.react.connect_pymol_structures(connect=False)
         self.delete_all_files()
 
-
+    @pyqtSlot()
+    def print_selector(self, stdout):
+        if "negative_charge" in stdout:
+            self.neg_charge = stdout.split()[5]
+        if "positive_charge" in stdout:
+            self.pos_charge = stdout.split()[5]
+        
+        try:
+            if self.neg_charge and self.pos_charge:
+                overall_charge = int(self.pos_charge) - int(self.neg_charge)
+                self.overallChargeSignal.emit(str(overall_charge))
+        except:
+            self.react.append_text('Something went wrong while calculating charge of the system..')

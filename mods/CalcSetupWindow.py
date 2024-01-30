@@ -50,6 +50,12 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             # Connect signals from pymol:
             self.pymol.atomsSelectedSignal.connect(self.pymol_atom_clicked)
 
+            
+            # Connect signal, update charge variable with the signal emitted
+            self.pymol.overallChargeSignal.connect(self.handle_overall_charge)
+            self.pymol.set_overall_charge()
+
+
         self.ui = Ui_SetupWindow()
         self.ui.setupUi(self)
         # TODO auto freeze function not working, hiding button for now
@@ -153,16 +159,12 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.list_model.itemSelectionChanged.connect(lambda: self.model_atom_clicked(self.ui.list_model))
         self.ui.list_model.setSelectionMode(1)
 
-        self.ui.list_model_scan.itemSelectionChanged.connect(lambda: self.model_atom_clicked(self.ui.list_model_scan))
-        self.ui.list_model_scan.setSelectionMode(2)
-
         self.ui.list_model_mv.itemSelectionChanged.connect(lambda: self.model_atom_clicked(self.ui.list_model_mv))
         self.ui.list_model_mv.setSelectionMode(2)
 
         self.ui.list_freeze_atoms.itemSelectionChanged.connect(self.freeze_list_clicked)
-        self.ui.list_scan_bonds.itemSelectionChanged.connect(self.scan_list_clicked)
 
-        self.atoms_to_select = 1
+        self.atoms_to_select = 2
         self.ui.comboBox_freezetype.currentTextChanged.connect(self.change_selection_mode)
 
         # Keep track of atoms selected (for multiple selection options)
@@ -173,18 +175,22 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         self.toggle_raman()
 
-    
+        # key to get scan bond from list of bonds
+        self.scan_bond_key = False
 
     @property
     def scan_bond(self):
         """
         Return AtomBond obj representing the bond selected from the scan list
         """
-        return self.atom_bonds[self.ui.list_scan_bonds.currentItem().text()]
+        try:
+            return self.atom_bonds[self.scan_bond_key]
+        except KeyError:
+            pass
 
     def on_invert_atoms(self):
 
-        if self.ui.list_scan_bonds.count() < 1:
+        if self.ui.list_model.count() < 1:
             return
 
         self.scan_bond.invert_atoms()
@@ -194,7 +200,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def on_move_both_changed(self):
 
-        if self.ui.list_scan_bonds.count() < 1:
+        if self.ui.list_model.count() < 1:
             return
 
         if self.ui.checkBox_moveboth.isChecked():
@@ -232,7 +238,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def enable_scan(self, enable=True):
         self.ui.button_add_scan.setEnabled(enable)
-        #self.ui.button_delete_scan.setEnabled(enable)
+        self.ui.button_delete_scan.setEnabled(enable)
         self.ui.spinbox_radius.setEnabled(enable)
         self.ui.spinbox_scan_pm.setEnabled(enable)
         self.ui.spinbox_scan_increment.setEnabled(enable)
@@ -249,8 +255,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             atom_list = self.ui.list_model_mv
         if self.ui.tabWidget.currentIndex() == 2:
             atom_list = self.ui.list_model
-        elif self.ui.tabWidget.currentIndex() == 3:
-            atom_list = self.ui.list_model_scan
 
         ids = [int(x) - 1 for x in ids]
 
@@ -390,6 +394,16 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         to a new instance of AtomBond object.
         """
 
+        if len(self.selected_indexes) != 2:
+            self.react.append_text('Scan only works when only 2 atoms are selected...')
+            return 
+        
+        if self.scan_bond_key:
+            try:
+                del self.atom_bonds[self.scan_bond_key]
+            except:
+                pass 
+
         freeze = ""
         atoms = list()
         bond_size = self.ui.spinbox_radius.value()
@@ -411,11 +425,13 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                                            atoms[0], atoms[1], bond_size, scan_size,
                                            scan_increment, self.ui.checkBox_moveboth.isChecked(),
                                            scan_mode)
+        
+        self.scan_bond_key = freeze
 
 
-        list_item = QtWidgets.QListWidgetItem(freeze)
-        self.ui.list_scan_bonds.addItem(list_item)
-        self.ui.list_scan_bonds.setCurrentItem(list_item)
+        #list_item = QtWidgets.QListWidgetItem(freeze)
+        #self.ui.list_scan_bonds.addItem(list_item)
+        #self.ui.list_scan_bonds.setCurrentItem(list_item)
         self.ui.lineEdit_freeze.setText(str(atoms[0]))
         self.ui.lineEdit_move.setText(str(atoms[1]))
 
@@ -563,34 +579,37 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def remove_scan_atoms(self):
         try:
-            del self.atom_bonds[self.ui.list_scan_bonds.currentItem().text()]
-            self.ui.list_scan_bonds.takeItem(self.ui.list_scan_bonds.currentRow())
+            del self.atom_bonds[self.scan_bond_key]
+            self.ui.lineEdit_move.clear()
+            self.ui.lineEdit_freeze.clear()
+            self.ui.spinbox_radius.clear()
         except:
             pass
+        #self.update_scan()
 
-    def scan_list_clicked(self):
-        if not hasattr(self, "scan_bond"):
-            return
-        self.ui.list_model_scan.clearSelection()
+    # def scan_list_clicked(self):
+    #     if not hasattr(self, "scan_bond"):
+    #         return
+    #     self.ui.list_model_scan.clearSelection()
 
-        self.ui.lineEdit_freeze.setText(str(self.scan_bond.atom1_idx))
-        self.ui.lineEdit_move.setText(str(self.scan_bond.atom2_idx))
+    #     self.ui.lineEdit_freeze.setText(str(self.scan_bond.atom1_idx))
+    #     self.ui.lineEdit_move.setText(str(self.scan_bond.atom2_idx))
 
-        self.ui.checkBox_moveboth.setChecked(self.scan_bond.move_both)
-        self.ui.spinbox_radius.setValue(self.scan_bond.bond_dist)
-        self.ui.spinbox_scan_pm.setValue(self.scan_bond.scan_dist)
-        self.ui.spinbox_scan_increment.setValue(self.scan_bond.step_size)
-        if self.scan_bond.scan_mode == '+':
-            self.ui.radioButton_plus.setChecked(True)
-        elif self.scan_bond.scan_mode == '-':
-            self.ui.radioButton_plus.setChecked(True)
-        else:
-            self.ui.radioButton_both.setChecked(True)
+    #     self.ui.checkBox_moveboth.setChecked(self.scan_bond.move_both)
+    #     self.ui.spinbox_radius.setValue(self.scan_bond.bond_dist)
+    #     self.ui.spinbox_scan_pm.setValue(self.scan_bond.scan_dist)
+    #     self.ui.spinbox_scan_increment.setValue(self.scan_bond.step_size)
+    #     if self.scan_bond.scan_mode == '+':
+    #         self.ui.radioButton_plus.setChecked(True)
+    #     elif self.scan_bond.scan_mode == '-':
+    #         self.ui.radioButton_plus.setChecked(True)
+    #     else:
+    #         self.ui.radioButton_both.setChecked(True)
 
-        for i in [self.scan_bond.atom1_idx - 1, self.scan_bond.atom2_idx - 1]:
-            self.ui.list_model_scan.item(i).setSelected(True)
+    #     for i in [self.scan_bond.atom1_idx - 1, self.scan_bond.atom2_idx - 1]:
+    #         self.ui.list_model_scan.item(i).setSelected(True)
 
-        #self.scan_bond.write_xyzfiles()
+    #     #self.scan_bond.write_xyzfiles()
 
 
         
@@ -771,10 +790,11 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         this to text preview box.
         """
 
-        if self.ui.tabWidget.currentIndex() == 1 or self.ui.tabWidget.currentIndex() == 3: 
+        if self.ui.tabWidget.currentIndex() == 1:
             self.atoms_to_select = 2
+
         # check if preview tab is selected. if not, return
-        if not self.ui.tabWidget.currentIndex() == 4:
+        if not self.ui.tabWidget.currentIndex() == 3:
             return
 
         self.ui.ComboBox_files.blockSignals(True)
@@ -1046,9 +1066,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         for item in [self.ui.list_freeze_atoms.item(x).text() for x in range(self.ui.list_freeze_atoms.count())]:
             restraints_list.append(item)
         if bond_obj:
-            restraints_list.append(f"B {bond_obj.atom1_idx} {bond_obj.atom2_idx} F")
-        
-
+            if self.ui.checkBox_switchXB.isChecked:
+                restraints_list.append(f"X {bond_obj.atom1_idx} F\nX {bond_obj.atom2_idx} F")
+            else:
+                restraints_list.append(f"B {bond_obj.atom1_idx} {bond_obj.atom2_idx} F")
 
         restraints_str = "\n".join(restraints_list)
 
@@ -1120,7 +1141,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.ui.button_auto_freeze.setEnabled(False)
             atoms = self.mol_obj.formatted_xyz
 
-        for atom_list in [self.ui.list_model, self.ui.list_model_mv, self.ui.list_model_scan]:
+        for atom_list in [self.ui.list_model, self.ui.list_model_mv]:
             for i in range(len(atoms)):
                 atom_list.insertItem(i, atoms[i])
 
@@ -1215,3 +1236,5 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         self.react.setup_window = None
 
+    def handle_overall_charge(self, charge):
+        self.ui.lineEdit_charge.setText(str(charge))

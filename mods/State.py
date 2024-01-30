@@ -57,7 +57,10 @@ class State:
 
     def get_molecule_object(self, filepath):
         # print(f'this is states: {self.files}')
-        return self.files[filepath]
+        try:
+            return self.files[filepath]
+        except KeyError:
+            return False
 
     def get_energy(self, filepath):
         """

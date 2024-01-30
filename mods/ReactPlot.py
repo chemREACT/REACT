@@ -267,7 +267,7 @@ class SpectrumIR(SinglePlot):
 
 class PlotEnergyDiagram(PlotStuff):
     def __init__(self, ene_array, parent=None, legends=None, x_title=None, y_title=None, plot_title=None,
-                 plot_legend=False, line_colors=None, react_style=True):
+                 plot_legend=False, line_colors=None, react_style=True, custom_names=None, activation=None, reaction=None):
         self.x_title = x_title
         self.y_title = y_title
         self.plot_title = plot_title
@@ -275,6 +275,9 @@ class PlotEnergyDiagram(PlotStuff):
         self.legends = legends
         self.line_colors = line_colors
         self.parent = parent
+        self.custom_names = custom_names
+        self.activation = activation
+        self.reaction = reaction
 
         super().__init__(react_style=react_style)
 
@@ -382,6 +385,39 @@ class PlotEnergyDiagram(PlotStuff):
             legend_elements.append(plt.Line2D([0], [0], color=color, lw=3, label=label))
             plots.append(self.energy_rank(energies=ene_array[i], marker_width=.5, color=color))
 
+            # Find the maximum y-value and its corresponding x-value
+            try:
+
+                # Make energy diagrams:
+                for i in range(len(ene_array)):
+
+                    # Get the energy rank lines for the current set of energies
+                    #energy_lines = self.energy_rank(energies=ene_array[i], marker_width=.5, color=color)
+
+                    # Add the energy lines to the plot
+                    #for line in energy_lines:
+                    #    self.ax.add_line(line)
+
+                    # Annotate all y-values except the first one
+                    for j, y_value in enumerate(ene_array[i]):
+                        if j == 0:
+                            continue  # Skip the first y-value
+                        x_position = j + 1  # x-positions start at 1
+
+                        # if j is even, it is likekly a product state, if odd, it is likely a transiton state
+                        if j%2==0:
+                            if self.reaction:
+                                self.ax.text(x_position, y_value, f'{y_value:.2f}',  # Format to 2 decimal places
+                                            va='bottom', ha='center', color='black')  # Text in black
+                        else:
+                            if self.activation:
+                                self.ax.text(x_position, y_value, f'{y_value:.2f}',  # Format to 2 decimal places
+                                            va='bottom', ha='center', color='black')
+                            
+
+            except TypeError:
+                pass
+
         return plots, legend_elements
 
     def plot_energy_diagram(self, ene_array=None, new_plot=True):
@@ -411,9 +447,27 @@ class PlotEnergyDiagram(PlotStuff):
             # Add one more tick to make space for custom legend:
             x_max += 1
 
+        num_energies = max(len(ene) for ene in ene_array)
+
+        # Set the positions and labels for the x-ticks
+        if self.custom_names and (num_energies == len(self.custom_names)):
+            self.ax.set_xticks(range(1, num_energies + 1))
+            self.ax.set_xticklabels(self.custom_names)
+
         # Set boundary of X- and Y-axes
-        self.ax.set_ybound([y_min, y_max])
-        self.ax.set_xbound([x_min, x_max])
+        y_padding = (y_max - y_min) * 0.05  # 5% of the y-range as padding, adjust as needed
+        y_min_padded = y_min - y_padding  # Apply padding below the minimum y-value
+        y_max_padded = y_max + y_padding  # Apply padding above the maximum y-value
+
+        self.ax.set_ybound([y_min_padded, y_max_padded])
+
+        # Calculate padding based on the number of energy levels
+        padding = 0.5  # You can adjust this value as needed
+        x_min_padded = 1 - padding  # Apply padding to the left of the first x-value
+        x_max_padded = num_energies + padding  # Apply padding to the right of the last x-value
+
+        # distribute x-ticks evenly:
+        self.ax.set_xbound([x_min_padded, x_max_padded])
 
         for i in range(len(plots)):
             for plot in plots[i]:
@@ -425,6 +479,7 @@ class PlotEnergyDiagram(PlotStuff):
             self.ax.set_ylabel(self.y_title)
         if self.x_title:
             self.ax.set_xlabel(self.x_title)
+            
 
         if new_plot:
             self.update_style(ax=self.ax, fig=self.fig, title=self.plot_title)

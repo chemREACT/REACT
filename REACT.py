@@ -190,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
 
         mol_obj = self.states[self.state_index].get_molecule_object(filepath)
-        if mol_obj.faulty:
+        if mol_obj.faulty or not mol_obj:
             return
 
         if not self.pymol:
@@ -475,9 +475,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 tab_widget.item(item_index).setForeground(QtGui.QColor(195, 82, 52))
                 self.append_text("\nWarning: %s seems to have not converged!" % mol_obj.filename)
             elif isinstance(converged, bool) and converged:
-                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 129, 104))
+                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 180, 104))
             elif not isinstance(converged, bool):
-                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 129, 104))
+                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 180, 104))
 
     def delete_file(self):
         """
@@ -513,13 +513,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_list.takeItem(current_list.row(item))
 
             # Remove from included_files if existing:
-            if self.included_files:
-                for type_ in self.included_files[tab_index+1].keys():
-                    if item.text() == self.included_files[tab_index + 1][type_]:
-                        self.included_files[tab_index+1][type_] = ""
-                        # Update analyse window, if active:
-                        if self.analyse_window:
-                            self.analyse_window.update_state_included_files()
+            try:
+                if self.included_files:
+                    for type_ in self.included_files[tab_index+1].keys():
+                        if item.text() == self.included_files[tab_index + 1][type_]:
+                            self.included_files[tab_index+1][type_] = ""
+                            # Update analyse window, if active:
+                            if self.analyse_window:
+                                self.analyse_window.update_state_included_files()
+            except KeyError:
+                pass
 
     def update_tab_names(self):
         """
@@ -879,10 +882,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
-        if mol_obj.faulty:
-            self.append_text("ERROR: Plotter not possible for broken file!")
-            return
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            pass
+        # if mol_obj.faulty:
+        #     self.append_text("ERROR: Plotter not possible for broken file!")
+        #     return
 
         self.plotter = Plotter(self)
         self.plotter.show()
