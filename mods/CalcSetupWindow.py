@@ -52,6 +52,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
             
             # Connect signal, update charge variable with the signal emitted
+            self.pymol_charge = None
             self.pymol.overallChargeSignal.connect(self.handle_overall_charge)
             self.pymol.set_overall_charge()
 
@@ -69,7 +70,12 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.setWindowTitle("REACT - Calculation setup")
 
         self.mol_obj = self.react.states[self.react.state_index].get_molecule_object(self.filepath)
-        self.charge = self.mol_obj.charge
+        
+        if self.mol_obj.charge:
+            self.charge = self.mol_obj.charge
+        else:
+            self.charge = self.pymol_charge
+
         if self.mol_obj.multiplicity:
             self.multiplicity = self.mol_obj.multiplicity
         else:
@@ -864,7 +870,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                 content = self.make_input_content(filename=filename, extra_job_keywords=keywords)
                 filepath = self._make_file(filename, content)
                 files.append(filepath)
-        if self.atom_bonds:
+        elif self.atom_bonds:
             for bond, bond_obj in self.atom_bonds.items():
                 for filename_scan, xyz in bond_obj.scan_new_coordinates.items():
                     content = self.make_input_content(filename=filename_scan, xyz=xyz, bond_obj=bond_obj)
@@ -1237,4 +1243,4 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.react.setup_window = None
 
     def handle_overall_charge(self, charge):
-        self.ui.lineEdit_charge.setText(str(charge))
+        self.pymol_charge = charge

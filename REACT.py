@@ -189,9 +189,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(filepath)
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(filepath)
+        except AttributeError:
+            self.append_text("Make sure you have selected a file to display in Pymol")
+
         if mol_obj.faulty or not mol_obj:
             return
+        
 
         if not self.pymol:
             return
