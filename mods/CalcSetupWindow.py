@@ -72,9 +72,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.mol_obj = self.react.states[self.react.state_index].get_molecule_object(self.filepath)
         
         if self.mol_obj.charge:
-            self.charge = self.mol_obj.charge
+             self.charge = self.mol_obj.charge
         else:
-            self.charge = self.pymol_charge
+            self.charge = None
 
         if self.mol_obj.multiplicity:
             self.multiplicity = self.mol_obj.multiplicity
@@ -344,8 +344,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
 
     def update_pymol_selection(self, atoms):
+        filetype = self.mol_obj.filepath.split(".")[-1]
+        object_name = self.mol_obj.molecule_name + "_" + filetype
         group = "state_%d" % self.react.get_current_state
-        self.pymol.set_selection(atoms=atoms, sele_name="sele", object_name=self.mol_obj.molecule_name, group=group)
+        self.pymol.set_selection(atoms=atoms, sele_name="sele", object_name=object_name, group=group)
 
     def add_freeze_atoms(self):
         """
@@ -379,17 +381,18 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.ui.list_freeze_atoms.takeItem(row)
     
     def on_spinbox_changed(self, spinbox):
-        if not hasattr(self, "scan_bond"):
-            return
 
-        if spinbox.value() == 0:
+        try:
+            if spinbox.value() == 0:
+                return
+            if spinbox == self.ui.spinbox_scan_pm:
+                self.scan_bond.scan_dist = spinbox.value()
+            elif spinbox == self.ui.spinbox_scan_increment:
+                self.scan_bond.step_size = spinbox.value()
+            elif spinbox == self.ui.spinbox_mv_bonds:
+                self.move_bond.scan_dist = spinbox.value()
+        except AttributeError:
             return
-        if spinbox == self.ui.spinbox_scan_pm:
-            self.scan_bond.scan_dist = spinbox.value()
-        elif spinbox == self.ui.spinbox_scan_increment:
-            self.scan_bond.step_size = spinbox.value()
-        elif spinbox == self.ui.spinbox_mv_bonds:
-            self.move_bond.scan_dist = spinbox.value()
 
         
         self.update_scan()
@@ -453,8 +456,12 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         scan_size = self.ui.spinbox_mv_bonds.value()
         scan_increment = self.ui.spinbox_scan_increment.value()
 
+        self.atoms_mv.clear()
+
         for i in self.selected_indexes:
             self.atoms_mv.append(self.mol_obj.molecule[i.row() + 1].atom_index)
+
+        print(f"current atoms: {self.atoms_mv}")
 
         if self.ui.radioButton_plus_mv.isChecked():
             scan_mode = '+'
@@ -546,10 +553,13 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             for f in tempfiles:
                 remove(f)
 
-        self.scan_bond.write_xyzfiles(self.settings.workdir + '/.scan_temp/')
-        if self.pymol:
-            # read files to pymol obj
-            self.anmiate_bond_pymol()
+        try:
+            self.scan_bond.write_xyzfiles(self.settings.workdir + '/.scan_temp/')
+            if self.pymol:
+                # read files to pymol obj
+                self.anmiate_bond_pymol()
+        except AttributeError:
+            pass
 
     def update_move(self):
         """
@@ -625,12 +635,13 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
         group = "state_%d" % self.react.get_current_state
         _cmd = "show"
+        mol_obj_name = self.mol_obj.filename.split('.')[0] + "_" + self.mol_obj.filepath.split(".")[-1]
         if hide:
             _cmd = "hide"
-        self.pymol.pymol_cmd(f"{_cmd} spheres, id {atom_nr} and {group} and {self.mol_obj.filename.split('.')[0]}")
+        self.pymol.pymol_cmd(f"{_cmd} spheres, id {atom_nr} and {group} and {mol_obj_name}")
         if not hide:
             self.pymol.pymol_cmd(f"set sphere_scale, 0.3, id {atom_nr} and {group} and "
-                                 f"{self.mol_obj.filename.split('.')[0]}")
+                                 f"{mol_obj_name}")
 
     def update_job_details(self):
         """
@@ -983,6 +994,8 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             job_type = "Opt"
             for i in self.job_options["Opt (TS)"]:
                 job_keywords.append(i)
+        elif self.job_type == "Single point":
+            job_type = ""
         else:
             for i in self.job_options[job_type]:
                 job_keywords.append(i)
@@ -1243,4 +1256,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.react.setup_window = None
 
     def handle_overall_charge(self, charge):
-        self.pymol_charge = charge
+
+        if self.charge:
+            return
+        
+        if charge:
+            self.charge = charge
+            self.ui.lineEdit_charge.setText(self.charge)

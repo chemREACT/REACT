@@ -102,6 +102,7 @@ class PymolSession(QObject):
         Load file in pymol
         :param file_: path to file (xyz, pdb, mae)
         """
+        print("Loading structure", file_)
         if delete_after:
             # filename as displayed in pymol : filepath
             self.files_to_delete.append(file_)
@@ -440,12 +441,20 @@ class PymolSession(QObject):
     def print_selector(self, stdout):
         if "negative_charge" in stdout:
             self.neg_charge = stdout.split()[5]
+            print("got neg charge", self.neg_charge)
         if "positive_charge" in stdout:
             self.pos_charge = stdout.split()[5]
+            print("got pos charge", self.pos_charge)
+        else:
+            return
         
         try:
             if self.neg_charge and self.pos_charge:
+                print("got both charges")
                 overall_charge = int(self.pos_charge) - int(self.neg_charge)
+                print("Overall charge:", overall_charge)
                 self.overallChargeSignal.emit(str(overall_charge))
+                self.pymol_cmd("delete %s" % "negative_charge")
+                self.pymol_cmd("delete %s" % "positive_charge")
         except:
             self.react.append_text('Something went wrong while calculating charge of the system..')

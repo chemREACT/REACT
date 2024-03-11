@@ -61,6 +61,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         self.ui.unit_kcal.toggled.connect(lambda: self.set_unit(627.51))
         self.ui.unit_kj.toggled.connect(lambda: self.set_unit(2625.51))
 
+        self.react.tabWidget.tabBar().setMovable(False)
+
     def update_scale(self):
         """
         connect scalebar with LCD number displayed
@@ -218,10 +220,13 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         :return:
         """
         self.energies = dict()
+        print(self.react.included_files)
         for state in self.react.included_files.keys():
             state = int(state)
             if state not in self.energies.keys():
                 self.energies[state] = {0: None, 1: None, 2: None, 3: None}
+
+            print(f"state: {state}")
 
             for term in self.react.included_files[state].keys():
                 # Check if state term has file (file length for now)
@@ -229,6 +234,7 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     filepath = self.react.included_files[state][term]
                     #state_object = self.react.states[state - 1]
                     mol_obj = self.react.states[state - 1].get_molecule_object(filepath)
+                    print(f"mol_obj: {mol_obj} from {filepath}")
                     # Include 3 corrections from frequency calculation
                     if term == 1:
                         self.energies[state][term] = dict()
@@ -621,6 +627,7 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         :param event:
         """
         self.react.analyse_window = None
+        self.react.tabWidget.tabBar().setMovable(True)
         self.react.tabWidget.tabBar().currentChanged.disconnect(self.update_state_included_files)
         if self.pymol:
             self.pymol.pymol_cmd("mstop")
