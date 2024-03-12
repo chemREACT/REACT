@@ -193,21 +193,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         try:
             mol_obj = self.states[state - 1].get_molecule_object(filepath)
-            print(f"got mol obj from state {state} - 1")
         except AttributeError:
             self.append_text("Make sure you have selected a file to display in Pymol")
-            print("Did not get mol obj from state {state} - 1")
 
         try:
             if mol_obj.faulty or not mol_obj:
-                print("OKEII??")
                 return
         except AttributeError:
-            print("????????")
             return
         
         if not self.pymol:
-            print("no pymol?")
             return
 
         delete_after = True
@@ -346,14 +341,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Adds only one file.
         """        
         self.states[self.state_index].add_file(filepath)
-        print(f"adding file {filepath} to state {self.state_index}")
 
         items_insert_index = self.tabWidget.currentWidget().count()
         self.tabWidget.currentWidget().insertItem(items_insert_index, filepath)
         self.check_convergence(filepath, items_insert_index, self.tabWidget.currentIndex())
 
         if self.pymol:
-            print(f"sending {filepath} to pymol with state {self.get_current_state}")
             self.file_to_pymol(filepath=filepath, state=self.get_current_state, set_defaults=True)
 
    
@@ -548,41 +541,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             except KeyError:
                 pass
 
-    def update_tab_names_old(self):
-        """
-        Activated whenever tabs are moved. Renames Tabs in correct order of states (1,2,3,4...)
-        Algorithm for updating list of states: temporary new list is created, 
-
-        """
-        # new list of pointers to State-objects. Pointers are appended one by one by the following for-loop,
-        # thus, according to the new order of tabs. Tabs still have their original labels, which are used to retrive correct pointer.
-
-        print("before update_tab_names", self.states)
-        new_pointers = []
-        new_included_files = dict()
-
-        for tab_index in range(len(self.states)):
-            state = self.tabWidget.tabText(tab_index)
-            new_pointers.append(self.states[tab_index])
-            if state != str(tab_index+1):
-                self.tabWidget.setTabText(tab_index, str(tab_index+1))
-                # swap values of state and tab_index+1
-                if self.included_files:
-                    new_included_files[int(state)] = self.included_files[tab_index+1]
-
-            else:
-                if self.included_files:
-                    new_included_files[int(state)] = self.included_files[int(state)]
-
-        self.states = new_pointers
-        self.included_files = new_included_files
-
-        if self.pymol:
-            self.pymol.pymol_cmd("delete state_*")
-            QTimer.singleShot(100, self.load_all_states_pymol)
-        
-        print("after update_tab_names", self.states)
-
     def update_tab_names(self):
         """
         Changes the order of states in self.states according to the order of tabs in the tabBar widget.
@@ -717,7 +675,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     #self.threadpool.waitForDone()
                     for file in state[1]:
                         self.add_file(file)
-                        print(f"Done with {file}")
 
             if key == 'included files':
                     self.included_files = proj_item
@@ -933,7 +890,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def pdb_from_pymol(self, pdb_path):
         if not self.cluster_window:
             return
-        print(f"this is what I got; {pdb_path}")
         if self.cluster_window.ui.copy_to_project.isChecked():
             self.add_file(pdb_path)
 

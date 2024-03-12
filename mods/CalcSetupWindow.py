@@ -373,7 +373,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         # Get rows for selected to delete:
         to_del = [self.ui.list_freeze_atoms.row(x) for x in self.ui.list_freeze_atoms.selectedItems()]
         for row in to_del:
-            print(row)
             if self.pymol:
                 for i in self.ui.list_freeze_atoms.item(row).text().split()[1:-1]:
                     self.pymol_spheres(atom_nr=i, hide=True)
@@ -461,7 +460,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         for i in self.selected_indexes:
             self.atoms_mv.append(self.mol_obj.molecule[i.row() + 1].atom_index)
 
-        print(f"current atoms: {self.atoms_mv}")
 
         if self.ui.radioButton_plus_mv.isChecked():
             scan_mode = '+'

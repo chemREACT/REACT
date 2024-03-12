@@ -35,6 +35,7 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
 
         # Track State viewed in MainWindow:
         self.react.tabWidget.tabBar().currentChanged.connect(self.update_state_included_files)
+        self.react.tabWidget.currentWidget().itemClicked.connect(self.update_included_files)
 
         # Initialise dict of included files if it does not exist:
         self.energies = dict()
@@ -44,12 +45,14 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         self.pymol = self.react.pymol
 
         state = self.react.get_current_state
-        try:
-            if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
-                self.init_included_files()
-            self.update_state_included_files()
-        except KeyError:
-            pass
+        self.init_included_files()
+        self.update_state_included_files()
+        # try:
+        #     if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
+        #         self.init_included_files()
+        #     self.update_state_included_files()
+        # except KeyError:
+        #     pass
 
         self.ui.calctype.setCurrentRow(0)
 
@@ -179,6 +182,21 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     if self.react.states[tab_index].has_solvent(file_path):
                         self.react.included_files[state][2] = file_path
 
+    def update_included_files(self):
+        tab_index = self.react.tabWidget.currentIndex()
+        selected_file = self.react.tabWidget.widget(tab_index).currentItem().text()
+
+        if selected_file.split(".")[-1] not in ["out"]:
+            return
+        
+        self.react.included_files[tab_index + 1][0] = selected_file
+        
+        if self.react.states[tab_index].has_frequencies(selected_file):
+            self.react.included_files[tab_index + 1][1] = selected_file
+
+        self.update_state_included_files()
+        
+
     def update_state_included_files(self):
         """
         When tabs are changed (state displayed) in main window, update correct files in list in analyse window
@@ -220,13 +238,10 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         :return:
         """
         self.energies = dict()
-        print(self.react.included_files)
         for state in self.react.included_files.keys():
             state = int(state)
             if state not in self.energies.keys():
                 self.energies[state] = {0: None, 1: None, 2: None, 3: None}
-
-            print(f"state: {state}")
 
             for term in self.react.included_files[state].keys():
                 # Check if state term has file (file length for now)
@@ -234,7 +249,6 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     filepath = self.react.included_files[state][term]
                     #state_object = self.react.states[state - 1]
                     mol_obj = self.react.states[state - 1].get_molecule_object(filepath)
-                    print(f"mol_obj: {mol_obj} from {filepath}")
                     # Include 3 corrections from frequency calculation
                     if term == 1:
                         self.energies[state][term] = dict()
