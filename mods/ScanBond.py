@@ -219,29 +219,35 @@ class AtomBond():
             filename =  filenames[i]
 
             with open(path + filename + '.xyz', "w+") as f:
+                        
+                f.write(str(len(xyz))+'\n'+filename +'\n')
+
                 for item in xyz:
 
-                    whitespaces = []
+                    f.write(" ".join(item) + '\n')
 
-                    if item[1][0] == '-':
-                        whitespaces.append('     ')
-                    else:
-                        whitespaces.append('      ')
-                    if item[2][0] == '-':
-                        whitespaces.append('  ')
-                    else:
-                        whitespaces.append('   ')
-                    if item[3][0] == '-':
-                        whitespaces.append('  ')
-                    else:
-                        whitespaces.append('   ')
+
+                    # whitespaces = []
+
+                    # if item[1][0] == '-':
+                    #     whitespaces.append('     ')
+                    # else:
+                    #     whitespaces.append('      ')
+                    # if item[2][0] == '-':
+                    #     whitespaces.append('  ')
+                    # else:
+                    #     whitespaces.append('   ')
+                    # if item[3][0] == '-':
+                    #     whitespaces.append('  ')
+                    # else:
+                    #     whitespaces.append('   ')
 
                     #length of whitespace + xyz = 7
-                    atom = [None]*(7)
-                    atom[::2] = item
-                    atom[1::2] = whitespaces
+                    #atom = [None]*(7)
+                    #atom[::2] = item
+                    #atom[1::2] = whitespaces
                     
-                    f.write("   ".join(atom) + "\n")
+                    #f.write("   ".join(atom) + "\n")
 
     @property
     def scan_new_coordinates(self):

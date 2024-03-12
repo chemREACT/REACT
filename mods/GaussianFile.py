@@ -92,7 +92,6 @@ class OutputFile(Properties):
     def __init__(self, filepath):
         self._filepath = filepath
         molecules = self.get_coordinates()
-        self.faulty = False
 
         if not molecules:
             self.faulty = True

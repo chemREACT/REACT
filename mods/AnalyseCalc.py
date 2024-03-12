@@ -35,6 +35,7 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
 
         # Track State viewed in MainWindow:
         self.react.tabWidget.tabBar().currentChanged.connect(self.update_state_included_files)
+        self.react.tabWidget.currentWidget().itemClicked.connect(self.update_included_files)
 
         # Initialise dict of included files if it does not exist:
         self.energies = dict()
@@ -44,9 +45,14 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         self.pymol = self.react.pymol
 
         state = self.react.get_current_state
-        if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
-            self.init_included_files()
+        self.init_included_files()
         self.update_state_included_files()
+        # try:
+        #     if not self.react.included_files or sum(len(x) for x in self.react.included_files[state].values()) < 4:
+        #         self.init_included_files()
+        #     self.update_state_included_files()
+        # except KeyError:
+        #     pass
 
         self.ui.calctype.setCurrentRow(0)
 
@@ -57,6 +63,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         self.ui.unit_hartree.toggled.connect(lambda: self.set_unit(1))
         self.ui.unit_kcal.toggled.connect(lambda: self.set_unit(627.51))
         self.ui.unit_kj.toggled.connect(lambda: self.set_unit(2625.51))
+
+        self.react.tabWidget.tabBar().setMovable(False)
 
     def update_scale(self):
         """
@@ -173,6 +181,21 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     # Check output file for Solvent
                     if self.react.states[tab_index].has_solvent(file_path):
                         self.react.included_files[state][2] = file_path
+
+    def update_included_files(self):
+        tab_index = self.react.tabWidget.currentIndex()
+        selected_file = self.react.tabWidget.widget(tab_index).currentItem().text()
+
+        if selected_file.split(".")[-1] not in ["out"]:
+            return
+        
+        self.react.included_files[tab_index + 1][0] = selected_file
+        
+        if self.react.states[tab_index].has_frequencies(selected_file):
+            self.react.included_files[tab_index + 1][1] = selected_file
+
+        self.update_state_included_files()
+        
 
     def update_state_included_files(self):
         """
@@ -363,8 +386,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         if "big" in rel_ene[1].keys():
             big = True
             header += "  %1sE(big)" % D
-
-        header += " %1sE(main)" % D
+        else:
+            header += " %1sE(main)" % D
 
         # Include solvation correction?
         solvation = False
@@ -376,7 +399,9 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         freq = False
         if "dG" in rel_ene[1].keys():
             freq = True
-            header += "%8s %8s %8s %8s %8s %8s" % (Dd + "G", Dd + "H", Dd + "E", D + "G", D + "H", D + "E")
+            # only printing out Gibbs, to simplify table 
+            #header += "%8s %8s %8s %8s %8s %8s" % (Dd + "G", Dd + "H", Dd + "E", D + "G", D + "H", D + "E")
+            header += "%8s %8s" % (Dd + "G", D + "G")
 
         self.ui.text_relative_values.appendPlainText(header)
 
@@ -390,12 +415,12 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                 if "big" in rel_ene[state].keys():
                     dbig = rel_ene[state]["big"] * self.unit
                 energies += "%9.2f" % dbig
-
             # Electronic energies of main file:
-            d_el = 0
-            if "main" in rel_ene[state].keys():
-                d_el = rel_ene[state]["main"] * self.unit
-            energies += "%9.2f" % d_el
+            else:
+                d_el = 0
+                if "main" in rel_ene[state].keys():
+                    d_el = rel_ene[state]["main"] * self.unit
+                energies += "%9.2f" % d_el
 
             # Change in solvation energy:
             dd_solv = 0
@@ -421,7 +446,8 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                     de = rel_ene[state]["dE"] * self.unit
                     dh = rel_ene[state]["dH"] * self.unit
 
-                energies += "%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f" % (ddg, ddh, dde, dg, dh, de)
+                #energies += "%8.2f %8.2f %8.2f %8.2f %8.2f %8.2f" % (ddg, ddh, dde, dg, dh, de)
+                energies += "%8.2f %8.2f" % (ddg, dg)
 
             self.ui.text_relative_values.appendPlainText(energies)
 
@@ -615,6 +641,7 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
         :param event:
         """
         self.react.analyse_window = None
+        self.react.tabWidget.tabBar().setMovable(True)
         self.react.tabWidget.tabBar().currentChanged.disconnect(self.update_state_included_files)
         if self.pymol:
             self.pymol.pymol_cmd("mstop")

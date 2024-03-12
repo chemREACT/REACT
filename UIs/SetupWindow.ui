@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>706</width>
-    <height>636</height>
+    <width>792</width>
+    <height>715</height>
    </rect>
   </property>
   <property name="font">
@@ -19,8 +19,8 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_6">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="styleSheet">
        <string notr="true">
@@ -62,8 +62,8 @@ background-color: rgb(20,20,20);
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>634</width>
-             <height>805</height>
+             <width>705</width>
+             <height>802</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -98,6 +98,9 @@ background-color: rgb(20,20,20);
                <widget class="QCheckBox" name="checkBox_cp_to_reactmain">
                 <property name="text">
                  <string>Add to project table</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1436,133 +1439,139 @@ QPushButton:pressed
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_freeze">
+      <widget class="QWidget" name="tab_movepair">
        <attribute name="title">
-        <string>ModRedundant</string>
+        <string>Move atom pair</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <layout class="QGridLayout" name="gridLayout_16">
-          <item row="4" column="1">
-           <layout class="QGridLayout" name="gridLayout_11">
-            <item row="0" column="2">
-             <widget class="QDoubleSpinBox" name="spinbox_scan_increment">
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>99.989999999999995</double>
-              </property>
-              <property name="singleStep">
-               <double>0.050000000000000</double>
-              </property>
-              <property name="value">
-               <double>0.100000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="2">
-             <widget class="QLabel" name="label_11">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Increment</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QDoubleSpinBox" name="spinbox_radius">
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>-99.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>99.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QDoubleSpinBox" name="spinbox_scan_pm">
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="minimum">
-               <double>-99.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>99.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>R (Å)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QRadioButton" name="radioButton_plus">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
+       <layout class="QGridLayout" name="gridLayout_15">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_21">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Atoms in model</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" rowspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_24">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Move atom pair</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_20">
+              <item row="0" column="2">
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <item>
+                 <widget class="QRadioButton" name="radioButton_plus_mv">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string>+</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="radioButton_minus_mv">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="text">
+                   <string>-</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="3">
+               <widget class="QDoubleSpinBox" name="spinbox_mv_bonds">
+                <property name="decimals">
+                 <number>2</number>
                 </property>
-                <property name="text">
-                 <string>+</string>
+                <property name="minimum">
+                 <double>-99.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>99.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_minus">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_9">
                 <property name="text">
-                 <string>-</string>
+                 <string>Current distance:</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_both">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>+/-</string>
-                </property>
-                <property name="checked">
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="spinbox_curr_mv"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_21">
+              <item row="1" column="0">
+               <layout class="QVBoxLayout" name="verticalLayout_3"/>
+              </item>
+              <item row="0" column="0">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
+                <item>
+                 <spacer name="horizontalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="checkBox_moveboth_mv">
+                <property name="enabled">
                  <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Move both</string>
                 </property>
                </widget>
               </item>
@@ -1570,10 +1579,174 @@ QPushButton:pressed
             </item>
            </layout>
           </item>
-          <item row="3" column="1">
-           <layout class="QGridLayout" name="gridLayout_8">
+          <item>
+           <widget class="QPushButton" name="pushButton_create_mv">
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Create new geometry</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="Button_save_new_geometry">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>50</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Save new geometry as xyz file</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QListWidget" name="list_model_mv">
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Courier</family>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border 2px solid rgb(143, 23, 119);
+
+</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_freeze">
+       <attribute name="title">
+        <string>Constraints</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QComboBox" name="comboBox_freezetype">
+            <item>
+             <property name="text">
+              <string>Atom</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Bond</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Angle</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Dihedral</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_auto_freeze">
+            <property name="text">
+             <string>Auto-freeze</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>349</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0" rowspan="5">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="1" column="0">
+           <widget class="QListWidget" name="list_model">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>500</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier</family>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border 2px solid rgb(143, 23, 119);
+
+</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Atoms in model</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="1">
-             <widget class="QLabel" name="label_8">
+             <widget class="QLabel" name="label_2">
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -1581,12 +1754,12 @@ QPushButton:pressed
                </font>
               </property>
               <property name="text">
-               <string>Scan (bond)</string>
+               <string>Atoms to freeze</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <spacer name="horizontalSpacer_6">
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_7">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -1598,8 +1771,8 @@ QPushButton:pressed
               </property>
              </spacer>
             </item>
-            <item row="0" column="0">
-             <spacer name="horizontalSpacer_5">
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_11">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -1613,7 +1786,7 @@ QPushButton:pressed
             </item>
            </layout>
           </item>
-          <item row="2" column="1">
+          <item>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="1" rowspan="4">
              <widget class="QListWidget" name="list_freeze_atoms">
@@ -1782,114 +1955,69 @@ QPushButton:pressed
             </item>
            </layout>
           </item>
-          <item row="6" column="1">
-           <layout class="QGridLayout" name="gridLayout_15">
-            <item row="0" column="1">
-             <widget class="QPushButton" name="button_invert">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Invert</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="checkBox_moveboth">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Move both</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>Freeze:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_freeze">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>29</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_12">
-                <property name="text">
-                 <string>Move:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_move">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>29</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <spacer name="horizontalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>242</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
-          <item row="5" column="1">
-           <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="1" rowspan="4">
-             <widget class="QListWidget" name="list_scan_bonds">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <family>Courier</family>
-                <pointsize>11</pointsize>
-               </font>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">border 2px solid rgb(143, 23, 119)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
+          <item>
+           <widget class="QLabel" name="label_27">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Bond distance scan</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>267</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
              <widget class="QPushButton" name="button_add_scan">
               <property name="minimumSize">
                <size>
@@ -1946,20 +2074,7 @@ QPushButton:pressed
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <spacer name="verticalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="2" column="0">
+            <item>
              <widget class="QPushButton" name="button_delete_scan">
               <property name="minimumSize">
                <size>
@@ -2016,76 +2131,166 @@ QPushButton:pressed
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <spacer name="verticalSpacer_5">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>Freeze:</string>
               </property>
-              <property name="sizeHint" stdset="0">
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_freeze">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>29</width>
+                <height>16777215</height>
                </size>
               </property>
-             </spacer>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>Move:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_move">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>29</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="button_invert">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Invert</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_moveboth">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Move both</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
-          <item row="1" column="0" rowspan="6">
-           <layout class="QGridLayout" name="gridLayout_4">
+         </layout>
+        </item>
+        <item row="5" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_23">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Current distance (Å)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_22">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Increment</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
-             <widget class="QListWidget" name="list_model">
-              <property name="minimumSize">
-               <size>
-                <width>300</width>
-                <height>0</height>
-               </size>
+             <widget class="QDoubleSpinBox" name="spinbox_radius"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="spinbox_scan_pm">
+              <property name="decimals">
+               <number>2</number>
               </property>
-              <property name="font">
-               <font>
-                <family>Courier</family>
-                <pointsize>11</pointsize>
-               </font>
+              <property name="minimum">
+               <double>-99.000000000000000</double>
               </property>
-              <property name="styleSheet">
-               <string notr="true">border 2px solid rgb(143, 23, 119);
-
-</string>
+              <property name="maximum">
+               <double>99.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
+            <item row="1" column="2">
+             <widget class="QDoubleSpinBox" name="spinbox_scan_increment">
+              <property name="decimals">
+               <number>2</number>
               </property>
-              <property name="text">
-               <string>Atoms in model</string>
+              <property name="minimum">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>99.989999999999995</double>
+              </property>
+              <property name="singleStep">
+               <double>0.050000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.100000000000000</double>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item row="1" column="1">
-           <layout class="QGridLayout" name="gridLayout_5">
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_2">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Atoms to freeze</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <spacer name="horizontalSpacer_7">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <spacer name="horizontalSpacer_6">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -2097,8 +2302,41 @@ QPushButton:pressed
               </property>
              </spacer>
             </item>
-            <item row="0" column="2">
-             <spacer name="horizontalSpacer_11">
+            <item>
+             <widget class="QRadioButton" name="radioButton_plus">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="text">
+               <string>+</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButton_minus">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioButton_both">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
+              <property name="text">
+               <string>+/-</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_12">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -2112,53 +2350,21 @@ QPushButton:pressed
             </item>
            </layout>
           </item>
-          <item row="0" column="0" colspan="2">
-           <layout class="QGridLayout" name="gridLayout_6">
-            <item row="0" column="2">
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="button_auto_freeze">
-              <property name="text">
-               <string>Auto-freeze</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QComboBox" name="comboBox_freezetype">
-              <item>
-               <property name="text">
-                <string>Atom</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Bond</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Angle</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Dihedral</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
+          <item>
+           <widget class="QCheckBox" name="checkBox_switchXB">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Constrain atoms instead of bond</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -2223,7 +2429,7 @@ QPushButton:pressed
       </widget>
      </widget>
     </item>
-    <item>
+    <item row="1" column="0">
      <widget class="QFrame" name="frame_2">
       <property name="minimumSize">
        <size>
@@ -2255,19 +2461,6 @@ QPushButton:pressed
        </property>
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="1">
-          <widget class="QPushButton" name="button_write">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Write</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QPushButton" name="button_close">
            <property name="minimumSize">
@@ -2278,6 +2471,19 @@ QPushButton:pressed
            </property>
            <property name="text">
             <string>Close</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="button_write">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Write</string>
            </property>
           </widget>
          </item>

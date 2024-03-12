@@ -172,7 +172,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         state = self.get_current_state
         name = None
         if self.get_selected_filepath:
-            name = self.get_selected_filepath.split("/")[-1].split(".")[0]
+            name_split = self.get_selected_filepath.split("/")[-1].split(".")
+            name = name_split[0] + "_" + name_split[-1]
+
         self.pymol.pymol_cmd("group state_%d, toggle, open" % state)
         for i in range(1, self.count_states + 1):
             if i != state:
@@ -189,26 +191,40 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(filepath)
-        if mol_obj.faulty:
-            return
+        try:
+            mol_obj = self.states[state - 1].get_molecule_object(filepath)
+        except AttributeError:
+            self.append_text("Make sure you have selected a file to display in Pymol")
 
+        try:
+            if mol_obj.faulty or not mol_obj:
+                return
+        except AttributeError:
+            return
+        
         if not self.pymol:
             return
 
-        delete_after = False
+        delete_after = True
         if filepath.split(".")[-1] not in ["xyz", "pdb"]:
-            delete_after = True
             xyz = self.states[state - 1].get_final_xyz(filepath)
-            filepath = "%s.xyz" % filepath.split(".")[0]
-            cf.write_file(xyz, filepath)
+            filename = filepath.split("/")[-1]
+            new_filename = "_".join(filename.split("."))
+            new_filepath = f"{self.settings.workdir}/{new_filename}.xyz"
+            cf.write_file(xyz, new_filepath)
+        else:
+            old_filename = filepath.split("/")[-1]
+            new_filename = "_".join(old_filename.split("."))
+            new_filepath = f"{self.settings.workdir}/{new_filename}.{old_filename.split('.')[-1]}"
+            os.popen(f"cp {filepath} {new_filepath}")
 
-        self.pymol.load_structure(filepath, delete_after=delete_after)
-        self.pymol.pymol_cmd("group state_%d, %s" % (state, filepath.split("/")[-1].split(".")[0]))
+
+        self.pymol.load_structure(new_filepath, delete_after=delete_after)
+        self.pymol.pymol_cmd("group state_%d, %s" % (state, new_filepath.split("/")[-1].split(".")[0]))
 
         if set_defaults:
             self.pymol.set_default_rep()
-            self.pymol.pymol_cmd("enable state_%d and %s" % (state, filepath.split("/")[-1].split(".")[0]))
+            self.pymol.pymol_cmd("enable state_%d and %s" % (state, new_filepath.split("/")[-1].split(".")[0]))
 
     def load_all_states_pymol(self):
         """
@@ -221,7 +237,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(len(self.states)):
             state = i + 1
             for filepath in self.states[i].get_all_paths:
-                print(filepath)
                 self.file_to_pymol(filepath, state, set_defaults=False)
             self.pymol.pymol_cmd(f"group state_{state}")
 
@@ -277,7 +292,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not self.pymol:
             return
         group = "state_%d" % self.get_current_state
-        name = self.get_selected_filepath.split("/")[-1].split(".")[0]
+        name_split = self.get_selected_filepath.split("/")[-1].split(".")
+        name = name_split[0] + "_" + name_split[-1]
         self.pymol.highlight(name=name, group=group)
 
     def plot_scf(self):
@@ -323,14 +339,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def add_file(self, filepath):
         """
         Adds only one file.
-        """
+        """        
         self.states[self.state_index].add_file(filepath)
 
         items_insert_index = self.tabWidget.currentWidget().count()
         self.tabWidget.currentWidget().insertItem(items_insert_index, filepath)
+        self.check_convergence(filepath, items_insert_index, self.tabWidget.currentIndex())
 
         if self.pymol:
             self.file_to_pymol(filepath=filepath, state=self.get_current_state, set_defaults=True)
+
    
     def add_files(self, paths=False):
         """
@@ -396,7 +414,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pymol_defaults = False
         for n in range(len(file_paths)):
             file = file_paths[n]
-            print(file)
             self.states[self.state_index].add_file(file)
             if n == len(file_paths) - 1:
                 pymol_defaults = True
@@ -447,7 +464,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.progressBar.setValue(int(val))
 
     def thread_complete(self):
-        print("THREAD COMPLETE!")
+        pass
 
         #if self.pymol:
         #    self.file_to_pymol(filepath=file, state=self.get_current_state, set_defaults=True)
@@ -475,9 +492,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 tab_widget.item(item_index).setForeground(QtGui.QColor(195, 82, 52))
                 self.append_text("\nWarning: %s seems to have not converged!" % mol_obj.filename)
             elif isinstance(converged, bool) and converged:
-                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 129, 104))
+                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 180, 104))
             elif not isinstance(converged, bool):
-                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 129, 104))
+                tab_widget.item(item_index).setForeground(QtGui.QColor(117, 180, 104))
 
     def delete_file(self):
         """
@@ -505,7 +522,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # delete files from pymol
         if self.pymol:
             state = self.get_current_state
-            [self.pymol.pymol_cmd("delete %s" % (x.text().split("/")[-1].split(".")[0]))
+            [self.pymol.pymol_cmd("delete %s" % (x.text().split("/")[-1].split(".")[0] + "_" + x.text().split("/")[-1].split(".")[-1]))
              for x in list_items]
 
         #Remove selected items from list:
@@ -513,28 +530,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             current_list.takeItem(current_list.row(item))
 
             # Remove from included_files if existing:
-            if self.included_files:
-                for type_ in self.included_files[tab_index+1].keys():
-                    if item.text() == self.included_files[tab_index + 1][type_]:
-                        self.included_files[tab_index+1][type_] = ""
-                        # Update analyse window, if active:
-                        if self.analyse_window:
-                            self.analyse_window.update_state_included_files()
+            try:
+                if self.included_files:
+                    for type_ in self.included_files[tab_index+1].keys():
+                        if item.text() == self.included_files[tab_index + 1][type_]:
+                            self.included_files[tab_index+1][type_] = ""
+                            # Update analyse window, if active:
+                            if self.analyse_window:
+                                self.analyse_window.update_state_included_files()
+            except KeyError:
+                pass
 
     def update_tab_names(self):
         """
-        Activated whenever tabs are moved. Renames Tabs in correct order of states (1,2,3,4...)
-        Algorithm for updating list of states: temporary new list is created, 
-
+        Changes the order of states in self.states according to the order of tabs in the tabBar widget.
         """
-        # new list of pointers to State-objects. Pointers are appended one by one by the following for-loop,
-        # thus, according to the new order of tabs. Tabs still have their original labels, which are used to retrive correct pointer.
-        new_pointers = []
+        new_states = []
         new_included_files = dict()
 
         for tab_index in range(len(self.states)):
             state = self.tabWidget.tabText(tab_index)
-            new_pointers.append(self.states[tab_index])
+            new_states.append(self.states[int(state) - 1])
             if state != str(tab_index+1):
                 self.tabWidget.setTabText(tab_index, str(tab_index+1))
                 # swap values of state and tab_index+1
@@ -545,13 +561,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 if self.included_files:
                     new_included_files[int(state)] = self.included_files[int(state)]
 
-        self.states = new_pointers
+        self.states = new_states
         self.included_files = new_included_files
 
         if self.pymol:
             self.pymol.pymol_cmd("delete state_*")
             QTimer.singleShot(100, self.load_all_states_pymol)
-
     def add_state(self):
         """
         Add state (new tab) to tabBar widget with a ListWidget child.
@@ -653,11 +668,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if key == 'states':
                 for state in proj_item.items():
                     self.add_state()
-                    self.add_files(state[1])
+                    #self.add_files(state[1])
 
                     # each state has to be completely loaded before moving on to text,
                     # to ensure the multithreading assigns files to correct state. 
-                    self.threadpool.waitForDone()
+                    #self.threadpool.waitForDone()
+                    for file in state[1]:
+                        self.add_file(file)
+
             if key == 'included files':
                     self.included_files = proj_item
             if key == 'log':
@@ -767,8 +785,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.tabWidget.widget(tab_index).currentItem():
                 file_path = self.tabWidget.widget(tab_index).currentItem().text()
                 if file_path.split(".")[-1] in ["out", "log"]:
-                    energies.append(self.states[tab_index].get_energy(file_path))
-                    d_energies[tab_index + 1] = {"dE": energies[tab_index]-energies[0], "file": file_path}
+                    try:
+                        energies.append(self.states[tab_index].get_energy(file_path))
+                        d_energies[tab_index + 1] = {"dE": energies[tab_index]-energies[0], "file": file_path}
+                    except IndexError:
+                        self.append_text("Something went wrong with tab indexes...")
 
                 else:
                     self.append_text("%s does not seem to be Gaussian output" % file_path)
@@ -820,8 +841,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        if not self.tabWidget.currentWidget().currentItem():
+            self.append_text("\n Nothing to analyse here ... Make sure you have selected a file to analyse.")
+            return
         
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            self.append_text("ERROR: something is wrong")
+            return
         if mol_obj.faulty:
             self.append_text("ERROR: Analyse not possible for broken file!")
             return
@@ -831,9 +859,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.analyse_window.raise_()
             return
 
-        if not self.tabWidget.currentWidget().currentItem() and not self.included_files:
-            self.append_text("\n Nothing to analyse here ...")
-            return
         self.analyse_window = AnalyseCalc(self)
         self.analyse_window.show()
 
@@ -841,7 +866,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            self.append_text("ERROR: please select the geometry file to create a cluster from.")
+            return
+
         
         if mol_obj.faulty:
             self.append_text("ERROR: Create cluster not possible for broken file!")
@@ -860,7 +890,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def pdb_from_pymol(self, pdb_path):
         if not self.cluster_window:
             return
-        print(f"this is what I got; {pdb_path}")
         if self.cluster_window.ui.copy_to_project.isChecked():
             self.add_file(pdb_path)
 
@@ -869,10 +898,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         :return:
         """
 
-        mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
-        if mol_obj.faulty:
-            self.append_text("ERROR: Plotter not possible for broken file!")
-            return
+        try:
+            mol_obj = self.states[self.state_index].get_molecule_object(self.tabWidget.currentWidget().currentItem().text())
+        except AttributeError:
+            pass
+        # if mol_obj.faulty:
+        #     self.append_text("ERROR: Plotter not possible for broken file!")
+        #     return
 
         self.plotter = Plotter(self)
         self.plotter.show()
