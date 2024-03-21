@@ -43,5 +43,8 @@ If you would like to use Open Source Pymol, you will need to compile it with you
 
 
 
-Now you can take the included pyinstaller OpenSourcePymol.spec and run it i
+Now you can take the included pyinstaller OpenSourcePymol.spec and run it.
+
+## Known bugs:
+- Stuctures missing in PyMOL window. Closing and re-opening PyMOL window will correctly import all strucutres in the REACT workspace.
 
