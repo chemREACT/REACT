@@ -269,8 +269,11 @@ class Properties(Geometries):
         :return: list of gaussian molecules, where the first is the original optimised molecules.
         """
         molecule = self.molecule
-        displacement = self.get_displacement(freq).molecule
-
+        try:
+            displacement = self.get_displacement(freq).molecule
+        except AttributeError:
+            self.react.append_text("No molecule found...")
+            return False
         molecules = list()
         molecules.append(Molecule(atoms=molecule))
 
