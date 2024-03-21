@@ -221,7 +221,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             new_filepath = f"{self.settings.workdir}/{new_filename}.{old_filename.split('.')[-1]}"
             os.popen(f"cp {filepath} {new_filepath}")
 
-
+            
         self.pymol.load_structure(new_filepath, delete_after=delete_after)
         self.pymol.pymol_cmd("group state_%d, %s" % (state, new_filepath.split("/")[-1].split(".")[0]))
 
@@ -548,6 +548,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Changes the order of states in self.states according to the order of tabs in the tabBar widget.
         """
+
         try:
             new_states = []
             new_included_files = dict()
@@ -574,6 +575,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except KeyError:
             if self.analyse_window:
                 self.analyse_window.init_included_files()
+                
     def add_state(self):
         """
         Add state (new tab) to tabBar widget with a ListWidget child.
@@ -883,7 +885,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except AttributeError:
             self.append_text("ERROR: please select the geometry file to create a cluster from.")
             return
-        
+
         if isinstance(mol_obj, bool):
             return
         
