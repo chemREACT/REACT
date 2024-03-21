@@ -121,7 +121,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Things get a bit different in bundle mode:
         bundle_dir = getattr(sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__)))
+
         if self.settings.REACT_pymol:
+            print(f"found: {self.settings.REACT_pymol}")
             if os.path.isdir(f'OpenSourcePymol/dist/'):
                 pymol_path = f'OpenSourcePymol/dist/{pymol}'
             elif os.path.abspath(os.path.join(bundle_dir, "/OpenSourcePymol/dist/")):
@@ -136,6 +138,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not pymol_path:
             self.append_text("No PyMol path set. Please see settings.")
             return
+
 
         self.pymol = PymolSession(parent=self, home=self, pymol_path=pymol_path)
 
@@ -545,28 +548,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         Changes the order of states in self.states according to the order of tabs in the tabBar widget.
         """
-        new_states = []
-        new_included_files = dict()
+        try:
+            new_states = []
+            new_included_files = dict()
 
-        for tab_index in range(len(self.states)):
-            state = self.tabWidget.tabText(tab_index)
-            new_states.append(self.states[int(state) - 1])
-            if state != str(tab_index+1):
-                self.tabWidget.setTabText(tab_index, str(tab_index+1))
-                # swap values of state and tab_index+1
-                if self.included_files:
-                    new_included_files[int(state)] = self.included_files[tab_index+1]
+            for tab_index in range(len(self.states)):
+                state = self.tabWidget.tabText(tab_index)
+                new_states.append(self.states[int(state) - 1])
+                if state != str(tab_index+1):
+                    self.tabWidget.setTabText(tab_index, str(tab_index+1))
+                    # swap values of state and tab_index+1
+                    if self.included_files:
+                        new_included_files[int(state)] = self.included_files[tab_index+1]
 
-            else:
-                if self.included_files:
-                    new_included_files[int(state)] = self.included_files[int(state)]
+                else:
+                    if self.included_files:
+                        new_included_files[int(state)] = self.included_files[int(state)]
 
-        self.states = new_states
-        self.included_files = new_included_files
+            self.states = new_states
+            self.included_files = new_included_files
 
-        if self.pymol:
-            self.pymol.pymol_cmd("delete state_*")
-            QTimer.singleShot(100, self.load_all_states_pymol)
+            if self.pymol:
+                self.pymol.pymol_cmd("delete state_*")
+                QTimer.singleShot(100, self.load_all_states_pymol)
+        except KeyError:
+            if self.analyse_window:
+                self.analyse_window.init_included_files()
     def add_state(self):
         """
         Add state (new tab) to tabBar widget with a ListWidget child.
@@ -850,8 +857,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except AttributeError:
             self.append_text("ERROR: something is wrong")
             return
-        if mol_obj.faulty:
-            self.append_text("ERROR: Analyse not possible for broken file!")
+        try:
+            if mol_obj.faulty:
+                self.append_text("ERROR: Analyse not possible for broken file!")
+                return
+        except AttributeError:
+            print(self.states)
+            print(self.included_files)
             return
 
         if self.analyse_window:
@@ -871,7 +883,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except AttributeError:
             self.append_text("ERROR: please select the geometry file to create a cluster from.")
             return
-
+        
+        if isinstance(mol_obj, bool):
+            return
         
         if mol_obj.faulty:
             self.append_text("ERROR: Create cluster not possible for broken file!")

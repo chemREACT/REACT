@@ -183,18 +183,51 @@ class AnalyseCalc(QtWidgets.QMainWindow, Ui_AnalyseWindow):
                         self.react.included_files[state][2] = file_path
 
     def update_included_files(self):
-        tab_index = self.react.tabWidget.currentIndex()
-        selected_file = self.react.tabWidget.widget(tab_index).currentItem().text()
 
-        if selected_file.split(".")[-1] not in ["out"]:
+        insert_index = self.ui.calctype.currentRow()
+        filepath = self.react.get_selected_filepath
+        state = self.react.get_current_state
+
+        if filepath.split(".")[-1] not in ["out", "log"]:
+            self.react.append_text("File must be Gaussian output file")
             return
-        
-        self.react.included_files[tab_index + 1][0] = selected_file
-        
-        if self.react.states[tab_index].has_frequencies(selected_file):
-            self.react.included_files[tab_index + 1][1] = selected_file
 
+        #Check if file is what it is supposed to be:
+        if insert_index == 0:
+            if not self.react.states[state - 1].has_energy(filepath):
+                self.react.append_text("\nNo energy found in %s" % filepath)
+                return
+            if not self.react.states[state - 1].has_frequencies(filepath):
+                self.react.included_files[state][1] = filepath
+
+        if insert_index == 1:
+            if not self.react.states[state - 1].has_frequencies(filepath):
+                self.react.append_text("\nNo frequencies found in %s" % filepath)
+                return
+        elif insert_index == 2:
+            if not self.react.states[state - 1].has_solvent(filepath):
+                self.react.append_text("\nNo solvent found in %s" % filepath)
+                return
+
+
+
+        self.react.included_files[state][insert_index] = filepath
         self.update_state_included_files()
+    
+
+
+        # tab_index = self.react.tabWidget.currentIndex()
+        # selected_file = self.react.tabWidget.widget(tab_index).currentItem().text()
+
+        # if selected_file.split(".")[-1] not in ["out"]:
+        #     return
+        
+        # self.react.included_files[tab_index + 1][0] = selected_file
+        
+        # if self.react.states[tab_index].has_frequencies(selected_file):
+        #     self.react.included_files[tab_index + 1][1] = selected_file
+
+        # self.update_state_included_files()
         
 
     def update_state_included_files(self):

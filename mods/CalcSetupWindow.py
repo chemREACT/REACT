@@ -572,14 +572,16 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def anmiate_bond_pymol(self):
         # It is not possible to delete states, so we actually need to delete the mol_obj and load it again :/
-        self.pymol.pymol_cmd(f"delete {self.mol_obj.molecule_name} and state_{self.state}")
-        self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
-
+        #name_split = self.mol_obj.filepath.split("/")[-1].split(".")
+        #name = name_split[0] + "_" + name_split[-1]
+        #self.pymol.pymol_cmd(f"delete {name} and state_{self.state}")
+        #self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
         state = 1
+        self.pymol.pymol_cmd(f"delete scan")
         for f in sorted(os.listdir(f"{self.settings.workdir}/.scan_temp")):
             state += 1
             _mol = f"{self.settings.workdir}/.scan_temp/{f}"
-            self.pymol.pymol_cmd(f"load {_mol},  {self.mol_obj.molecule_name}, {state}")
+            self.pymol.pymol_cmd(f"load {_mol},  scan, {state}")
         self.pymol.set_default_rep()
         self.pymol.pymol_cmd("set movie_fps, 10")
         self.pymol_animation = True
@@ -587,8 +589,8 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def stop_pymol_animation(self):
         self.pymol.pymol_cmd("mstop")
-        self.pymol.pymol_cmd(f"delete {self.mol_obj.molecule_name} and state_{self.state}")
-        self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
+        self.pymol.pymol_cmd(f"delete scan")
+        #self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
         self.pymol_animation = False
 
     def remove_scan_atoms(self):
@@ -1077,6 +1079,8 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         else:
             molecule_str = f"{self.charge} {self.multiplicity}\n" + "\n".join(self.mol_obj.formatted_xyz)
 
+        molecule_str = self.remove_extra_newline(molecule_str)
+
         ### This part prepares the restraints, if there are any ###
         restraints_list = []
         
@@ -1093,7 +1097,22 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         return f"{link0_str}\n{route_str}\n\n{filename} {self.job_type}\n\n{molecule_str}\n\n{restraints_str}\n\n{eps}\n\n"
     
+    def remove_extra_newline(self, input_string):
+        """
+        To remedy some strange bug in make_input_content..
+        """
 
+        # Split the string into lines
+        lines = input_string.split('\n')
+        
+        # Remove any empty lines
+        lines = [line for line in lines if line]
+        
+        # Join the lines back together with newline characters
+        output_string = '\n'.join(lines)
+    
+        return output_string
+    
     def route_checkboxes_update(self, checkbox, lineEdit):
 
         if checkbox.isChecked():
