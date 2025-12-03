@@ -50,12 +50,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             # Connect signals from pymol:
             self.pymol.atomsSelectedSignal.connect(self.pymol_atom_clicked)
 
-            
             # Connect signal, update charge variable with the signal emitted
             self.pymol_charge = None
             self.pymol.overallChargeSignal.connect(self.handle_overall_charge)
             self.pymol.set_overall_charge()
-
 
         self.ui = Ui_SetupWindow()
         self.ui.setupUi(self)
@@ -63,16 +61,18 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.button_auto_freeze.hide()
 
         # TODO optimize this?:
-        screen_size = QtWidgets.QDesktopWidget().screenGeometry()
+        screen_size = self.screen().availableGeometry()
         window_size = self.geometry()
         self.move(int(((screen_size.width() - window_size.width()) / 2)) - 250, 100)
 
         self.setWindowTitle("REACT - Calculation setup")
 
-        self.mol_obj = self.react.states[self.react.state_index].get_molecule_object(self.filepath)
-        
+        self.mol_obj = self.react.states[self.react.state_index].get_molecule_object(
+            self.filepath
+        )
+
         if self.mol_obj.charge:
-             self.charge = self.mol_obj.charge
+            self.charge = self.mol_obj.charge
         else:
             self.charge = None
 
@@ -80,7 +80,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.multiplicity = self.mol_obj.multiplicity
         else:
             self.multiplicity = "1"
-        self.filename = self.mol_obj.filename.split(".")[0] 
+        self.filename = self.mol_obj.filename.split(".")[0]
 
         # we need to make a local copy of all info job-related stuff,
         # So that we dont change the attributes in Settings object
@@ -89,8 +89,8 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.basis_diff = copy.deepcopy(self.settings.basis_diff)
         self.basis_pol1 = copy.deepcopy(self.settings.basis_pol1)
         self.basis_pol2 = copy.deepcopy(self.settings.basis_pol2)
-        # -2 = low (#t), -3 = normal (# or #n), -4 = high (#p) 
-        self.output_print = "#" # TODO add this to settings class?
+        # -2 = low (#t), -3 = normal (# or #n), -4 = high (#p)
+        self.output_print = "#"  # TODO add this to settings class?
         self.additional_keys = copy.deepcopy(self.settings.additional_keys)
         self.job_type = self.settings.job_type
         self.opt_freq_combi = False
@@ -103,9 +103,11 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.Qbutton_group.addButton(self.ui.radioButton_3)
 
         self.ui.lineEdit_chk.setHidden(True)
-        self.link0_checkboxes = {self.ui.checkBox_chk: None,
-                                 self.ui.checkBox_mem_2: self.ui.lineEdit_mem_2,
-                                 self.ui.checkBox_oldchk: self.ui.lineEdit_oldchk}
+        self.link0_checkboxes = {
+            self.ui.checkBox_chk: None,
+            self.ui.checkBox_mem_2: self.ui.lineEdit_mem_2,
+            self.ui.checkBox_oldchk: self.ui.lineEdit_oldchk,
+        }
 
         self.opt_freq_details = {"checked": False, "keywords": []}
         self.num_files = 1
@@ -120,12 +122,36 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.insert_model_atoms()
         self.fill_main_tab()
 
-        self.ui.Button_add_job.clicked.connect(lambda: self.add_item_to_list(self.ui.LineEdit_add_job, self.ui.List_add_job, self.job_options[self.job_type]))
-        self.ui.Button_del_job.clicked.connect(lambda:  self.del_item_from_list(self.ui.List_add_job, self.job_options[self.job_type]))
-        self.ui.Button_add_link0.clicked.connect(lambda: self.add_item_to_list(self.ui.LineEdit_link0, self.ui.list_link0, self.link0_options))
-        self.ui.Button_del_link0.clicked.connect(lambda: self.del_item_from_list(self.ui.list_link0, self.link0_options))
-        self.ui.Button_add_job_2.clicked.connect(lambda: self.add_item_to_list(self.ui.LineEdit_add_job_2, self.ui.List_add_job_2, self.additional_keys))
-        self.ui.Button_del_job_2.clicked.connect(lambda: self.del_item_from_list(self.ui.List_add_job_2, self.additional_keys))
+        self.ui.Button_add_job.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.LineEdit_add_job,
+                self.ui.List_add_job,
+                self.job_options[self.job_type],
+            )
+        )
+        self.ui.Button_del_job.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.List_add_job, self.job_options[self.job_type]
+            )
+        )
+        self.ui.Button_add_link0.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.LineEdit_link0, self.ui.list_link0, self.link0_options
+            )
+        )
+        self.ui.Button_del_link0.clicked.connect(
+            lambda: self.del_item_from_list(self.ui.list_link0, self.link0_options)
+        )
+        self.ui.Button_add_job_2.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.LineEdit_add_job_2, self.ui.List_add_job_2, self.additional_keys
+            )
+        )
+        self.ui.Button_del_job_2.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.List_add_job_2, self.additional_keys
+            )
+        )
         self.ui.comboBox_basis1.currentIndexChanged.connect(self.update_basis1)
         self.ui.comboBox_basis2.currentIndexChanged.connect(self.update_basis2)
         self.ui.comboBox_basis3.currentIndexChanged.connect(self.update_basis3)
@@ -135,9 +161,21 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.ComboBox_files.currentTextChanged.connect(self.update_preview_combobox)
         self.ui.button_close.clicked.connect(self.on_close)
         self.ui.button_write.clicked.connect(self.on_write)
-        self.ui.checkBox_mem_2.clicked.connect(lambda: self.route_checkboxes_update(self.ui.checkBox_mem_2, self.ui.lineEdit_mem_2))
-        self.ui.checkBox_chk.clicked.connect(lambda: self.route_checkboxes_update(self.ui.checkBox_chk, self.ui.lineEdit_chk))
-        self.ui.checkBox_oldchk.clicked.connect(lambda: self.route_checkboxes_update(self.ui.checkBox_oldchk, self.ui.lineEdit_oldchk))
+        self.ui.checkBox_mem_2.clicked.connect(
+            lambda: self.route_checkboxes_update(
+                self.ui.checkBox_mem_2, self.ui.lineEdit_mem_2
+            )
+        )
+        self.ui.checkBox_chk.clicked.connect(
+            lambda: self.route_checkboxes_update(
+                self.ui.checkBox_chk, self.ui.lineEdit_chk
+            )
+        )
+        self.ui.checkBox_oldchk.clicked.connect(
+            lambda: self.route_checkboxes_update(
+                self.ui.checkBox_oldchk, self.ui.lineEdit_oldchk
+            )
+        )
         self.ui.button_add_freeze.clicked.connect(self.add_freeze_atoms)
         self.ui.button_delete_freeze.clicked.connect(self.remove_freeze_atoms)
         self.ui.button_auto_freeze.clicked.connect(self.auto_freeze_atoms)
@@ -150,28 +188,40 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.Qbutton_group.buttonClicked.connect(self.update_print_button)
         self.ui.checkbox_freq.clicked.connect(self.toggle_raman)
         self.Qbutton_scan_group.buttonClicked.connect(self.on_scan_mode_changed)
-        self.ui.spinbox_scan_pm.valueChanged.connect(lambda: self.on_spinbox_changed(self.ui.spinbox_scan_pm))
-        self.ui.spinbox_scan_increment.valueChanged.connect(lambda: self.on_spinbox_changed(self.ui.spinbox_scan_increment))
+        self.ui.spinbox_scan_pm.valueChanged.connect(
+            lambda: self.on_spinbox_changed(self.ui.spinbox_scan_pm)
+        )
+        self.ui.spinbox_scan_increment.valueChanged.connect(
+            lambda: self.on_spinbox_changed(self.ui.spinbox_scan_increment)
+        )
         self.ui.button_invert.clicked.connect(self.on_invert_atoms)
         self.ui.checkBox_moveboth.clicked.connect(self.on_move_both_changed)
 
         self.ui.pushButton_create_mv.clicked.connect(self.add_move_atoms)
         self.ui.checkBox_moveboth_mv.clicked.connect(self.on_move_both_changed_mv)
-        self.ui.spinbox_mv_bonds.valueChanged.connect(lambda: self.on_spinbox_changed(self.ui.spinbox_mv_bonds))
+        self.ui.spinbox_mv_bonds.valueChanged.connect(
+            lambda: self.on_spinbox_changed(self.ui.spinbox_mv_bonds)
+        )
         self.move_bond = False
         self.atoms_mv = list()
         self.ui.Button_save_new_geometry.clicked.connect(self.save_geometry_to_file)
 
-        self.ui.list_model.itemSelectionChanged.connect(lambda: self.model_atom_clicked(self.ui.list_model))
+        self.ui.list_model.itemSelectionChanged.connect(
+            lambda: self.model_atom_clicked(self.ui.list_model)
+        )
         self.ui.list_model.setSelectionMode(1)
 
-        self.ui.list_model_mv.itemSelectionChanged.connect(lambda: self.model_atom_clicked(self.ui.list_model_mv))
+        self.ui.list_model_mv.itemSelectionChanged.connect(
+            lambda: self.model_atom_clicked(self.ui.list_model_mv)
+        )
         self.ui.list_model_mv.setSelectionMode(2)
 
         self.ui.list_freeze_atoms.itemSelectionChanged.connect(self.freeze_list_clicked)
 
         self.atoms_to_select = 2
-        self.ui.comboBox_freezetype.currentTextChanged.connect(self.change_selection_mode)
+        self.ui.comboBox_freezetype.currentTextChanged.connect(
+            self.change_selection_mode
+        )
 
         # Keep track of atoms selected (for multiple selection options)
         self.selected_indexes = list()
@@ -195,7 +245,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             pass
 
     def on_invert_atoms(self):
-
         if self.ui.list_model.count() < 1:
             return
 
@@ -205,7 +254,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.update_scan()
 
     def on_move_both_changed(self):
-
         if self.ui.list_model.count() < 1:
             return
 
@@ -220,7 +268,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.lineEdit_freeze.setDisabled(disable)
         self.ui.lineEdit_move.setDisabled(disable)
         self.update_scan()
-
 
     def on_move_both_changed_mv(self):
         if self.move_bond == False:
@@ -310,12 +357,11 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             coordinates.append(self.mol_obj.molecule[i.row() + 1].coordinate)
 
         if len(atoms) == 2:
-            
-            #self.enable_scan(enable=True)
+            # self.enable_scan(enable=True)
             r = atom_distance(coordinates[0], coordinates[1])
             self.ui.spinbox_radius.setValue(r)
             self.ui.spinbox_curr_mv.setValue(r)
-        #else:
+        # else:
         #    self.enable_scan(enable=False)
 
         if self.pymol:
@@ -329,7 +375,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.stop_pymol_animation()
 
         try:
-            indexes = [int(x) - 1 for x in self.ui.list_freeze_atoms.currentItem().text().split()[1:-1]]
+            indexes = [
+                int(x) - 1
+                for x in self.ui.list_freeze_atoms.currentItem().text().split()[1:-1]
+            ]
         except AttributeError:
             return
         freeze_type = {1: "Atom", 2: "Bond", 3: "Angle", 4: "Dihedral"}
@@ -341,13 +390,13 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         for index in indexes:
             self.ui.list_model.item(index).setSelected(True)
 
-
-
     def update_pymol_selection(self, atoms):
         filetype = self.mol_obj.filepath.split(".")[-1]
         object_name = self.mol_obj.molecule_name + "_" + filetype
         group = "state_%d" % self.react.get_current_state
-        self.pymol.set_selection(atoms=atoms, sele_name="sele", object_name=object_name, group=group)
+        self.pymol.set_selection(
+            atoms=atoms, sele_name="sele", object_name=object_name, group=group
+        )
 
     def add_freeze_atoms(self):
         """
@@ -362,25 +411,29 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             atomnr = self.mol_obj.molecule[i.row() + 1].atom_index
             if self.pymol:
                 self.pymol_spheres(atomnr)
-            atoms += f"{atomnr } "
+            atoms += f"{atomnr} "
 
-        self.ui.list_freeze_atoms.insertItem(0, f"{g_cmd[self.ui.comboBox_freezetype.currentText()]} {atoms} {type}")
+        self.ui.list_freeze_atoms.insertItem(
+            0, f"{g_cmd[self.ui.comboBox_freezetype.currentText()]} {atoms} {type}"
+        )
 
     def remove_freeze_atoms(self):
         """
         Removes selected freeze atoms/bonds/angles/torsions
         """
         # Get rows for selected to delete:
-        to_del = [self.ui.list_freeze_atoms.row(x) for x in self.ui.list_freeze_atoms.selectedItems()]
+        to_del = [
+            self.ui.list_freeze_atoms.row(x)
+            for x in self.ui.list_freeze_atoms.selectedItems()
+        ]
         for row in to_del:
             if self.pymol:
                 for i in self.ui.list_freeze_atoms.item(row).text().split()[1:-1]:
                     self.pymol_spheres(atom_nr=i, hide=True)
 
             self.ui.list_freeze_atoms.takeItem(row)
-    
-    def on_spinbox_changed(self, spinbox):
 
+    def on_spinbox_changed(self, spinbox):
         try:
             if spinbox.value() == 0:
                 return
@@ -393,7 +446,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         except AttributeError:
             return
 
-        
         self.update_scan()
 
     def add_scan_atoms(self):
@@ -403,14 +455,14 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
 
         if len(self.selected_indexes) != 2:
-            self.react.append_text('Scan only works when only 2 atoms are selected...')
-            return 
-        
+            self.react.append_text("Scan only works when only 2 atoms are selected...")
+            return
+
         if self.scan_bond_key:
             try:
                 del self.atom_bonds[self.scan_bond_key]
             except:
-                pass 
+                pass
 
         freeze = ""
         atoms = list()
@@ -423,23 +475,28 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             freeze += f"{self.mol_obj.molecule[i.row() + 1].atom_name} ({self.mol_obj.molecule[i.row() + 1].atom_index})    "
 
         if self.ui.radioButton_plus.isChecked():
-            scan_mode = '+'
+            scan_mode = "+"
         elif self.ui.radioButton_minus.isChecked():
-            scan_mode = '-'
+            scan_mode = "-"
         else:
-            scan_mode = '+/-'
+            scan_mode = "+/-"
 
-        self.atom_bonds[freeze] = AtomBond(self.mol_obj.formatted_xyz,
-                                           atoms[0], atoms[1], bond_size, scan_size,
-                                           scan_increment, self.ui.checkBox_moveboth.isChecked(),
-                                           scan_mode)
-        
+        self.atom_bonds[freeze] = AtomBond(
+            self.mol_obj.formatted_xyz,
+            atoms[0],
+            atoms[1],
+            bond_size,
+            scan_size,
+            scan_increment,
+            self.ui.checkBox_moveboth.isChecked(),
+            scan_mode,
+        )
+
         self.scan_bond_key = freeze
 
-
-        #list_item = QtWidgets.QListWidgetItem(freeze)
-        #self.ui.list_scan_bonds.addItem(list_item)
-        #self.ui.list_scan_bonds.setCurrentItem(list_item)
+        # list_item = QtWidgets.QListWidgetItem(freeze)
+        # self.ui.list_scan_bonds.addItem(list_item)
+        # self.ui.list_scan_bonds.setCurrentItem(list_item)
         self.ui.lineEdit_freeze.setText(str(atoms[0]))
         self.ui.lineEdit_move.setText(str(atoms[1]))
 
@@ -460,49 +517,56 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         for i in self.selected_indexes:
             self.atoms_mv.append(self.mol_obj.molecule[i.row() + 1].atom_index)
 
-
         if self.ui.radioButton_plus_mv.isChecked():
-            scan_mode = '+'
+            scan_mode = "+"
         else:
-            scan_mode = '-'
+            scan_mode = "-"
 
         try:
-            self.move_bond = AtomBond(self.mol_obj.formatted_xyz,
-                                           self.atoms_mv[0], self.atoms_mv[1], bond_size, scan_size,
-                                           scan_increment, self.ui.checkBox_moveboth_mv.isChecked(),
-                                           scan_mode)
+            self.move_bond = AtomBond(
+                self.mol_obj.formatted_xyz,
+                self.atoms_mv[0],
+                self.atoms_mv[1],
+                bond_size,
+                scan_size,
+                scan_increment,
+                self.ui.checkBox_moveboth_mv.isChecked(),
+                scan_mode,
+            )
         except:
             pass
 
         all_xyz = self.move_bond.scan_new_coordinates
         last_xyz = all_xyz.popitem()
 
-        content = str(len(last_xyz[1])) + '\n' + last_xyz[0] + '\n'
+        content = str(len(last_xyz[1])) + "\n" + last_xyz[0] + "\n"
         for line in last_xyz[1]:
-            content += line + '\n'
+            content += line + "\n"
 
-        filepath = self.settings.workdir + '/.move_tmp.xyz'
+        filepath = self.settings.workdir + "/.move_tmp.xyz"
         try:
             remove(filepath)
         except:
             pass
-            
-        with open(filepath, 'w+') as f:
 
+        with open(filepath, "w+") as f:
             f.write(content)
 
         self.react.pymol.load_structure(filepath, delete_after=True)
-        self.react.pymol.pymol_cmd("group state_%d, %s" % (1, filepath.split("/")[-1].split(".")[0]))
+        self.react.pymol.pymol_cmd(
+            "group state_%d, %s" % (1, filepath.split("/")[-1].split(".")[0])
+        )
 
         self.react.pymol.set_default_rep()
-        self.react.pymol.pymol_cmd("enable state_%d and %s" % (1, filepath.split("/")[-1].split(".")[0]))
-        #self.react.file_to_pymol(self.settings.workdir + '/.move_tmp.xyz', state=1, set_defaults=True)
+        self.react.pymol.pymol_cmd(
+            "enable state_%d and %s" % (1, filepath.split("/")[-1].split(".")[0])
+        )
+        # self.react.file_to_pymol(self.settings.workdir + '/.move_tmp.xyz', state=1, set_defaults=True)
 
-        #if self.pymol:
+        # if self.pymol:
         #    self.react.add_file(self.settings.workdir + '/.move_tmp.xyz')
 
     def save_geometry_to_file(self):
-
         bond_size = self.ui.spinbox_curr_mv.value()
         scan_size = self.ui.spinbox_mv_bonds.value()
         scan_increment = self.ui.spinbox_scan_increment.value()
@@ -511,35 +575,38 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.atoms_mv.append(self.mol_obj.molecule[i.row() + 1].atom_index)
 
         if self.ui.radioButton_plus_mv.isChecked():
-            scan_mode = '+'
+            scan_mode = "+"
         else:
-            scan_mode = '-'
+            scan_mode = "-"
 
         try:
-            self.move_bond = AtomBond(self.mol_obj.formatted_xyz,
-                                           self.atoms_mv[0], self.atoms_mv[1], bond_size, scan_size,
-                                           scan_increment, self.ui.checkBox_moveboth_mv.isChecked(),
-                                           scan_mode)
+            self.move_bond = AtomBond(
+                self.mol_obj.formatted_xyz,
+                self.atoms_mv[0],
+                self.atoms_mv[1],
+                bond_size,
+                scan_size,
+                scan_increment,
+                self.ui.checkBox_moveboth_mv.isChecked(),
+                scan_mode,
+            )
         except IndentationError:
             pass
 
         all_xyz = self.move_bond.scan_new_coordinates
         last_xyz = all_xyz.popitem()
 
-        content = str(len(last_xyz[1])) + '\n' + last_xyz[0] + '\n'
+        content = str(len(last_xyz[1])) + "\n" + last_xyz[0] + "\n"
         for line in last_xyz[1]:
-            content += line + '\n'
+            content += line + "\n"
 
-        filepath = self.settings.workdir + f'/{last_xyz[0]}.xyz'
-            
-        with open(filepath, 'w+') as f:
+        filepath = self.settings.workdir + f"/{last_xyz[0]}.xyz"
 
+        with open(filepath, "w+") as f:
             f.write(content)
 
         self.react.add_file(filepath)
 
-
-    
     def update_scan(self):
         """
         Remove all old files before making new ones
@@ -552,7 +619,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                 remove(f)
 
         try:
-            self.scan_bond.write_xyzfiles(self.settings.workdir + '/.scan_temp/')
+            self.scan_bond.write_xyzfiles(self.settings.workdir + "/.scan_temp/")
             if self.pymol:
                 # read files to pymol obj
                 self.anmiate_bond_pymol()
@@ -563,7 +630,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
         Remove all old files before making new ones
         """
-        #if path.isfile(f"{self.settings.workdir}/.move_temp"):
+        # if path.isfile(f"{self.settings.workdir}/.move_temp"):
         #    self.react.remove_file(f"{self.settings.workdir}/.move_temp")
         #    remove(f"{self.settings.workdir}/.move_temp")
         #    self.ui.list_model_mv.clearSelection()
@@ -572,10 +639,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def anmiate_bond_pymol(self):
         # It is not possible to delete states, so we actually need to delete the mol_obj and load it again :/
-        #name_split = self.mol_obj.filepath.split("/")[-1].split(".")
-        #name = name_split[0] + "_" + name_split[-1]
-        #self.pymol.pymol_cmd(f"delete {name} and state_{self.state}")
-        #self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
+        # name_split = self.mol_obj.filepath.split("/")[-1].split(".")
+        # name = name_split[0] + "_" + name_split[-1]
+        # self.pymol.pymol_cmd(f"delete {name} and state_{self.state}")
+        # self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
         state = 1
         self.pymol.pymol_cmd(f"delete scan")
         for f in sorted(os.listdir(f"{self.settings.workdir}/.scan_temp")):
@@ -590,7 +657,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
     def stop_pymol_animation(self):
         self.pymol.pymol_cmd("mstop")
         self.pymol.pymol_cmd(f"delete scan")
-        #self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
+        # self.react.file_to_pymol(filepath=self.mol_obj.filepath, state=1, set_defaults=True)
         self.pymol_animation = False
 
     def remove_scan_atoms(self):
@@ -601,7 +668,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.ui.spinbox_radius.clear()
         except:
             pass
-        #self.update_scan()
+        # self.update_scan()
 
     # def scan_list_clicked(self):
     #     if not hasattr(self, "scan_bond"):
@@ -627,27 +694,32 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     #     #self.scan_bond.write_xyzfiles()
 
-
-        
     def pymol_spheres(self, atom_nr, hide=False):
         """
         Indicate withe spheres atoms to be frozen / modredundant
         """
         group = "state_%d" % self.react.get_current_state
         _cmd = "show"
-        mol_obj_name = self.mol_obj.filename.split('.')[0] + "_" + self.mol_obj.filepath.split(".")[-1]
+        mol_obj_name = (
+            self.mol_obj.filename.split(".")[0]
+            + "_"
+            + self.mol_obj.filepath.split(".")[-1]
+        )
         if hide:
             _cmd = "hide"
-        self.pymol.pymol_cmd(f"{_cmd} spheres, id {atom_nr} and {group} and {mol_obj_name}")
+        self.pymol.pymol_cmd(
+            f"{_cmd} spheres, id {atom_nr} and {group} and {mol_obj_name}"
+        )
         if not hide:
-            self.pymol.pymol_cmd(f"set sphere_scale, 0.3, id {atom_nr} and {group} and "
-                                 f"{mol_obj_name}")
+            self.pymol.pymol_cmd(
+                f"set sphere_scale, 0.3, id {atom_nr} and {group} and {mol_obj_name}"
+            )
 
     def update_job_details(self):
         """
         Activated when job option combobox is updated. Will fill Qlist,
-        Enable multiple files in case IRC is chosen, and hide Opt+freq 
-        buttons whenever job != opt. 
+        Enable multiple files in case IRC is chosen, and hide Opt+freq
+        buttons whenever job != opt.
         :return:
         """
         self.IRC_files.clear()
@@ -661,7 +733,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.ui.tabWidget.setTabEnabled(1, True)
         else:
             self.ui.tabWidget.setTabEnabled(1, False)
-            
+
         if self.job_type in ["IRC", "IRCMax"]:
             self.IRC_files[self.filename + "_frwd"] = ["forward"]
             self.IRC_files[self.filename + "_rev"] = ["reverse"]
@@ -698,7 +770,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         else:
             self.ui.checkBox_raman.setHidden(True)
 
-
     def update_functional(self):
         self.functional = self.ui.comboBox_funct.currentText()
 
@@ -707,18 +778,26 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         Fill all widgets in main tab.
         Every link0 checkboxes is crossed-checked with entries in self.link0_options.
         If any entry in link0_options has a dedicated checkbox, set the checkbox to True,
-        and omit this entry from the additional link 0 QlistWidget. 
+        and omit this entry from the additional link 0 QlistWidget.
         :return:
         """
         self.ui.lineEdit_filename.setText(self.filename)
         self.ui.comboBox_funct.addItems(self.settings.functional_options)
         self.ui.comboBox_basis1.addItems(self.settings.basis_options)
-        self.ui.comboBox_basis2.addItems(self.settings.basis_options[self.basis]["diff"])
-        self.ui.comboBox_basis3.addItems(self.settings.basis_options[self.basis]["pol1"])
-        self.ui.comboBox_basis4.addItems(self.settings.basis_options[self.basis]["pol2"])
+        self.ui.comboBox_basis2.addItems(
+            self.settings.basis_options[self.basis]["diff"]
+        )
+        self.ui.comboBox_basis3.addItems(
+            self.settings.basis_options[self.basis]["pol1"]
+        )
+        self.ui.comboBox_basis4.addItems(
+            self.settings.basis_options[self.basis]["pol2"]
+        )
         self.ui.List_add_job_2.addItems(self.additional_keys)
         self.ui.comboBox_job_type.addItems(self.job_options)
-        self.ui.List_add_job.addItems(self.job_options[self.ui.comboBox_job_type.currentText()])
+        self.ui.List_add_job.addItems(
+            self.job_options[self.ui.comboBox_job_type.currentText()]
+        )
         self.ui.ComboBox_files.addItem(self.filename)
 
         self.ui.comboBox_job_type.setCurrentText(self.settings.job_type)
@@ -734,7 +813,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         link0_to_add_to_list = [x for x in self.link0_options]
 
         for checkbox, lineEdit in self.link0_checkboxes.items():
-
             checkbox.setChecked(False)
             if lineEdit:
                 lineEdit.setEnabled(False)
@@ -742,7 +820,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             found_keyword = False
 
             for keyword in link0_to_add_to_list:
-
                 orig_keyword = copy.deepcopy(keyword)
 
                 if "=" in keyword:
@@ -767,7 +844,7 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                     if value and lineEdit:
                         lineEdit.setEnabled(True)
                         lineEdit.setText(value)
-                    
+
                     found_keyword = False
 
         self.ui.list_link0.addItems(link0_to_add_to_list)
@@ -779,12 +856,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         self.update_job_details()
 
-        #setup SCRF 
+        # setup SCRF
         self.ui.comboBox_SCRF.addItems(["PCM", "CPCM", "Dipole", "IPCM", "SMD"])
-        
 
     def update_print_button(self):
-
         key = self.Qbutton_group.checkedId()
         print_button_dict = {-2: "#t", -3: "#", -4: "#p"}
 
@@ -798,10 +873,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.scan_bond.scan_mode = scan_mode_map[key]
         self.update_scan()
 
-
     def update_preview(self):
         """
-        Update preview tab. Combobox is cleared and loaded again everytime. 
+        Update preview tab. Combobox is cleared and loaded again everytime.
         In case of multiple files, add correct num of items to combobox,
         but make only file content for the last file in combobox, and load
         this to text preview box.
@@ -824,13 +898,17 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                     self.ui.ComboBox_files.addItem(filename)
 
                 self.ui.ComboBox_files.setCurrentText(filename)
-                file_content = self.make_input_content(filename=filename, xyz=xyz, bond_obj=bond_obj)
+                file_content = self.make_input_content(
+                    filename=filename, xyz=xyz, bond_obj=bond_obj
+                )
         elif self.IRC_files:
             for filename, keywords in self.IRC_files.items():
                 self.ui.ComboBox_files.addItem(filename)
 
             self.ui.ComboBox_files.setCurrentText(filename)
-            file_content = self.make_input_content(filename=filename, extra_job_keywords=keywords)
+            file_content = self.make_input_content(
+                filename=filename, extra_job_keywords=keywords
+            )
         else:
             file_content = self.make_input_content(filename=self.filename)
             self.ui.ComboBox_files.addItem(self.filename)
@@ -840,28 +918,27 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
     def update_preview_combobox(self):
         """
         This function is called everytime any change to combobox is made.
-        Program crashes if runs with only one file in comobox, thus the 
+        Program crashes if runs with only one file in comobox, thus the
         if statement is neccesarry!
         """
         if self.ui.ComboBox_files.count() > 1:
             filename = self.ui.ComboBox_files.currentText()
             try:
-                file_content = self.make_input_content(filename=filename,
-                                                       extra_job_keywords=self.IRC_files[filename])
+                file_content = self.make_input_content(
+                    filename=filename, extra_job_keywords=self.IRC_files[filename]
+                )
                 self.ui.text_preview.setPlainText(file_content)
                 return
             except KeyError:
                 pass
 
-
             for bond, bond_obj in self.atom_bonds.items():
                 for filename_scan, xyz in bond_obj.scan_new_coordinates.items():
                     if filename_scan == filename:
-                        file_content = self.make_input_content(filename=filename, 
-                                                               xyz=xyz, bond_obj=bond_obj)
+                        file_content = self.make_input_content(
+                            filename=filename, xyz=xyz, bond_obj=bond_obj
+                        )
                         self.ui.text_preview.setPlainText(file_content)
-
-
 
     def update_charge(self):
         self.charge = self.ui.lineEdit_charge.text()
@@ -878,13 +955,17 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         files = []
         if self.IRC_files:
             for filename, keywords in self.IRC_files.items():
-                content = self.make_input_content(filename=filename, extra_job_keywords=keywords)
+                content = self.make_input_content(
+                    filename=filename, extra_job_keywords=keywords
+                )
                 filepath = self._make_file(filename, content)
                 files.append(filepath)
         elif self.atom_bonds:
             for bond, bond_obj in self.atom_bonds.items():
                 for filename_scan, xyz in bond_obj.scan_new_coordinates.items():
-                    content = self.make_input_content(filename=filename_scan, xyz=xyz, bond_obj=bond_obj)
+                    content = self.make_input_content(
+                        filename=filename_scan, xyz=xyz, bond_obj=bond_obj
+                    )
                     filepath = self._make_file(filename_scan, content)
                     files.append(filepath)
         else:
@@ -895,38 +976,44 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         # Add files separate to avoid issues relating to multithreading prosess in REACT.py
         for filepath in files:
             if filepath == None:
-                #Something happend (maybe user changed their mind and closed QfileDialog)
+                # Something happend (maybe user changed their mind and closed QfileDialog)
                 return
             self.react.append_text(f"{filepath.split('/')[-1]} saved to: {filepath}")
             if self.ui.checkBox_cp_to_reactmain.isChecked():
                 self.react.add_file(filepath)
 
-
     def _make_file(self, filename, file_content):
         """
-        Private function. Makes sure that no files are overwritten, and 
+        Private function. Makes sure that no files are overwritten, and
         makes an unique filepath by adding _1, _2, _3 etc until an unique
         filepath is found.
         """
         i = 0
-        new_filepath = self.react.settings.workdir + '/' + filename + '.com'
+        new_filepath = self.react.settings.workdir + "/" + filename + ".com"
 
         if path.isfile(new_filepath) == True:
-            new_filepath, filter_ = QtWidgets.QFileDialog.getSaveFileName(self, "Filename already exists, please select a different filename", self.react.settings.workdir, "input files (*.com *.inp)")
-        if new_filepath == '':
+            new_filepath, filter_ = QtWidgets.QFileDialog.getSaveFileName(
+                self,
+                "Filename already exists, please select a different filename",
+                self.react.settings.workdir,
+                "input files (*.com *.inp)",
+            )
+        if new_filepath == "":
             return
         with open(new_filepath, "w+") as f:
             f.write(file_content)
             f.write("\n")
-        
+
         return new_filepath
 
-    def make_input_content(self, filename, extra_job_keywords=False, xyz=False, bond_obj=False):
+    def make_input_content(
+        self, filename, extra_job_keywords=False, xyz=False, bond_obj=False
+    ):
         """
         Make content (not file) for one Gaussian inputfile.
         :return: str
         The code is divided into the following parts: link0, route, molecule and restraint.
-        Each part prepares it's respective part as a string. named for ex. link0_str. 
+        Each part prepares it's respective part as a string. named for ex. link0_str.
         Finally, all sub-strings are jointed into one string, containing the whole file content
         """
 
@@ -935,7 +1022,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         route_str = ""
         molecule_str = ""
         restraints_str = ""
-
 
         ### This part creates prepares all link0 keyword by adding them first to the 'link0_list' ###
         ### It also adds "%" to the keyword if its missing                                        ###
@@ -948,7 +1034,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                     value = LineEdit.text()
 
                     if not value or value.isspace():
-                        self.react.append_text(f"WARNING - {checkbox.text()}: no text given, default settings use instead. Please fill details in the text line")
+                        self.react.append_text(
+                            f"WARNING - {checkbox.text()}: no text given, default settings use instead. Please fill details in the text line"
+                        )
 
                     if "=" in value:
                         value = value.split("=")[1]
@@ -959,21 +1047,22 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                         value = value + "GB"
                     link0_list.append("%mem=" + value)
                 elif checkbox.text() == "Chk":
-                    link0_list.append(f"%chk={filename}.chk") 
+                    link0_list.append(f"%chk={filename}.chk")
                 elif checkbox.text() == "OldChk":
                     if value:
                         link0_list.append(f"%oldchk={value}.chk")
                     else:
                         link0_list.append(f"%oldchk={filename}_old.chk")
 
-        for item in [self.ui.list_link0.item(x).text() for x in range(self.ui.list_link0.count())]:
+        for item in [
+            self.ui.list_link0.item(x).text() for x in range(self.ui.list_link0.count())
+        ]:
             item.replace(" ", "")
-            if not item[0] == '%':
-                item = '%' + item
+            if not item[0] == "%":
+                item = "%" + item
             link0_list.append(item)
 
         link0_str = "\n".join(link0_list)
-
 
         ### This part prepares all part of the route comment, by first adding them to route_list ###
         ### Then, all items  in route_list are joined into one str.                              ###
@@ -1000,7 +1089,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             for i in self.job_options[job_type]:
                 job_keywords.append(i)
 
-
         freq = ""
         if self.ui.checkbox_freq.isChecked() or self.job_type == "Freq":
             freq_keywords = []
@@ -1009,9 +1097,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
             if not self.ui.checkBox_raman.isChecked():
                 if "noraman" not in freq_keywords:
-                    freq_keywords.append("noraman")                    
-                
-            if freq_keywords: 
+                    freq_keywords.append("noraman")
+
+            if freq_keywords:
                 freq = "Freq=(" + ", ".join(freq_keywords) + ") "
             else:
                 freq = "Freq "
@@ -1026,17 +1114,21 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         if self.basis_diff and not self.basis_diff.isspace():
             tmp = list(self.basis)
-            if tmp[-1] == 'G':
+            if tmp[-1] == "G":
                 tmp[-1] = self.basis_diff
-                tmp.append('G')
+                tmp.append("G")
             else:
                 tmp.append(self.basis_diff)
             basis = "".join(tmp)
         else:
             basis = self.basis
 
-        if self.basis_pol1 and not self.basis_pol1.isspace() and self.basis_pol2\
-           and not self.basis_pol2.isspace():
+        if (
+            self.basis_pol1
+            and not self.basis_pol1.isspace()
+            and self.basis_pol2
+            and not self.basis_pol2.isspace()
+        ):
             basis_pol = f"({self.basis_pol1},{self.basis_pol2})"
         elif self.basis_pol1 and not self.basis_pol1.isspace():
             basis_pol = f"({self.basis_pol1})"
@@ -1050,11 +1142,10 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         else:
             basis_str = f"{basis}"
 
-        #solvent
+        # solvent
         solvent = ""
         eps = ""
         if self.ui.checkbox_SCRF.isChecked():
-
             if self.ui.checkbox_eps.isChecked():
                 solvent = f"SCRF=({self.ui.comboBox_SCRF.currentText()}, read)"
                 eps = f"Eps={self.ui.lineEdit_eps.text()}"
@@ -1063,63 +1154,71 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
                     solvent = f"SCRF=({self.ui.comboBox_SCRF.currentText()}, solvent={self.ui.lineEdit_solvent.text()})"
                 else:
                     solvent = f"SCRF=({self.ui.comboBox_SCRF.currentText()})"
-                    
 
-        route_str = f"{self.output_print} {job_str}{self.functional}/{basis_str} "\
-                    + f"{solvent} " +" ".join(self.additional_keys)
-
+        route_str = (
+            f"{self.output_print} {job_str}{self.functional}/{basis_str} "
+            + f"{solvent} "
+            + " ".join(self.additional_keys)
+        )
 
         ### This part prepares the molecule ###
         if not self.charge:
-            self.react.append_text("WARNING: No charge is given to the system. Please add a charge in the main window of\
-                                   Calculation setup. Will set it to 0..")
+            self.react.append_text(
+                "WARNING: No charge is given to the system. Please add a charge in the main window of\
+                                   Calculation setup. Will set it to 0.."
+            )
             self.charge = "0"
         if xyz:
             molecule_str = f"{self.charge} {self.multiplicity}\n" + "\n".join(xyz)
         else:
-            molecule_str = f"{self.charge} {self.multiplicity}\n" + "\n".join(self.mol_obj.formatted_xyz)
+            molecule_str = f"{self.charge} {self.multiplicity}\n" + "\n".join(
+                self.mol_obj.formatted_xyz
+            )
 
         molecule_str = self.remove_extra_newline(molecule_str)
 
         ### This part prepares the restraints, if there are any ###
         restraints_list = []
-        
-        for item in [self.ui.list_freeze_atoms.item(x).text() for x in range(self.ui.list_freeze_atoms.count())]:
+
+        for item in [
+            self.ui.list_freeze_atoms.item(x).text()
+            for x in range(self.ui.list_freeze_atoms.count())
+        ]:
             restraints_list.append(item)
         if bond_obj:
             if self.ui.checkBox_switchXB.isChecked:
-                restraints_list.append(f"X {bond_obj.atom1_idx} F\nX {bond_obj.atom2_idx} F")
+                restraints_list.append(
+                    f"X {bond_obj.atom1_idx} F\nX {bond_obj.atom2_idx} F"
+                )
             else:
                 restraints_list.append(f"B {bond_obj.atom1_idx} {bond_obj.atom2_idx} F")
 
         restraints_str = "\n".join(restraints_list)
 
-
         return f"{link0_str}\n{route_str}\n\n{filename} {self.job_type}\n\n{molecule_str}\n\n{restraints_str}\n\n{eps}\n\n"
-    
+
     def remove_extra_newline(self, input_string):
         """
         To remedy some strange bug in make_input_content..
         """
 
         # Split the string into lines
-        lines = input_string.split('\n')
-        
+        lines = input_string.split("\n")
+
         # Remove any empty lines
         lines = [line for line in lines if line]
-        
-        # Join the lines back together with newline characters
-        output_string = '\n'.join(lines)
-    
-        return output_string
-    
-    def route_checkboxes_update(self, checkbox, lineEdit):
 
+        # Join the lines back together with newline characters
+        output_string = "\n".join(lines)
+
+        return output_string
+
+    def route_checkboxes_update(self, checkbox, lineEdit):
         if checkbox.isChecked():
             lineEdit.setEnabled(True)
         else:
             lineEdit.setEnabled(False)
-        
+
     def update_basis1(self):
         """
         Updates self.basis1 according to basis selected by user
@@ -1133,13 +1232,19 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.comboBox_basis3.clear()
         self.ui.comboBox_basis4.clear()
 
-        self.ui.comboBox_basis2.addItems(self.settings.basis_options[self.basis]['diff'])
-        self.ui.comboBox_basis3.addItems(self.settings.basis_options[self.basis]['pol1'])
-        self.ui.comboBox_basis4.addItems(self.settings.basis_options[self.basis]['pol2'])
+        self.ui.comboBox_basis2.addItems(
+            self.settings.basis_options[self.basis]["diff"]
+        )
+        self.ui.comboBox_basis3.addItems(
+            self.settings.basis_options[self.basis]["pol1"]
+        )
+        self.ui.comboBox_basis4.addItems(
+            self.settings.basis_options[self.basis]["pol2"]
+        )
 
-        #self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
-        #self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
-        #self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
+        # self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
+        # self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
+        # self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
 
     def update_basis2(self):
         """
@@ -1160,7 +1265,6 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.basis_pol2 = self.ui.comboBox_basis4.currentText()
 
     def filename_update(self):
-        
         self.filename = self.ui.lineEdit_filename.text()
 
         self.ui.lineEdit_chk.setText(self.filename + ".chk")
@@ -1193,14 +1297,15 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
             if pdb_name in ["C", "N"]:
                 atoms.pop(0)
                 for next_atom in atoms:
-                    radius = atom_distance(atom.get_coordinate, next_atom.get_coordinate)
+                    radius = atom_distance(
+                        atom.get_coordinate, next_atom.get_coordinate
+                    )
                     if radius < 1.7:
                         if next_atom.get_pdb_atom_name not in expected:
                             atom_nr = next_atom.get_atom_index
                             self.ui.list_freeze_atoms.insertItem(0, f"X {atom_nr} F")
                             if self.pymol:
                                 self.pymol_spheres(atom_nr)
-
 
     def add_item_to_list(self, Qtextinput, Qlist, job_list):
         """
@@ -1232,12 +1337,11 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def del_tempfiles(self):
         try:
-            shutil.rmtree(self.react.react_path + '/.scan_temp')
+            shutil.rmtree(self.react.react_path + "/.scan_temp")
         except OSError as e:
             pass
 
     def on_close(self):
-
         self.del_tempfiles()
         self.close()
 
@@ -1248,17 +1352,17 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         # TODO reply --> just open the .com file in the current state (tab) of REACT after write?
         # TODO on_write should probably just write whatever is in the preview window to a file.
         """
-        #self.mol_obj.filename = self.ui.lineEdit_filename.text()
-        #self.mol_obj.job_type = self.ui.comboBox_job_type.currentText()
-        #self.mol_obj.basis = self.ui.comboBox_basis1.currentText()
-        #self.mol_obj.basis_diff = self.ui.comboBox_basis2.currentText()
-        #self.mol_obj.basis_pol1 = self.ui.comboBox_basis3.currentText()
-        #self.mol_obj.basis_pol2 = self.ui.comboBox_basis4.currentText()
-        #self.react.states[self.react.state_index].add_instance(self.mol_obj)
+        # self.mol_obj.filename = self.ui.lineEdit_filename.text()
+        # self.mol_obj.job_type = self.ui.comboBox_job_type.currentText()
+        # self.mol_obj.basis = self.ui.comboBox_basis1.currentText()
+        # self.mol_obj.basis_diff = self.ui.comboBox_basis2.currentText()
+        # self.mol_obj.basis_pol1 = self.ui.comboBox_basis3.currentText()
+        # self.mol_obj.basis_pol2 = self.ui.comboBox_basis4.currentText()
+        # self.react.states[self.react.state_index].add_instance(self.mol_obj)
 
         self.make_files()
         self.del_tempfiles()
-        #self.close()
+        # self.close()
 
     def closeEvent(self, event):
         if self.pymol:
@@ -1273,10 +1377,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.react.setup_window = None
 
     def handle_overall_charge(self, charge):
-
         if self.charge:
             return
-        
+
         if charge:
             self.charge = charge
             self.ui.lineEdit_charge.setText(self.charge)

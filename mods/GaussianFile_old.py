@@ -1,8 +1,25 @@
-import distutils.util
 from mods.Atoms import GaussianAtom, Atom
 from mods.MoleculeFile import GaussianMolecule
 import re
 import copy
+
+
+def strtobool(val):
+    """
+    Convert a string representation of truth to boolean.
+    Replacement for deprecated distutils.util.strtobool (removed in Python 3.12).
+
+    True values: 'y', 'yes', 't', 'true', 'on', '1'
+    False values: 'n', 'no', 'f', 'false', 'off', '0'
+    Raises ValueError for any other input.
+    """
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return 1
+    elif val in ("n", "no", "f", "false", "off", "0"):
+        return 0
+    else:
+        raise ValueError(f"invalid truth value {val!r}")
 
 
 class GaussianFile:
@@ -11,32 +28,38 @@ class GaussianFile:
             self.file_path = file_path
 
         # TODO Put in some defaults here for now:
-        self.job_details = {"route" : None,
-                            "job type": None,
-                            "DFT functional" : None,
-                            "basis set" : None,
-                            "scrf" : None,
-                            "empiricaldispersion" : None
-                            }
+        self.job_details = {
+            "route": None,
+            "job type": None,
+            "DFT functional": None,
+            "basis set": None,
+            "scrf": None,
+            "empiricaldispersion": None,
+        }
 
-        #self.set_default_settings()
+        # self.set_default_settings()
 
-        #For each job details item, there is a list of known option (ex for basis sets there are b3lyp, m062x, etc)
-        # These options are saved as regular expression objects, which makes it easier to search for them in textfiles. 
+        # For each job details item, there is a list of known option (ex for basis sets there are b3lyp, m062x, etc)
+        # These options are saved as regular expression objects, which makes it easier to search for them in textfiles.
 
-        #TODO how to handle multiple job type? ex: opt freq ?
-        #TODO for now, all optimization-related keywords (TS, modreduant..) are saved as part of 'job-type'. (could be a bad idea? ex: omit modredundant if no atoms are freezed?)
-        #TODO deal with geom=connectivity, or ignore it?
-        #TODO %chk, %mem, etc. retrive from output file, or just assign from default settings?
+        # TODO how to handle multiple job type? ex: opt freq ?
+        # TODO for now, all optimization-related keywords (TS, modreduant..) are saved as part of 'job-type'. (could be a bad idea? ex: omit modredundant if no atoms are freezed?)
+        # TODO deal with geom=connectivity, or ignore it?
+        # TODO %chk, %mem, etc. retrive from output file, or just assign from default settings?
 
-        self.job_details_regEx =  { "route" : [re.compile(p, re.IGNORECASE) for p in ['#p', '#n' '#']],
-                                    "job type" : [re.compile(p, re.IGNORECASE) for p in ['opt[^\s]*', 'freq[^\s]*']],
-                                    "DFT functional" : [re.compile(p, re.IGNORECASE) for p in [' b3lyp','rb3lyp', 'm062x']],
-                                    "basis set" : [re.compile(p, re.IGNORECASE) for p in ['6-31g\(d,p\)']],
-                                    "scrf" : [re.compile(p, re.IGNORECASE) for p in ['scrf[^\s]*'] ],
-                                    "empiricaldispersion" : [re.compile(p, re.IGNORECASE) for p in [ 'gd3']]
-                                  }
-        self.modredudant_text = ''
+        self.job_details_regEx = {
+            "route": [re.compile(p, re.IGNORECASE) for p in ["#p", "#n#"]],
+            "job type": [
+                re.compile(p, re.IGNORECASE) for p in ["opt[^\s]*", "freq[^\s]*"]
+            ],
+            "DFT functional": [
+                re.compile(p, re.IGNORECASE) for p in [" b3lyp", "rb3lyp", "m062x"]
+            ],
+            "basis set": [re.compile(p, re.IGNORECASE) for p in ["6-31g\(d,p\)"]],
+            "scrf": [re.compile(p, re.IGNORECASE) for p in ["scrf[^\s]*"]],
+            "empiricaldispersion": [re.compile(p, re.IGNORECASE) for p in ["gd3"]],
+        }
+        self.modredudant_text = ""
 
         self.charge_multiplicity = None
 
@@ -47,18 +70,18 @@ class GaussianFile:
         """
         self.job_details["basis set"] = "6-31g(d,p)"
         self.job_details["DFT functional"] = "b3lyp"
-        #self.job_details["modredundant"] = True
+        # self.job_details["modredundant"] = True
         self.job_details["empiricaldispersion"] = "gd3"
 
     @property
     def get_job_details(self):
         """
         :return: job details
-        NB should this propery be moved to parent class? problem: uses the read_gaussian_out fuction. 
+        NB should this propery be moved to parent class? problem: uses the read_gaussian_out fuction.
         """
         return self.job_details
 
-    @property 
+    @property
     def get_charge_multiplicity(self):
         """
         :return: tuple -> (charge, multiplicity)
@@ -67,31 +90,31 @@ class GaussianFile:
 
     @property
     def get_routecard(self):
-        '''
+        """
         :return: route card as one string.
         TODO: some warning if essential details are missing. (#, functional and basisset?)
-        '''
+        """
 
         essential_jobdetails = ["route", "job type", "DFT functional", "basis set"]
-        routecard = ''
+        routecard = ""
 
         for job_detail in self.job_details.items():
             if job_detail[0] in essential_jobdetails and job_detail[1]:
-                routecard += ' ' + job_detail[1]
+                routecard += " " + job_detail[1]
                 essential_jobdetails.remove(job_detail[0])
 
             elif job_detail[1]:
-                routecard += ' ' + job_detail[0]+'='+job_detail[1]
+                routecard += " " + job_detail[0] + "=" + job_detail[1]
 
-        try: 
-            essential_jobdetails.remove('job type')
+        try:
+            essential_jobdetails.remove("job type")
         except:
             pass
 
         if essential_jobdetails:
-            print(f'missing job details: {essential_jobdetails}')
+            print(f"missing job details: {essential_jobdetails}")
 
-        #first character in string is a whitespace, thus we remove it
+        # first character in string is a whitespace, thus we remove it
         return routecard[1:]
 
     @property
@@ -111,23 +134,21 @@ class GaussianFile:
 
     def update_fileobject(self):
         """
-        TODO Called after file has been edited in text editor, should update object accordingly to changes in file. 
+        TODO Called after file has been edited in text editor, should update object accordingly to changes in file.
         """
         pass
-    
+
     def _regEx_job_detail_search(self, string, job_detail_key):
-        '''
-        Private function used in read_gaussian_out() and read_gaussian_inp(). 
-        '''
+        """
+        Private function used in read_gaussian_out() and read_gaussian_inp().
+        """
         if not self.job_details[job_detail_key]:
             for regEx in self.job_details_regEx[job_detail_key]:
-
-                if regEx.search(string) and re.search('^ %', string) == None:
+                if regEx.search(string) and re.search("^ %", string) == None:
                     self.job_details[job_detail_key] = regEx.search(string).group()
 
 
 class InputFile(GaussianFile):
-
     def __init__(self, file_path):
         super().__init__(file_path)
 
@@ -159,8 +180,8 @@ class InputFile(GaussianFile):
         # Eps: None (default for solvent), number (include read at top and eps=number at end of input file)
         job_options = {"Job type": "Energy"}
 
-        #regEx pattern to reconize charge-multiplicity line. -?\d+ any digit any length, [13] = digit 1 or 3, \s*$ = any num of trailing whitespace 
-        self.charge_multiplicity_regEx = re.compile('-?\d+ [13]\s*$')
+        # regEx pattern to reconize charge-multiplicity line. -?\d+ any digit any length, [13] = digit 1 or 3, \s*$ = any num of trailing whitespace
+        self.charge_multiplicity_regEx = re.compile("-?\d+ [13]\s*$")
 
         self.read_gaussian_inp()
 
@@ -175,14 +196,13 @@ class InputFile(GaussianFile):
 
         with open(DFT_inp) as f:
             for line in f:
-
                 if self.charge_multiplicity_regEx.search(line):
                     temp = self.charge_multiplicity_regEx.search(line).group().split()
                     self.charge_multiplicity = (temp[0], temp[1])
-                    #after charge/multiplicity line, all job details have been read -> break loop
+                    # after charge/multiplicity line, all job details have been read -> break loop
                     break
 
-                #for every job detail item, check line to see if any regEx are present. If found, assign it to job_details{}
+                # for every job detail item, check line to see if any regEx are present. If found, assign it to job_details{}
                 for job_detail_key in self.job_details.keys():
                     self._regEx_job_detail_search(line, job_detail_key)
 
@@ -196,73 +216,87 @@ class InputFile(GaussianFile):
         """
         atoms = list()
         index = 1
-        with open(self.file_path, 'r') as ginp:
+        with open(self.file_path, "r") as ginp:
             get_coordinates = False
             for line in ginp:
-
                 if get_coordinates:
                     if line.isspace():
                         break
                     else:
                         atom_info = line.split()
-                        atoms.append(Atom(atom_info[0], atom_info[1], atom_info[2], atom_info[3], index))
+                        atoms.append(
+                            Atom(
+                                atom_info[0],
+                                atom_info[1],
+                                atom_info[2],
+                                atom_info[3],
+                                index,
+                            )
+                        )
                         index += 1
                 if self.charge_multiplicity_regEx.search(line):
                     get_coordinates = True
-        
+
         return [atoms]
 
 
 class OutputFile(GaussianFile):
-
     def __init__(self, filepath=None):
         super().__init__(filepath)
 
         self.file_path = filepath
 
         # Job converged or not?
-        self.converged = {"Maximum Force": bool,
-                          "RMS     Force": bool,
-                          "Maximum Displacement": bool,
-                          "RMS     Displacement": bool}
+        self.converged = {
+            "Maximum Force": bool,
+            "RMS     Force": bool,
+            "Maximum Displacement": bool,
+            "RMS     Displacement": bool,
+        }
 
         # Where to get gaussian output value from line.split(int)
         # first key = Line to look for in output file
         # second key(s) are key names for assignment in self.g_outdata with tuple value giving index [0] and
         # type expected in line [1]
-        self.g_reader = {"Solvent":
-                            {"Solvent": (2, str),
-                             "Eps": (4, float)},
-                        "SCF Done":
-                            {"SCF Done": (4, float)},
-                        "Zero-point correction=":
-                            {"Zero-point correction": (2, float)},
-                        "Thermal correction to Energy= ":
-                            {"Thermal correction to Energy": (4, float)},
-                        "Thermal correction to Enthalpy":
-                            {"Thermal correction to Enthalpy": (4, float)},
-                        "Thermal correction to Gibbs Free Energy":
-                            {"Thermal correction to Gibbs Free Energy": (6, float)},
-                        "Maximum Force":
-                             {"Maximum Force Value": (2, float),
-                              "Maximum Force Threshold": (3, float),
-                              "Maximum Force Converged?": (4, bool)},
-                        "RMS     Force":
-                             {"RMS Force Value": (2, float),
-                              "RMS Force Threshold": (3, float),
-                              "RMS Force Converged?": (4, bool)},
-                        "Maximum Displacement":
-                             {"Maximum Displacement Value": (2, float),
-                              "Maximum Displacement Threshold": (3, float),
-                              "Maximum Displacement Converged?": (4, bool)},
-                        "RMS     Displacement":
-                             {"RMS Displacement Value": (2, float),
-                              "RMS Displacement Threshold": (3, float),
-                              "RMS Displacement Converged?": (4, bool)}
-                        }
+        self.g_reader = {
+            "Solvent": {"Solvent": (2, str), "Eps": (4, float)},
+            "SCF Done": {"SCF Done": (4, float)},
+            "Zero-point correction=": {"Zero-point correction": (2, float)},
+            "Thermal correction to Energy= ": {
+                "Thermal correction to Energy": (4, float)
+            },
+            "Thermal correction to Enthalpy": {
+                "Thermal correction to Enthalpy": (4, float)
+            },
+            "Thermal correction to Gibbs Free Energy": {
+                "Thermal correction to Gibbs Free Energy": (6, float)
+            },
+            "Maximum Force": {
+                "Maximum Force Value": (2, float),
+                "Maximum Force Threshold": (3, float),
+                "Maximum Force Converged?": (4, bool),
+            },
+            "RMS     Force": {
+                "RMS Force Value": (2, float),
+                "RMS Force Threshold": (3, float),
+                "RMS Force Converged?": (4, bool),
+            },
+            "Maximum Displacement": {
+                "Maximum Displacement Value": (2, float),
+                "Maximum Displacement Threshold": (3, float),
+                "Maximum Displacement Converged?": (4, bool),
+            },
+            "RMS     Displacement": {
+                "RMS Displacement Value": (2, float),
+                "RMS Displacement Threshold": (3, float),
+                "RMS Displacement Converged?": (4, bool),
+            },
+        }
 
-        self.charge_multiplicity_regEx = re.compile('Charge = -?\d+ Multiplicity = [13]')
-        #This will store data from output file given by self.g_reader
+        self.charge_multiplicity_regEx = re.compile(
+            "Charge = -?\d+ Multiplicity = [13]"
+        )
+        # This will store data from output file given by self.g_reader
         self.g_outdata = dict()
 
         # Read output on init to get key job details
@@ -274,41 +308,48 @@ class OutputFile(GaussianFile):
         """
         DFT_out = self.file_path
 
-        found_all_jobdetails = False 
+        found_all_jobdetails = False
 
         with open(DFT_out) as f:
             for line in f:
-                #Check if line contains any self.g_reader keys:
+                # Check if line contains any self.g_reader keys:
                 if any(g_key in line for g_key in self.g_reader.keys()):
                     g_key = [term for term in self.g_reader.keys() if term in line][0]
                     for out_name in self.g_reader[g_key].keys():
                         split_int, type_ = self.g_reader[g_key][out_name][0:2]
                         if type_ is bool:
-                            line_value = bool(distutils.util.strtobool(line.split()[split_int]))
+                            line_value = bool(strtobool(line.split()[split_int]))
                         else:
                             line_value = type_(line.split()[split_int])
 
                         self.g_outdata[out_name] = line_value
 
                 if not found_all_jobdetails:
-                    if ' Cycle   1' in line:
+                    if " Cycle   1" in line:
                         found_all_jobdetails = True
 
-                    #for every job detail item, check line to see if any regEx are present. If found, assign it to job_details{}
+                    # for every job detail item, check line to see if any regEx are present. If found, assign it to job_details{}
                     for job_detail_key in self.job_details.keys():
                         self._regEx_job_detail_search(line, job_detail_key)
 
-                    if 'The following ModRedundant input section has been read:' in line:
-                        while True: 
+                    if (
+                        "The following ModRedundant input section has been read:"
+                        in line
+                    ):
+                        while True:
                             temp = next(f)
-                            if temp.isspace(): 
-                                break 
-                            else:  
-                                self.modredudant_text += temp 
+                            if temp.isspace():
+                                break
+                            else:
+                                self.modredudant_text += temp
 
                     if not self.charge_multiplicity:
                         if self.charge_multiplicity_regEx.search(line):
-                            temp = self.charge_multiplicity_regEx.search(line).group().split()
+                            temp = (
+                                self.charge_multiplicity_regEx.search(line)
+                                .group()
+                                .split()
+                            )
                             self.charge_multiplicity = (temp[2], temp[5])
 
     @property
@@ -359,11 +400,13 @@ class OutputFile(GaussianFile):
 
         # "RMS     Displacement" 2
         rms_displacement = list()
-        scf_data = {"SCF Done": list(),
-                    "Maximum Force": list(),
-                    "RMS     Force": list(),
-                    "Maximum Displacement": list(),
-                    "RMS     Displacement": list()}
+        scf_data = {
+            "SCF Done": list(),
+            "Maximum Force": list(),
+            "RMS     Force": list(),
+            "Maximum Displacement": list(),
+            "RMS     Displacement": list(),
+        }
 
         with open(self.file_path) as out:
             for line in out:
@@ -387,7 +430,7 @@ class OutputFile(GaussianFile):
         iter_atoms = list()
 
         atoms = list()
-        with open(self.file_path, 'r') as gout:
+        with open(self.file_path, "r") as gout:
             standard_orientation = False
             get_coordinates = False
             for line in gout:
@@ -442,7 +485,6 @@ class OutputFile(GaussianFile):
 
 
 class FrequenciesOut(OutputFile):
-
     def __init__(self, filepath=None):
         super().__init__(filepath)
 
@@ -453,7 +495,6 @@ class FrequenciesOut(OutputFile):
 
         # frequency : {atom nr: name, x:float, y: float, z:float}
         self.freq_displacement = dict()
-
 
         self.read_frequencies()
 
@@ -505,11 +546,15 @@ class FrequenciesOut(OutputFile):
                 if found_displacement:
                     if len(line.split()) > 5:
                         coord_start, coord_end = index_range[frq_index][:]
-                        g_line = "%s 0 %s" % (" ".join((line.split()[0:2])),
-                                              " ".join(line.split()[coord_start:coord_end]))
+                        g_line = "%s 0 %s" % (
+                            " ".join((line.split()[0:2])),
+                            " ".join(line.split()[coord_start:coord_end]),
+                        )
                         g_atoms.append(GaussianAtom(g_line))
                     else:
-                        self.freq_displacement[frequency] = GaussianMolecule(g_atoms=g_atoms)
+                        self.freq_displacement[frequency] = GaussianMolecule(
+                            g_atoms=g_atoms
+                        )
                         return self.freq_displacement[frequency]
 
                 if found_frequency and "Atom  AN      X      Y      Z" in line:
@@ -531,7 +576,7 @@ class FrequenciesOut(OutputFile):
         for i in range(steps):
             mol_disp = copy.deepcopy(molecule)
             for atom in mol_disp.keys():
-                mol_disp[atom].x += float(displacement[atom].x) * scale * (i/steps)
+                mol_disp[atom].x += float(displacement[atom].x) * scale * (i / steps)
                 mol_disp[atom].y += float(displacement[atom].y) * scale * (i / steps)
                 mol_disp[atom].z += float(displacement[atom].z) * scale * (i / steps)
 
@@ -601,5 +646,3 @@ class FrequenciesOut(OutputFile):
     # set movie_fps, 5 (higher = slower)
     # load mol1.xyz, load mol2.xyx etc...
     # join_states moviename, mol*, 0 (the 0 assumes identical input objects so bonds can vary)
-
-
