@@ -849,15 +849,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Return: files_ --> list of files (absolute path)
         Return: files_type --> string with the chosen filter_type
         """
-        #  DontUseNativeDialog was planned removed - but it is required on linux... will crash elsewise.
+        #  DontUseNativeDialog is required on Linux to avoid crashes, but native dialogs work better on macOS
+        import sys
 
-        files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(
-            self,
-            title_,
-            path,
-            filter_type,
-            options=QtWidgets.QFileDialog.DontUseNativeDialog,
-        )
+        if sys.platform == "linux":
+            files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(
+                self,
+                title_,
+                path,
+                filter_type,
+                options=QtWidgets.QFileDialog.DontUseNativeDialog,
+            )
+        else:
+            files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(
+                self,
+                title_,
+                path,
+                filter_type,
+            )
 
         return files_, files_type
 

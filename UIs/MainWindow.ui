@@ -292,6 +292,17 @@ border: 0px;
 color: rgb(98,114,164);
 }
 
+QFileDialog QListView{
+background-color: rgb(50,50,50);
+color: rgb(200,200,200);
+}
+
+QFileDialog QTreeView{
+background-color: rgb(50,50,50);
+color: rgb(200,200,200);
+}
+
+
 QTextEdit{
 color: rgb(98, 114, 164);
 border: None;
