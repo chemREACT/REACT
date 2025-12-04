@@ -13,8 +13,6 @@ class PymolSession(QObject):
     # atomClickedSignal = pyqtSignal(list)
     overallChargeSignal = pyqtSignal(str)
 
-
-
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
         self.parent = parent
@@ -39,52 +37,67 @@ class PymolSession(QObject):
         self.neg_charge = None
         self.pos_charge = None
 
-        self.stdout_handler = {"iterate sele, ID": {"collect": False,
-                                                    "process": self.collect_iterate,
-                                                    "return": "iterated",
-                                                    "signal": self.return_sel_atomnr},
-                               "iterate included, ID": {"collect": False,
-                                                        "process": self.collect_iterate,
-                                                        "return": "iterated",
-                                                        "signal": self.return_sel_atomnr},
-                               "iterate nterm": {"collect": False,
-                                                 "process": self.collect_iterate,
-                                                 "return": "iterated",
-                                                 "signal": self.return_nterm},
-                               "iterate cterm": {"collect": False,
-                                                 "process": self.collect_iterate,
-                                                 "return": "iterated",
-                                                 "signal": self.return_cterm},
-                               "get_dihedral ": {"collect": False,
-                                                 "process": self.collect_dihedral,
-                                                 "return": "cmd.get_dihedral:",
-                                                 "signal": self.return_dihedral},
-                               "count_atoms ": {"collect": False,
-                                                 "process": self.return_atom_count,
-                                                 "return": "count_atoms:",
-                                                 "signal": None},
-                               "Save: wrote ": {"collect": False,
-                                                 "process": self.pdb_written,
-                                                 "return": "Save: wrote",
-                                                 "signal": None
-                                                },
-                                "Selector": {"collect": False,
-                                                 "process": self.print_selector,
-                                                 "return": "Selector",
-                                                 "signal": None
-                                                },
-                                
-                               }
+        self.stdout_handler = {
+            "iterate sele, ID": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_sel_atomnr,
+            },
+            "iterate included, ID": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_sel_atomnr,
+            },
+            "iterate nterm": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_nterm,
+            },
+            "iterate cterm": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_cterm,
+            },
+            "get_dihedral ": {
+                "collect": False,
+                "process": self.collect_dihedral,
+                "return": "cmd.get_dihedral:",
+                "signal": self.return_dihedral,
+            },
+            "count_atoms ": {
+                "collect": False,
+                "process": self.return_atom_count,
+                "return": "count_atoms:",
+                "signal": None,
+            },
+            "Save: wrote ": {
+                "collect": False,
+                "process": self.pdb_written,
+                "return": "Save: wrote",
+                "signal": None,
+            },
+            "Selector": {
+                "collect": False,
+                "process": self.print_selector,
+                "return": "Selector",
+                "signal": None,
+            },
+        }
 
         self.start_pymol()
-        self.set_pymol_settings()
+        # Wait for PyMOL to be ready before sending commands
+        QTimer.singleShot(1000, self.set_pymol_settings)
 
     def monitor_clicks(self):
         self.stdout_handler["You clicked "] = {
             "collect": False,
             "process": self.iterate_sele,
             "return": "You clicked ",
-            "signal": None
+            "signal": None,
         }
         print("Now monitoring all pymol atom clicks!")
 
@@ -110,7 +123,20 @@ class PymolSession(QObject):
         if not file_:
             print("PymolProcess load_structure - No file given")
             return
-        self.pymol_cmd("load %s" % file_)
+
+        # Extract object name from filename (without extension)
+        import os
+
+        object_name = os.path.basename(file_).rsplit(".", 1)[0]
+
+        # Verify file exists
+        if not os.path.exists(file_):
+            print(f"ERROR: File does not exist: {file_}")
+            return
+
+        # Quote the file path and specify object name explicitly
+        self.pymol_cmd('load "%s", %s' % (file_, object_name))
+        print(f'PyMOL command: load "{file_}", {object_name}')
 
     def start_pymol(self, external_gui=False):
         startup = ["-p"]
@@ -128,6 +154,8 @@ class PymolSession(QObject):
         """
         cmd += "\n"
         self.session.write(cmd.encode())
+        # Flush to ensure command is sent immediately
+        self.session.waitForBytesWritten(100)
 
     def set_pymol_settings(self):
         """
@@ -135,7 +163,12 @@ class PymolSession(QObject):
         """
         if not self.session:
             return
-        settings = ["space cmyk\n", "set stick_radius, 0.17\n", "set spec_power, 250\n", "set spec_reflect, 2\n"]
+        settings = [
+            "space cmyk\n",
+            "set stick_radius, 0.17\n",
+            "set spec_power, 250\n",
+            "set spec_reflect, 2\n",
+        ]
         for setting in settings:
             self.pymol_cmd(setting)
 
@@ -164,9 +197,14 @@ class PymolSession(QObject):
         if len(residues) > 0:
             sel_str += " or resname ".join(residues)
 
-        self.pymol_cmd("hide sticks, %s and %s and not %s" % (group, pymol_name, sel_str))
+        self.pymol_cmd(
+            "hide sticks, %s and %s and not %s" % (group, pymol_name, sel_str)
+        )
         self.pymol_cmd("color gray, %s and %s and name C*" % (group, pymol_name))
-        self.pymol_cmd("color chartreuse, %s and %s and %s and name C*" % (group, pymol_name, sel_str))
+        self.pymol_cmd(
+            "color chartreuse, %s and %s and %s and name C*"
+            % (group, pymol_name, sel_str)
+        )
         self.pymol_cmd("zoom %s and %s and %s, 10" % (group, pymol_name, sel_str))
 
     def highlight_atoms(self, atoms=list, color=str, name=str, group=None):
@@ -209,10 +247,20 @@ class PymolSession(QObject):
         self.pymol_cmd("delete %s" % sele_name)
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
-        self.pymol_cmd("select %s, %s and %s and (%s)" % (sele_name, group, object_name, sel_str))
+        self.pymol_cmd(
+            "select %s, %s and %s and (%s)" % (sele_name, group, object_name, sel_str)
+        )
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
-    def expand_sele(self, selection="sele", sele_name="new", group="", radius=5, by_res=True, include_solv=True):
+    def expand_sele(
+        self,
+        selection="sele",
+        sele_name="new",
+        group="",
+        radius=5,
+        by_res=True,
+        include_solv=True,
+    ):
         """
         :param selection:
         :param radius: radius around selection to select
@@ -245,7 +293,6 @@ class PymolSession(QObject):
         self.pymol_cmd("unpick")
 
     def set_overall_charge(self):
-
         self.pymol_cmd("select negative_charge, visible and formal_charge < 0")
         QTimer.singleShot(500, lambda: None)
         self.pymol_cmd("select positive_charge, visible and formal_charge > 0")
@@ -281,8 +328,10 @@ class PymolSession(QObject):
         :param group:
         :return:
         """
-        selector = {"nterm": "and (elem n and (neighbor name CA and not neighbor name C))",
-                    "cterm": "and (elem C and (neighbor name O and not neighbor name N))"}
+        selector = {
+            "nterm": "and (elem n and (neighbor name CA and not neighbor name C))",
+            "cterm": "and (elem C and (neighbor name O and not neighbor name N))",
+        }
 
         cmd = "select %s, %s " % (type, pymol_name)
         if group:
@@ -324,7 +373,12 @@ class PymolSession(QObject):
         """
         data = self.session.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
-        # print(stdout)
+        print(stdout)  # Enable for debugging
+
+        # Check for errors
+        if "Error:" in stdout or "ExecutiveLoad-Error:" in stdout:
+            print(f"PyMOL Error detected: {stdout}")
+
         if "CmdLoad:" in stdout:
             if len(self.files_to_delete) > 0:
                 try:
@@ -402,9 +456,9 @@ class PymolSession(QObject):
 
     def handle_state(self, state):
         states = {
-            QProcess.NotRunning: 'Exited',
-            QProcess.Starting: 'Starting',
-            QProcess.Running: 'Running',
+            QProcess.NotRunning: "Exited",
+            QProcess.Starting: "Starting",
+            QProcess.Running: "Running",
         }
         state_name = states[state]
         print(f"Pymol: {state_name}")
@@ -433,7 +487,9 @@ class PymolSession(QObject):
             pass
 
     def disconnect_pymol(self):
-        self.react.tabWidget.tabBar().currentChanged.disconnect(self.react.pymol_view_current_state)
+        self.react.tabWidget.tabBar().currentChanged.disconnect(
+            self.react.pymol_view_current_state
+        )
         self.react.connect_pymol_structures(connect=False)
         self.delete_all_files()
 
@@ -447,7 +503,7 @@ class PymolSession(QObject):
             print("got pos charge", self.pos_charge)
         else:
             return
-        
+
         try:
             if self.neg_charge and self.pos_charge:
                 print("got both charges")
@@ -457,4 +513,6 @@ class PymolSession(QObject):
                 self.pymol_cmd("delete %s" % "negative_charge")
                 self.pymol_cmd("delete %s" % "positive_charge")
         except:
-            self.react.append_text('Something went wrong while calculating charge of the system..')
+            self.react.append_text(
+                "Something went wrong while calculating charge of the system.."
+            )

@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import time
+import shutil
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThreadPool, QTimer, pyqtSlot
@@ -266,18 +267,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             new_filepath = (
                 f"{self.settings.workdir}/{new_filename}.{old_filename.split('.')[-1]}"
             )
-            os.popen(f"cp {filepath} {new_filepath}")
+            try:
+                shutil.copy(filepath, new_filepath)
+            except Exception as e:
+                self.append_text(f"Error copying file: {e}")
+                return
+
+        # Verify file exists before loading
+        if not os.path.exists(new_filepath):
+            self.append_text(f"Error: File not found: {new_filepath}")
+            return
 
         self.pymol.load_structure(new_filepath, delete_after=delete_after)
-        self.pymol.pymol_cmd(
-            "group state_%d, %s" % (state, new_filepath.split("/")[-1].split(".")[0])
+
+        # Give PyMOL time to load the file before grouping and setting representation
+        object_name = new_filepath.split("/")[-1].split(".")[0]
+        QTimer.singleShot(
+            300,
+            lambda: self.pymol.pymol_cmd("group state_%d, %s" % (state, object_name)),
         )
 
         if set_defaults:
-            self.pymol.set_default_rep()
-            self.pymol.pymol_cmd(
-                "enable state_%d and %s"
-                % (state, new_filepath.split("/")[-1].split(".")[0])
+            QTimer.singleShot(400, lambda: self.pymol.set_default_rep())
+            QTimer.singleShot(
+                500,
+                lambda: self.pymol.pymol_cmd(
+                    "enable state_%d and %s" % (state, object_name)
+                ),
             )
 
     def load_all_states_pymol(self):
