@@ -28,7 +28,7 @@ This software require PyMOL installed on your computer. When first using REACT, 
 
 1. Open REACT Settings (Settings button in main window)
 2. Enable "Use external PyMOL"
-3. Set path to PyMOL executable (e.g., `/usr/local/bin/pymol` for Homebrew, or `which pymol` for source builds)
+3. Set path to PyMOL executable (e.g., `/usr/local/bin/pymol` or typically `/Applications/PyMOL.app/Contents/MacOS/PyMOL` on mac, or try `which pymol` for source builds)
 
 REACT also work with the free open-source version of PyMOL: https://github.com/schrodinger/pymol-open-source
 
