@@ -486,6 +486,19 @@ class ModelPDB(QtWidgets.QMainWindow):
         # Use cmd.save() with object selection - PyMOL will infer format from .pdb extension
         self.pymol.pymol_cmd('cmd.save("%s", "model_final", 0)' % pdb_path)
         self.react.append_text(f"\n{pdb_path} written.")
+        
+        # Check if user wants to copy to project table
+        if self.ui.copy_to_project.isChecked():
+            # Add a small delay to ensure file is written before importing
+            QTimer.singleShot(300, lambda: self._import_to_project(pdb_path))
+    
+    def _import_to_project(self, pdb_path):
+        """Import the saved PDB file into the project table"""
+        try:
+            self.react.add_file(pdb_path)
+            self.react.append_text(f"Added {pdb_path.split('/')[-1]} to project table")
+        except Exception as e:
+            self.react.append_text(f"Error importing to project: {e}")
 
     def closeEvent(self, event):
         self.react.cluster_window = None

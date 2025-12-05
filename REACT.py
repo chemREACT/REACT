@@ -186,6 +186,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Connect signal for thread-safe text messages
         self.pymol.textMessageSignal.connect(self.append_text)
+        # Connect signal for thread-safe PyMOL disconnection
+        self.pymol.disconnectSignal.connect(self.pymol._do_disconnect_pymol)
 
         if return_session:
             return self.pymol
@@ -1042,28 +1044,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def create_cluster(self):
         """ """
 
-        try:
-            mol_obj = self.states[self.state_index].get_molecule_object(
-                self.tabWidget.currentWidget().currentItem().text()
-            )
-        except AttributeError:
-            self.append_text(
-                "ERROR: please select the geometry file to create a cluster from."
-            )
-            return
-
-        if isinstance(mol_obj, bool):
-            return
-
-        if mol_obj.faulty:
-            self.append_text("ERROR: Create cluster not possible for broken file!")
-            return
-
+        # Check if PyMOL is running first
         if not self.pymol:
             self.append_text(
                 "\nINFO:\nPlease launch Pymol to use the Create cluster app.\n"
             )
             return
+
+        # Allow opening window even without selected file
         if self.cluster_window:
             self.cluster_window.raise_()
         else:

@@ -14,6 +14,8 @@ class PymolSession(QObject):
     overallChargeSignal = pyqtSignal(str)
     # Signal for text messages to avoid cross-thread GUI calls
     textMessageSignal = pyqtSignal(str, bool)  # (message, date_time)
+    # Signal to safely disconnect PyMOL from main thread
+    disconnectSignal = pyqtSignal()
 
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
@@ -24,9 +26,12 @@ class PymolSession(QObject):
         self.session.setInputChannelMode(QProcess.ManagedInputChannel)
         self.session.setProcessChannelMode(QProcess.MergedChannels)
 
-        # Connect Qprocess signals:
+        # Connect Qprocess signals
+        # Use QueuedConnection for stdout to avoid recursive repaint on Linux
         self.session.finished.connect(self.pymol_finished)
-        self.session.readyReadStandardOutput.connect(self.handle_stdout)
+        self.session.readyReadStandardOutput.connect(
+            self.handle_stdout, Qt.QueuedConnection
+        )
         self.session.stateChanged.connect(self.handle_state)
 
         # Delete file of loaded molecule after loading it:
@@ -235,8 +240,17 @@ class PymolSession(QObject):
         self.pymol_cmd("disable *")
         if group:
             self.pymol_cmd("group %s, toggle, open" % group)
-        self.pymol_cmd("enable %s or %s" % (group, name))
-        self.pymol_cmd("zoom %s and %s" % (group, name))
+
+        # Build enable command only if we have valid name or group
+        if name and group:
+            self.pymol_cmd("enable %s or %s" % (group, name))
+            self.pymol_cmd("zoom %s and %s" % (group, name))
+        elif name:
+            self.pymol_cmd("enable %s" % name)
+            self.pymol_cmd("zoom %s" % name)
+        elif group:
+            self.pymol_cmd("enable %s" % group)
+            self.pymol_cmd("zoom %s" % group)
 
     def set_selection(self, atoms, sele_name, object_name, group):
         """
@@ -375,9 +389,12 @@ class PymolSession(QObject):
         """
         data = self.session.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
-        print(stdout)  # Enable for debugging
 
-        # Check for errors
+        # Only print for debugging errors, not all output (prevents repaint issues)
+        # Uncomment next line for full PyMOL output debugging:
+        # print(stdout)
+
+        # Check for errors and print those
         if "Error:" in stdout or "ExecutiveLoad-Error:" in stdout:
             print(f"PyMOL Error detected: {stdout}")
 
@@ -466,7 +483,7 @@ class PymolSession(QObject):
         print(f"Pymol: {state_name}")
         # Use signal instead of direct GUI call to avoid cross-thread issues
         self.textMessageSignal.emit(f"Pymol: {state_name}", True)
-        if QProcess.NotRunning:
+        if state == QProcess.NotRunning:
             self.disconnect_pymol()
 
     def handle_stderr(self):
@@ -487,11 +504,22 @@ class PymolSession(QObject):
             pass
 
     def disconnect_pymol(self):
-        self.react.tabWidget.tabBar().currentChanged.disconnect(
-            self.react.pymol_view_current_state
-        )
-        self.react.connect_pymol_structures(connect=False)
+        # Emit signal to handle GUI disconnection in main thread
+        self.disconnectSignal.emit()
         self.delete_all_files()
+
+    def _do_disconnect_pymol(self):
+        """Actual GUI disconnection - must be called from main thread"""
+        try:
+            self.react.tabWidget.tabBar().currentChanged.disconnect(
+                self.react.pymol_view_current_state
+            )
+        except:
+            pass  # May already be disconnected
+        try:
+            self.react.connect_pymol_structures(connect=False)
+        except:
+            pass
 
     @pyqtSlot()
     def print_selector(self, stdout):
