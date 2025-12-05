@@ -5,7 +5,7 @@ import time
 import shutil
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QThreadPool, QTimer, pyqtSlot
+from PyQt5.QtCore import QThreadPool, QTimer, pyqtSlot, Qt
 from mods.SplashScreen import SplashScreen
 import UIs.icons_rc
 import mods.common_functions as cf
@@ -184,10 +184,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pymol = PymolSession(parent=self, home=self, pymol_path=pymol_path)
 
-        # Connect signal for thread-safe text messages
-        self.pymol.textMessageSignal.connect(self.append_text)
-        # Connect signal for thread-safe PyMOL disconnection
-        self.pymol.disconnectSignal.connect(self.pymol._do_disconnect_pymol)
+        # Connect signal for thread-safe text messages with explicit QueuedConnection
+        self.pymol.textMessageSignal.connect(self.append_text, Qt.QueuedConnection)
+        # Connect signal for thread-safe PyMOL disconnection with explicit QueuedConnection
+        self.pymol.disconnectSignal.connect(
+            self.pymol._do_disconnect_pymol, Qt.QueuedConnection
+        )
+        # Connect signal for when PyMOL process finishes
+        self.pymol.pymolFinishedSignal.connect(
+            self._on_pymol_finished, Qt.QueuedConnection
+        )
 
         if return_session:
             return self.pymol
@@ -199,6 +205,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.load_all_states_pymol()
 
         self.pymol.importSavedPDB.connect(self.pdb_from_pymol)
+
+    def _on_pymol_finished(self):
+        """Handler for when PyMOL process finishes - runs in main thread"""
+        self.pymol = None
 
     def connect_pymol_structures(self, connect=True):
         """
@@ -482,10 +492,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Where to start inserting files in project list:
         items_insert_index = self.tabWidget.currentWidget().count()
 
+        # Get tab_index and state in main thread before starting worker to avoid GUI access from worker
+        current_tab_index = self.tabWidget.currentIndex()
+        current_state = self.get_current_state
+
+        # Initialize progressbar in main thread before starting worker
+        self.update_progressbar(1)
+
         # Start thread first:
-        worker = Worker(self.thread_add_files, files_path, items_insert_index)
-        worker.signals.finished.connect(self.thread_complete)
-        worker.signals.progress.connect(self.progress_fn)
+        worker = Worker(
+            self.thread_add_files,
+            files_path,
+            items_insert_index,
+            current_tab_index,
+            current_state,
+        )
+        worker.signals.finished.connect(self.thread_complete, Qt.QueuedConnection)
+        worker.signals.progress.connect(self.progress_fn, Qt.QueuedConnection)
         self.threadpool.start(worker)
         self.timer.start(10)
 
@@ -505,20 +528,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         )
 
     def thread_add_files(
-        self, file_paths, item_index, progress_callback, results_callback
+        self,
+        file_paths,
+        item_index,
+        tab_index,
+        state,
+        progress_callback,
+        results_callback,
     ):
         """
         :param file_paths:
         :param item_index: index where to start insertion of files in list
+        :param tab_index: tab index passed from main thread to avoid GUI access
+        :param state: state value passed from main thread to avoid GUI access
         :param progress_callback:
         :return:
         """
-        # set progressbar to 1:
-        self.update_progressbar(1)
+        # Don't call GUI functions directly - use signals only
         pymol_defaults = False
         for n in range(len(file_paths)):
             file = file_paths[n]
-            self.states[self.state_index].add_file(file)
+            # Use tab_index instead of self.state_index to avoid GUI access from worker thread
+            self.states[tab_index].add_file(file)
             if n == len(file_paths) - 1:
                 pymol_defaults = True
             progress_callback.emit(
@@ -527,9 +558,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.check_convergence: (
                         file,
                         item_index,
-                        self.tabWidget.currentIndex(),
+                        tab_index,
                     ),
-                    self.file_to_pymol: (file, self.get_current_state, pymol_defaults),
+                    self.file_to_pymol: (file, state, pymol_defaults),
                 }
             )
             item_index += 1

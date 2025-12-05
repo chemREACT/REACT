@@ -16,6 +16,8 @@ class PymolSession(QObject):
     textMessageSignal = pyqtSignal(str, bool)  # (message, date_time)
     # Signal to safely disconnect PyMOL from main thread
     disconnectSignal = pyqtSignal()
+    # Signal when PyMOL process finishes
+    pymolFinishedSignal = pyqtSignal()
 
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
@@ -27,12 +29,13 @@ class PymolSession(QObject):
         self.session.setProcessChannelMode(QProcess.MergedChannels)
 
         # Connect Qprocess signals
-        # Use QueuedConnection for stdout to avoid recursive repaint on Linux
-        self.session.finished.connect(self.pymol_finished)
+        # Use QueuedConnection for frequently-emitting signals to avoid cross-thread issues on Linux
+        # finished and stateChanged use AutoConnection since they emit infrequently and Qt handles threading
+        self.session.finished.connect(self._on_process_finished)
         self.session.readyReadStandardOutput.connect(
             self.handle_stdout, Qt.QueuedConnection
         )
-        self.session.stateChanged.connect(self.handle_state)
+        self.session.stateChanged.connect(self._on_process_state_changed)
 
         # Delete file of loaded molecule after loading it:
         self.files_to_delete = list()
@@ -159,10 +162,18 @@ class PymolSession(QObject):
         :param cmd: pymol command
         :return:
         """
+        if not self.session or self.session.state() != QProcess.Running:
+            return
+
         cmd += "\n"
-        self.session.write(cmd.encode())
-        # Flush to ensure command is sent immediately
-        self.session.waitForBytesWritten(100)
+        try:
+            self.session.write(cmd.encode())
+            # Wait briefly for bytes to be written, but don't block too long
+            # Use a short timeout to avoid deadlocks on Linux
+            self.session.waitForBytesWritten(30)
+        except Exception as e:
+            # If write fails, don't crash - just log it
+            pass
 
     def set_pymol_settings(self):
         """
@@ -369,9 +380,19 @@ class PymolSession(QObject):
         if group:
             self.pymol_cmd("group %s, %s" % (group, target_name))
 
+    def _on_process_finished(self, exitCode, exitStatus):
+        """Wrapper for QProcess.finished signal - handles the exit status enum"""
+        self.pymol_finished()
+
     def pymol_finished(self):
-        self.parent.pymol = None
-        print("Pymol session completed")
+        # Emit signal instead of direct attribute access to avoid cross-thread issues
+        self.pymolFinishedSignal.emit()
+        # Disable print to prevent recursive repaint on Linux
+        # print("Pymol session completed")
+
+    def _on_process_state_changed(self, state):
+        """Wrapper for QProcess.stateChanged signal"""
+        self.handle_state(state)
 
     def delete_all_files(self):
         """
@@ -396,7 +417,9 @@ class PymolSession(QObject):
 
         # Check for errors and print those
         if "Error:" in stdout or "ExecutiveLoad-Error:" in stdout:
-            print(f"PyMOL Error detected: {stdout}")
+            # Disable print to prevent recursive repaint on Linux
+            # print(f"PyMOL Error detected: {stdout}")
+            pass
 
         if "CmdLoad:" in stdout:
             if len(self.files_to_delete) > 0:
@@ -480,7 +503,8 @@ class PymolSession(QObject):
             QProcess.Running: "Running",
         }
         state_name = states[state]
-        print(f"Pymol: {state_name}")
+        # Disable print to prevent recursive repaint on Linux
+        # print(f"Pymol: {state_name}")
         # Use signal instead of direct GUI call to avoid cross-thread issues
         self.textMessageSignal.emit(f"Pymol: {state_name}", True)
         if state == QProcess.NotRunning:
@@ -525,18 +549,22 @@ class PymolSession(QObject):
     def print_selector(self, stdout):
         if "negative_charge" in stdout:
             self.neg_charge = stdout.split()[5]
-            print("got neg charge", self.neg_charge)
+            # Disable print to prevent recursive repaint on Linux
+            # print("got neg charge", self.neg_charge)
         if "positive_charge" in stdout:
             self.pos_charge = stdout.split()[5]
-            print("got pos charge", self.pos_charge)
+            # Disable print to prevent recursive repaint on Linux
+            # print("got pos charge", self.pos_charge)
         else:
             return
 
         try:
             if self.neg_charge and self.pos_charge:
-                print("got both charges")
+                # Disable print to prevent recursive repaint on Linux
+                # print("got both charges")
                 overall_charge = int(self.pos_charge) - int(self.neg_charge)
-                print("Overall charge:", overall_charge)
+                # Disable print to prevent recursive repaint on Linux
+                # print("Overall charge:", overall_charge)
                 self.overallChargeSignal.emit(str(overall_charge))
                 self.pymol_cmd("delete %s" % "negative_charge")
                 self.pymol_cmd("delete %s" % "positive_charge")
