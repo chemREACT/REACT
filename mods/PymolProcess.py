@@ -12,6 +12,8 @@ class PymolSession(QObject):
     importSavedPDB = pyqtSignal(str)
     # atomClickedSignal = pyqtSignal(list)
     overallChargeSignal = pyqtSignal(str)
+    # Signal for text messages to avoid cross-thread GUI calls
+    textMessageSignal = pyqtSignal(str, bool)  # (message, date_time)
 
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
@@ -462,10 +464,8 @@ class PymolSession(QObject):
         }
         state_name = states[state]
         print(f"Pymol: {state_name}")
-        try:
-            self.react.append_text(f"Pymol: {state_name}", date_time=True)
-        except:
-            pass
+        # Use signal instead of direct GUI call to avoid cross-thread issues
+        self.textMessageSignal.emit(f"Pymol: {state_name}", True)
         if QProcess.NotRunning:
             self.disconnect_pymol()
 
@@ -513,6 +513,7 @@ class PymolSession(QObject):
                 self.pymol_cmd("delete %s" % "negative_charge")
                 self.pymol_cmd("delete %s" % "positive_charge")
         except:
-            self.react.append_text(
-                "Something went wrong while calculating charge of the system.."
+            # Use signal instead of direct GUI call to avoid cross-thread issues
+            self.textMessageSignal.emit(
+                "Something went wrong while calculating charge of the system..", False
             )

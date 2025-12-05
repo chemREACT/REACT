@@ -184,6 +184,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pymol = PymolSession(parent=self, home=self, pymol_path=pymol_path)
 
+        # Connect signal for thread-safe text messages
+        self.pymol.textMessageSignal.connect(self.append_text)
+
         if return_session:
             return self.pymol
 

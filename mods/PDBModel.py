@@ -483,7 +483,8 @@ class ModelPDB(QtWidgets.QMainWindow):
 
     def _do_save_pdb(self, pdb_path):
         """Helper to execute the actual save command after delay"""
-        self.pymol.pymol_cmd('save "%s", model_final' % pdb_path)
+        # Use cmd.save() with object selection - PyMOL will infer format from .pdb extension
+        self.pymol.pymol_cmd('cmd.save("%s", "model_final", 0)' % pdb_path)
         self.react.append_text(f"\n{pdb_path} written.")
 
     def closeEvent(self, event):
