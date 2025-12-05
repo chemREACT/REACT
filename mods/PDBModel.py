@@ -469,7 +469,21 @@ class ModelPDB(QtWidgets.QMainWindow):
         pdb_path, filter_ = QtWidgets.QFileDialog.getSaveFileName(
             self, "Save PDB model", temp_filepath, "PDB (*.pdb)"
         )
-        self.pymol.pymol_cmd("save %s, model_final" % pdb_path)
+
+        if not pdb_path:  # User cancelled dialog
+            return
+
+        # Ensure model_final exists before saving
+        if not self.model_final:
+            self.react.append_text("Please finalize the model first (tab 3)")
+            return
+
+        # Delay save command to ensure PyMOL has processed model_final creation
+        QTimer.singleShot(200, lambda: self._do_save_pdb(pdb_path))
+
+    def _do_save_pdb(self, pdb_path):
+        """Helper to execute the actual save command after delay"""
+        self.pymol.pymol_cmd('save "%s", model_final' % pdb_path)
         self.react.append_text(f"\n{pdb_path} written.")
 
     def closeEvent(self, event):
