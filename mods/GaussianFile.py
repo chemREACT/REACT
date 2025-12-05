@@ -25,7 +25,7 @@ def strtobool(val):
 class InputFile(Properties):
     def __init__(self, filepath, new_file=False):
         # regEx pattern to reconize charge-multiplicity line. -?\d+ any digit any length, [13] = digit 1 or 3, \s*$ = any num of trailing whitespace
-        self.charge_multiplicity_regEx = re.compile("^\s*-?\d+\s*[13]\s*$")
+        self.charge_multiplicity_regEx = re.compile(r"^\s*-?\d+\s*[13]\s*$")
 
         geometries, charge, multiplicity = self.get_molecules_charge_multiplicity(
             filepath

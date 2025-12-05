@@ -181,7 +181,7 @@ class InputFile(GaussianFile):
         job_options = {"Job type": "Energy"}
 
         # regEx pattern to reconize charge-multiplicity line. -?\d+ any digit any length, [13] = digit 1 or 3, \s*$ = any num of trailing whitespace
-        self.charge_multiplicity_regEx = re.compile("-?\d+ [13]\s*$")
+        self.charge_multiplicity_regEx = re.compile(r"-?\d+ [13]\s*$")
 
         self.read_gaussian_inp()
 
