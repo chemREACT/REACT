@@ -427,8 +427,12 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         self.ui.comboBox_funct.textActivated.connect(
             lambda: self.combobox_update(self.ui.comboBox_funct, "functional")
         )
-        self.ui.add_DFT_button_0.clicked.connect(self.add_funct_or_basis)
-        self.ui.del_DFT_button_0.clicked.connect(self.rem_funct_or_basis)
+        self.ui.add_DFT_button_0.clicked.connect(
+            lambda: self.add_funct_or_basis(self.ui.comboBox_funct)
+        )
+        self.ui.del_DFT_button_0.clicked.connect(
+            lambda: self.rem_funct_or_basis(self.ui.comboBox_funct)
+        )
         self.ui.basis1_comboBox_3.textActivated.connect(
             lambda: self.combobox_update(self.ui.basis1_comboBox_3, "basis")
         )
@@ -563,8 +567,15 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
     #        else:
     #            self.settings[key] = False
 
-    def add_funct_or_basis(self):
-        curr_combobox = QtWidgets.QApplication.focusWidget()
+    def add_funct_or_basis(self, curr_combobox=None):
+        # If no combobox provided, try to get focused widget (for backward compatibility)
+        if curr_combobox is None:
+            curr_combobox = QtWidgets.QApplication.focusWidget()
+
+        # Verify we have a combobox (handles Linux vs macOS focus differences)
+        if not isinstance(curr_combobox, QtWidgets.QComboBox):
+            return
+
         text = curr_combobox.currentText()
         curr_combobox.addItem(text)
 
@@ -578,11 +589,20 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
             key = "pol1"
         elif curr_combobox == self.ui.basis4_comboBox_5:
             key = "pol2"
+        else:
+            return
 
         self.combobox_update(curr_combobox, key)
 
-    def rem_funct_or_basis(self):
-        curr_combobox = QtWidgets.QApplication.focusWidget()
+    def rem_funct_or_basis(self, curr_combobox=None):
+        # If no combobox provided, try to get focused widget (for backward compatibility)
+        if curr_combobox is None:
+            curr_combobox = QtWidgets.QApplication.focusWidget()
+
+        # Verify we have a combobox (handles Linux vs macOS focus differences)
+        if not isinstance(curr_combobox, QtWidgets.QComboBox):
+            return
+
         text = curr_combobox.currentText()
         index = curr_combobox.currentIndex()
         curr_combobox.removeItem(index)
