@@ -104,21 +104,12 @@ class Ui_SettingsWindow(object):
         self.comboBox_funct.setEditable(True)
         self.comboBox_funct.setObjectName("comboBox_funct")
         self.gridLayout_6.addWidget(self.comboBox_funct, 0, 1, 1, 1)
-        self.add_DFT_button_0 = QtWidgets.QPushButton(self.frame)
-        self.add_DFT_button_0.setMinimumSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setMaximumSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(
             QtGui.QPixmap(":/24x24/resources/icons/arrow-plus.png"),
             QtGui.QIcon.Normal,
             QtGui.QIcon.Off,
         )
-        self.add_DFT_button_0.setIcon(icon)
-        self.add_DFT_button_0.setIconSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setFlat(True)
-        self.add_DFT_button_0.setObjectName("add_DFT_button_0")
-        self.gridLayout_6.addWidget(self.add_DFT_button_0, 0, 2, 1, 1)
         self.basis_label_1 = QtWidgets.QLabel(self.frame)
         self.basis_label_1.setMinimumSize(QtCore.QSize(70, 0))
         self.basis_label_1.setMaximumSize(QtCore.QSize(70, 16777215))
@@ -130,21 +121,12 @@ class Ui_SettingsWindow(object):
         self.basis1_comboBox_3.setEditable(True)
         self.basis1_comboBox_3.setObjectName("basis1_comboBox_3")
         self.gridLayout_6.addWidget(self.basis1_comboBox_3, 1, 1, 1, 1)
-        self.del_DFT_button_0 = QtWidgets.QPushButton(self.frame)
-        self.del_DFT_button_0.setMinimumSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setMaximumSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(
             QtGui.QPixmap(":/24x24/resources/icons/arrow-minus.png"),
             QtGui.QIcon.Normal,
             QtGui.QIcon.Off,
         )
-        self.del_DFT_button_0.setIcon(icon1)
-        self.del_DFT_button_0.setIconSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setFlat(True)
-        self.del_DFT_button_0.setObjectName("del_DFT_button_0")
-        self.gridLayout_6.addWidget(self.del_DFT_button_0, 1, 2, 1, 1)
         self.gridLayout_5 = QtWidgets.QGridLayout()
         self.gridLayout_5.setObjectName("gridLayout_5")
         self.basis2_comboBox_4 = QtWidgets.QComboBox(self.frame)

@@ -427,12 +427,6 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         self.ui.comboBox_funct.textActivated.connect(
             lambda: self.combobox_update(self.ui.comboBox_funct, "functional")
         )
-        self.ui.add_DFT_button_0.clicked.connect(
-            lambda: self.add_funct_or_basis(self.ui.comboBox_funct)
-        )
-        self.ui.del_DFT_button_0.clicked.connect(
-            lambda: self.rem_funct_or_basis(self.ui.comboBox_funct)
-        )
         self.ui.basis1_comboBox_3.textActivated.connect(
             lambda: self.combobox_update(self.ui.basis1_comboBox_3, "basis")
         )
@@ -567,61 +561,6 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
     #        else:
     #            self.settings[key] = False
 
-    def add_funct_or_basis(self, curr_combobox=None):
-        # If no combobox provided, try to get focused widget (for backward compatibility)
-        if curr_combobox is None:
-            curr_combobox = QtWidgets.QApplication.focusWidget()
-
-        # Verify we have a combobox (handles Linux vs macOS focus differences)
-        if not isinstance(curr_combobox, QtWidgets.QComboBox):
-            return
-
-        text = curr_combobox.currentText()
-        curr_combobox.addItem(text)
-
-        if curr_combobox == self.ui.comboBox_funct:
-            key = "functional"
-        elif curr_combobox == self.ui.basis1_comboBox_3:
-            key = "basis"
-        elif curr_combobox == self.ui.basis2_comboBox_4:
-            key = "diff"
-        elif curr_combobox == self.ui.basis3_comboBox_6:
-            key = "pol1"
-        elif curr_combobox == self.ui.basis4_comboBox_5:
-            key = "pol2"
-        else:
-            return
-
-        self.combobox_update(curr_combobox, key)
-
-    def rem_funct_or_basis(self, curr_combobox=None):
-        # If no combobox provided, try to get focused widget (for backward compatibility)
-        if curr_combobox is None:
-            curr_combobox = QtWidgets.QApplication.focusWidget()
-
-        # Verify we have a combobox (handles Linux vs macOS focus differences)
-        if not isinstance(curr_combobox, QtWidgets.QComboBox):
-            return
-
-        text = curr_combobox.currentText()
-        index = curr_combobox.currentIndex()
-        curr_combobox.removeItem(index)
-        basis = self.ui.basis1_comboBox_3.currentText()
-
-        try:
-            if curr_combobox == self.ui.comboBox_funct:
-                self.functional_options.remove(text)
-            elif curr_combobox == self.ui.basis1_comboBox_3:
-                self.basis_options.pop(text)
-            elif curr_combobox == self.ui.basis2_comboBox_4:
-                self.basis_options[basis]["diff"].remove(text)
-            elif curr_combobox == self.ui.basis3_comboBox_6:
-                self.basis_options[basis]["pol1"].remove(text)
-            elif curr_combobox == self.ui.basis4_comboBox_5:
-                self.basis_options[basis]["pol2"].remove(text)
-        except (KeyError, ValueError) as e:
-            pass
-
     def combobox_update(self, widget, key):
         """
         :param combobox: QComboBox
@@ -738,11 +677,41 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         self.ui.basis4_comboBox_5.blockSignals(bool_)
 
     def save_settings(self):
-        self.settings.functional = self.ui.comboBox_funct.currentText()
-        self.settings.basis = self.ui.basis1_comboBox_3.currentText()
-        self.settings.basis_diff = self.ui.basis2_comboBox_4.currentText()
-        self.settings.basis_pol1 = self.ui.basis3_comboBox_6.currentText()
-        self.settings.basis_pol2 = self.ui.basis4_comboBox_5.currentText()
+        # Get current values from UI
+        functional_name = self.ui.comboBox_funct.currentText()
+        basis_name = self.ui.basis1_comboBox_3.currentText()
+        basis_diff = self.ui.basis2_comboBox_4.currentText()
+        basis_pol1 = self.ui.basis3_comboBox_6.currentText()
+        basis_pol2 = self.ui.basis4_comboBox_5.currentText()
+
+        # Add functional to list if it's new
+        if functional_name and functional_name not in self.functional_options:
+            self.functional_options.append(functional_name)
+
+        # Ensure basis exists in basis_options with proper structure
+        if basis_name and basis_name not in self.basis_options:
+            # Create default structure for new basis set
+            self.basis_options[basis_name] = {
+                "pol1": ["", "d", "2d", "3d"],
+                "pol2": ["", "p", "2p", "3p"],
+                "diff": ["", "+", "++"],
+            }
+
+        # Add custom polarization/diffuse functions if they're new
+        if basis_name and basis_name in self.basis_options:
+            if basis_diff and basis_diff not in self.basis_options[basis_name]["diff"]:
+                self.basis_options[basis_name]["diff"].append(basis_diff)
+            if basis_pol1 and basis_pol1 not in self.basis_options[basis_name]["pol1"]:
+                self.basis_options[basis_name]["pol1"].append(basis_pol1)
+            if basis_pol2 and basis_pol2 not in self.basis_options[basis_name]["pol2"]:
+                self.basis_options[basis_name]["pol2"].append(basis_pol2)
+
+        # Save to settings
+        self.settings.functional = functional_name
+        self.settings.basis = basis_name
+        self.settings.basis_diff = basis_diff
+        self.settings.basis_pol1 = basis_pol1
+        self.settings.basis_pol2 = basis_pol2
         self.settings.job_type = self.ui.job_type_comboBox.currentText()
         self.settings.additional_keys = [
             self.ui.add_DFT_list_1.item(x).text()

@@ -784,6 +784,15 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.lineEdit_filename.setText(self.filename)
         self.ui.comboBox_funct.addItems(self.settings.functional_options)
         self.ui.comboBox_basis1.addItems(self.settings.basis_options)
+
+        # Ensure the current basis exists in basis_options with proper structure
+        if self.basis not in self.settings.basis_options:
+            self.settings.basis_options[self.basis] = {
+                "pol1": ["", "d", "2d", "3d"],
+                "pol2": ["", "p", "2p", "3p"],
+                "diff": ["", "+", "++"],
+            }
+
         self.ui.comboBox_basis2.addItems(
             self.settings.basis_options[self.basis]["diff"]
         )
@@ -1231,6 +1240,14 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.comboBox_basis2.clear()
         self.ui.comboBox_basis3.clear()
         self.ui.comboBox_basis4.clear()
+
+        # Ensure the basis exists in basis_options with proper structure
+        if self.basis not in self.settings.basis_options:
+            self.settings.basis_options[self.basis] = {
+                "pol1": ["", "d", "2d", "3d"],
+                "pol2": ["", "p", "2p", "3p"],
+                "diff": ["", "+", "++"],
+            }
 
         self.ui.comboBox_basis2.addItems(
             self.settings.basis_options[self.basis]["diff"]
