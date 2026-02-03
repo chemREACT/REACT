@@ -1,1 +1,504 @@
-{"workdir": "/Users/gvi022/programming/REACT/resources/DFT_testfiles", "pymolpath": null, "pymol_at_launch": true, "UI_mode": true, "functional": "B3LYP", "basis": "6-31G", "basis_diff": "", "basis_pol1": "", "basis_pol2": "", "additional_keys": ["empiricaldispersion=gd3"], "job_mem": 6, "chk": true, "job_options": {"Opt": ["noeigentest", "calcfc"], "Opt (TS)": ["noeigentest", "calcfc"], "Freq": [], "IRC": [], "IRCMax": [], "Single point": []}, "link0_options": [], "basis_options": {"3-21G": {"pol1": [""], "pol2": [""], "diff": [" ", "+"]}, "6-21G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]}, "4-31G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]}, "6-31G": {"pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"], "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"], "diff": ["", "+", "++"]}, "6-311G": {"pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"], "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"], "diff": ["", "+", "++"]}, "D95": {"pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"], "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"], "diff": ["", "+", "++"]}}, "functional_options": ["B3LYP", "rB3LYP", "M062X"], "job_type": "Opt"}
+{
+  "workdir": "/Users/bente.barge",
+  "pymolpath": null,
+  "pymol_at_launch": true,
+  "UI_mode": true,
+  "software": "Gaussian",
+  "gaussian_settings": {
+    "functional": "B3LYP",
+    "basis": "6-31G",
+    "basis_diff": null,
+    "basis_pol1": "d",
+    "basis_pol2": "p",
+    "job_type": "Opt",
+    "additional_keys": [
+      "empiricaldispersion=gd3"
+    ],
+    "job_mem": 6,
+    "chk": true,
+    "job_options": {
+      "Opt": [
+        "noeigentest",
+        "calcfc"
+      ],
+      "Opt (TS)": [
+        "noeigentest",
+        "calcfc"
+      ],
+      "Freq": [],
+      "IRC": [],
+      "IRCMax": [],
+      "Single point": []
+    },
+    "link0_options": [
+      "chk",
+      "mem=6GB"
+    ],
+    "basis_options": {
+      "3-21G": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          "",
+          "+"
+        ]
+      },
+      "6-21G": {
+        "pol1": [
+          "",
+          "d"
+        ],
+        "pol2": [
+          "",
+          "p"
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "4-31G": {
+        "pol1": [
+          "",
+          "d"
+        ],
+        "pol2": [
+          "",
+          "p"
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "6-31G": {
+        "pol1": [
+          "",
+          "d",
+          "2d",
+          "3d",
+          "df",
+          "2df",
+          "3df",
+          "3d2f"
+        ],
+        "pol2": [
+          "",
+          "p",
+          "2p",
+          "3p",
+          "pd",
+          "2pd",
+          "3pd",
+          "3p2d"
+        ],
+        "diff": [
+          "",
+          "+",
+          "++"
+        ]
+      },
+      "6-311G": {
+        "pol1": [
+          "",
+          "d",
+          "2d",
+          "3d",
+          "df",
+          "2df",
+          "3df",
+          "3d2f"
+        ],
+        "pol2": [
+          "",
+          "p",
+          "2p",
+          "3p",
+          "pd",
+          "2pd",
+          "3pd",
+          "3p2d"
+        ],
+        "diff": [
+          "",
+          "+",
+          "++"
+        ]
+      },
+      "D95": {
+        "pol1": [
+          "",
+          "d",
+          "2d",
+          "3d",
+          "df",
+          "2df",
+          "3df",
+          "3d2f"
+        ],
+        "pol2": [
+          "",
+          "p",
+          "2p",
+          "3p",
+          "pd",
+          "2pd",
+          "3pd",
+          "3p2d"
+        ],
+        "diff": [
+          "",
+          "+",
+          "++"
+        ]
+      }
+    },
+    "functional_options": [
+      "B3LYP",
+      "rB3LYP",
+      "M062X"
+    ]
+  },
+  "orca_settings": {
+    "functional": "B3LYP",
+    "basis": "def2-SVP",
+    "basis_diff": null,
+    "basis_pol1": null,
+    "basis_pol2": null,
+    "job_type": "Opt",
+    "additional_keys": [],
+    "job_options": {
+      "Opt": [
+        "TightOPT"
+      ],
+      "Opt (TS)": [
+        "TightOPT"
+      ],
+      "Freq": [],
+      "IRC": [],
+      "IRCMax": [],
+      "Single point": []
+    },
+    "nprocs": 4,
+    "maxcore": 2000,
+    "basis_options": {
+      "def2-SVP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-SV(P)": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-TZVP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-TZVP(-f)": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-TZVPP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-QZVP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-QZVPP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "ma-def2-SVP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "ma-def2-TZVP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "ma-def2-TZVPP": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-SVPD": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-TZVPD": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-TZVPPD": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-QZVPD": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "def2-QZVPPD": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "cc-pVDZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "cc-pVTZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "cc-pVQZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "cc-pV5Z": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "aug-cc-pVDZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "aug-cc-pVTZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "aug-cc-pVQZ": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "STO-3G": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          ""
+        ]
+      },
+      "3-21G": {
+        "pol1": [
+          ""
+        ],
+        "pol2": [
+          ""
+        ],
+        "diff": [
+          "",
+          "+"
+        ]
+      },
+      "6-31G": {
+        "pol1": [
+          "",
+          "d",
+          "2d",
+          "2df",
+          "3df"
+        ],
+        "pol2": [
+          "",
+          "p",
+          "2p",
+          "2df",
+          "3pd"
+        ],
+        "diff": [
+          "",
+          "+",
+          "++"
+        ]
+      },
+      "6-311G": {
+        "pol1": [
+          "",
+          "d",
+          "2d",
+          "2df",
+          "3df"
+        ],
+        "pol2": [
+          "",
+          "p",
+          "2p",
+          "2df",
+          "3pd"
+        ],
+        "diff": [
+          "",
+          "+",
+          "++"
+        ]
+      }
+    },
+    "functional_options": [
+      "B3LYP",
+      "PBE0",
+      "M06-2X",
+      "wB97X-D3",
+      "B97-D3",
+      "TPSS"
+    ]
+  }
+}
