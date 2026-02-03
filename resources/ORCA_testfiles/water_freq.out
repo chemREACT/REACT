@@ -1,0 +1,205 @@
+
+                                 *****************
+                                 * O   R   C   A *
+                                 *****************
+
+           --- An Ab Initio, DFT and Semiempirical electronic structure package ---
+
+                  #######################################################
+                  #                        -***-                        #
+                  #          Department of theory and spectroscopy      #
+                  #    Directorship and core code : Frank Neese         #
+                  #        Max Planck Institute fuer Kohlenforschung    #
+                  #                Kaiser Wilhelm Platz 1               #
+                  #                 D-45470 Muelheim/Ruhr               #
+                  #                      Germany                        #
+                  #                                                     #
+                  #                  All rights reserved                #
+                  #                        -***-                        #
+                  #######################################################
+
+
+                         Program Version 5.0.4 -  RELEASE  -
+
+
+--------------
+INPUT SECTION:
+--------------
+
+! B3LYP def2-TZVP Freq TightSCF
+
+%pal nprocs 8 end
+%maxcore 4000
+
+*xyz 0 1
+  O       0.000000000000      0.000000000000      0.117790000000
+  H       0.000000000000      0.755453000000     -0.471161000000
+  H       0.000000000000     -0.755453000000     -0.471161000000
+*
+
+---------------------------------
+MAIN ITERATION OF SCF CALCULATION
+---------------------------------
+
+SCF ITERATIONS
+
+ITER       Energy         Delta-E        Max-DP      RMS-DP      [F,P]     Damp
+  0    -76.3456789012   0.000000000000 0.02345678  0.00234567  0.0987654 0.7000
+  1    -76.4123456789  -0.066666777700 0.01234567  0.00123456  0.0543210 0.7000
+  2    -76.4234567890  -0.011111110100 0.00456789  0.00045678  0.0123456 0.0000
+  3    -76.4256789012  -0.002222112200 0.00123456  0.00012345  0.0034567 0.0000
+  4    -76.4258901234  -0.000211222200 0.00034567  0.00003456  0.0001234 0.0000
+                                ***SCF CONVERGED***
+
+-------------------------   ----------------
+FINAL SINGLE POINT ENERGY       -76.425890123
+-------------------------   ----------------
+
+-----------------------
+VIBRATIONAL FREQUENCIES
+-----------------------
+
+Scaling factor for frequencies =  1.000000000  (already applied!)
+
+   0:         0.00 cm**-1
+   1:         0.00 cm**-1
+   2:         0.00 cm**-1
+   3:         0.00 cm**-1
+   4:         0.00 cm**-1
+   5:         0.00 cm**-1
+   6:      1623.45 cm**-1   ***imaginary mode***
+   7:      3756.89 cm**-1
+   8:      3867.23 cm**-1
+
+
+------------
+NORMAL MODES
+------------
+
+These modes are the Cartesian displacements weighted by the diagonal matrix
+M(i,i)=1/sqrt(m[i]) where m[i] is the mass of the displaced atom
+Thus, these vectors are normalized but *not* orthogonal
+
+                  0          1          2          3          4          5    
+       0       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+       1       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+       2       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+       3       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+       4       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+       5       0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+
+                  6          7          8    
+       0       0.073456   0.000000   0.000000
+       1       0.000000   0.058912  -0.058912
+       2      -0.058234   0.041234   0.041234
+
+------------------
+THERMOCHEMISTRY AT 298.15 K, 1.00 ATM
+------------------
+
+Temperature         ... 298.15 K
+Pressure            ... 1.00 atm
+Total Mass          ... 18.01 AMU
+
+Throughout the following assumptions are being made:
+  (1) The electronic state is orbitally nondegenerate
+  (2) There are no thermally accessible electronically excited states
+  (3) Hindered rotations indicated by low frequency modes are not
+      treated as such but are treated as vibrations and this may
+      cause some error
+  (4) All equations used are the standard statistical mechanics
+      equations for an ideal gas
+  (5) All vibrations are strictly harmonic
+
+freq.    1623.45  E(vib)   ...       0.88 
+freq.    3756.89  E(vib)   ...       0.02 
+freq.    3867.23  E(vib)   ...       0.01 
+
+------------
+INNER ENERGY
+------------
+
+The inner energy is: U= E(el) + E(ZPE) + E(vib) + E(rot) + E(trans)
+    E(el)   - is the total energy from the electronic structure calculation
+              = E(kin-el) + E(nuc-el) + E(el-el) + E(nuc-nuc)
+    E(ZPE)  - the zero temperature vibrational energy from the frequency calculation
+    E(vib)  - the finite temperature correction to E(ZPE) due to population
+              of excited vibrational states
+    E(rot)  - is the rotational thermal energy
+    E(trans)- is the translational thermal energy
+
+Summary of contributions to the inner energy U:
+Electronic energy                ...    -76.42589012 Eh
+Zero point energy                ...      0.02134567 Eh      13.39 kcal/mol
+Thermal vibrational correction   ...      0.00012345 Eh       0.08 kcal/mol
+Thermal rotational correction    ...      0.00141627 Eh       0.89 kcal/mol
+Thermal translational correction ...      0.00141627 Eh       0.89 kcal/mol
+-----------------------------------------------------------------------
+Total thermal energy                    -76.40159846 Eh
+
+
+Summary of corrections to the electronic energy:
+(perhaps to be used in another calculation)
+Total thermal correction                  0.02429166 Eh      15.24 kcal/mol
+Non-thermal (ZPE) correction              0.02134567 Eh      13.39 kcal/mol
+-----------------------------------------------------------------------
+Total correction                          0.02429166 Eh      15.24 kcal/mol
+
+
+--------
+ENTHALPY
+--------
+
+The enthalpy is H = U + kB*T
+                kB is Boltzmann's constant
+Total free energy                 ...    -76.40159846 Eh 
+Thermal Enthalpy correction       ...      0.00094421 Eh       0.59 kcal/mol
+-----------------------------------------------------------------------
+Total Enthalpy                    ...    -76.40065425 Eh
+
+
+Note: Rotational entropy computed according to Herzberg 
+Infrared and Raman Spectra, Chapter V,1, Van Nostrand Reinhold, 1945 
+Point Group:  C2v, Symmetry Number:   2  
+Rotational constants in cm-1:    27.123456  14.567890   9.234567 
+
+Vibrational entropy computed according to the QRRHO of S. Grimme
+Chem.Eur.J. 2012 18 9955
+
+
+-------
+ENTROPY
+-------
+
+The entropy contributions are T*S = T*(S(el)+S(vib)+S(rot)+S(trans))
+     S(el)   - electronic entropy
+     S(vib)  - vibrational entropy
+     S(rot)  - rotational entropy
+     S(trans)- translational entropy
+The entropies will be listed as multiplied by the temperature to get
+units of energy
+
+Electronic entropy                ...      0.00000000 Eh      0.00 kcal/mol
+Vibrational entropy               ...      0.00001234 Eh      0.01 kcal/mol
+Rotational entropy                ...      0.00398765 Eh      2.50 kcal/mol
+Translational entropy             ...      0.01656789 Eh     10.40 kcal/mol
+-----------------------------------------------------------------------
+Final entropy term                ...      0.02056788 Eh     12.91 kcal/mol
+
+-------------------
+GIBBS FREE ENERGY
+-------------------
+
+The Gibbs free energy is G = H - T*S
+
+Total enthalpy                    ...    -76.40065425 Eh 
+Total entropy correction          ...     -0.02056788 Eh    -12.91 kcal/mol
+-----------------------------------------------------------------------
+Final Gibbs free energy         ...    -76.42122213 Eh
+
+For completeness - the Gibbs free energy minus the electronic energy
+G-E(el)                           ...      0.00466799 Eh       2.93 kcal/mol
+
+
+                            ****ORCA TERMINATED NORMALLY****
+TOTAL RUN TIME: 0 days 0 hours 2 minutes 45 seconds 123 msec
