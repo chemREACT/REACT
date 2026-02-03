@@ -20,22 +20,11 @@ class Settings:
         self._pymolpath = None
         self._pymol_at_launch = None
         self._UI_mode = None
+        self._software = None  # Gaussian or ORCA
 
-        # DFT settings
-        self._functional = None
-        self._basis = None
-        self._basis_diff = None
-        self._basis_pol1 = None
-        self._basis_pol2 = None
-        self._job_type = None
-        self._additional_keys = None
-        self._job_mem = None
-        self._chk = None
-        self._job_options = None
-        self._link0_options = None
-        self._basis_options = None
-        self._functional_options = None
-        self.output_print = None
+        # Separate DFT settings for Gaussian and ORCA
+        self._gaussian_settings = None
+        self._orca_settings = None
 
         try:
             with open(self.settingspath, "r") as f:
@@ -61,52 +50,95 @@ class Settings:
         return self._UI_mode
 
     @property
+    def software(self):
+        return self._software
+
+    @property
+    def gaussian_settings(self):
+        return self._gaussian_settings
+
+    @property
+    def orca_settings(self):
+        return self._orca_settings
+
+    @property
     def basis(self):
-        return self._basis
+        if self.software == "ORCA":
+            return self._orca_settings.get("basis", "6-31G")
+        return self._gaussian_settings.get("basis", "6-31G")
 
     @property
     def basis_diff(self):
-        return self._basis_diff
+        if self.software == "ORCA":
+            return self._orca_settings.get("basis_diff")
+        return self._gaussian_settings.get("basis_diff")
 
     @property
     def basis_pol1(self):
-        return self._basis_pol1
+        if self.software == "ORCA":
+            return self._orca_settings.get("basis_pol1", "d")
+        return self._gaussian_settings.get("basis_pol1", "d")
 
     @property
     def basis_pol2(self):
-        return self._basis_pol2
+        if self.software == "ORCA":
+            return self._orca_settings.get("basis_pol2", "p")
+        return self._gaussian_settings.get("basis_pol2", "p")
 
     @property
     def functional(self):
-        return self._functional
+        if self.software == "ORCA":
+            return self._orca_settings.get("functional", "B3LYP")
+        return self._gaussian_settings.get("functional", "B3LYP")
 
     @property
     def job_type(self):
-        return self._job_type
+        if self.software == "ORCA":
+            return self._orca_settings.get("job_type", "Opt")
+        return self._gaussian_settings.get("job_type", "Opt")
 
     @property
     def job_mem(self):
-        return self._job_mem
+        # Gaussian only
+        return self._gaussian_settings.get("job_mem", 6)
 
     @property
     def chk(self):
-        return self._chk
+        # Gaussian only
+        return self._gaussian_settings.get("chk", True)
 
     @property
     def additional_keys(self):
-        return self._additional_keys
+        if self.software == "ORCA":
+            return self._orca_settings.get("additional_keys", [])
+        return self._gaussian_settings.get("additional_keys", [])
 
     @property
     def job_options(self):
-        return self._job_options
+        if self.software == "ORCA":
+            return self._orca_settings.get("job_options", {})
+        return self._gaussian_settings.get("job_options", {})
 
     @property
     def basis_options(self):
-        return self._basis_options
+        if self.software == "ORCA":
+            return self._orca_settings.get("basis_options", {})
+        return self._gaussian_settings.get("basis_options", {})
 
     @property
     def link0_options(self):
-        return self._link0_options
+        # Gaussian only
+        return self._gaussian_settings.get("link0_options", [])
+
+    @property
+    def orca_nprocs(self):
+        # ORCA only
+        return self._orca_settings.get("nprocs", 4)
+
+    @property
+    def orca_maxcore(self):
+        # ORCA only
+        return self._orca_settings.get("maxcore", 2000)
 
     @workdir.setter
     def workdir(self, value):
@@ -124,99 +156,219 @@ class Settings:
     def UI_mode(self, value):
         self._UI_mode = value
 
+    @software.setter
+    def software(self, value):
+        if value in ["Gaussian", "ORCA"]:
+            self._software = value
+        else:
+            self._software = "Gaussian"  # Default to Gaussian
+
+    @gaussian_settings.setter
+    def gaussian_settings(self, value):
+        self._gaussian_settings = value
+
+    @orca_settings.setter
+    def orca_settings(self, value):
+        self._orca_settings = value
+
     @functional.setter
     def functional(self, value):
-        self._functional = value
+        if self.software == "ORCA":
+            self._orca_settings["functional"] = value
+        else:
+            self._gaussian_settings["functional"] = value
 
     @job_type.setter
     def job_type(self, value):
-        self._job_type = value
+        if self.software == "ORCA":
+            self._orca_settings["job_type"] = value
+        else:
+            self._gaussian_settings["job_type"] = value
 
     @basis.setter
     def basis(self, value):
-        self._basis = value
+        if self.software == "ORCA":
+            self._orca_settings["basis"] = value
+        else:
+            self._gaussian_settings["basis"] = value
 
     @basis_diff.setter
     def basis_diff(self, value):
-        self._basis_diff = value
+        if self.software == "ORCA":
+            self._orca_settings["basis_diff"] = value
+        else:
+            self._gaussian_settings["basis_diff"] = value
 
     @basis_pol1.setter
     def basis_pol1(self, value):
-        self._basis_pol1 = value
+        if self.software == "ORCA":
+            self._orca_settings["basis_pol1"] = value
+        else:
+            self._gaussian_settings["basis_pol1"] = value
 
     @basis_pol2.setter
     def basis_pol2(self, value):
-        self._basis_pol2 = value
+        if self.software == "ORCA":
+            self._orca_settings["basis_pol2"] = value
+        else:
+            self._gaussian_settings["basis_pol2"] = value
 
     @job_mem.setter
     def job_mem(self, value):
         if type(value) == int:
-            self._job_mem = value
+            self._gaussian_settings["job_mem"] = value
 
     @chk.setter
     def chk(self, value):
-        self._chk = value
+        self._gaussian_settings["chk"] = value
 
     @additional_keys.setter
     def additional_keys(self, value):
-        self._additional_keys = value
+        if self.software == "ORCA":
+            self._orca_settings["additional_keys"] = value
+        else:
+            self._gaussian_settings["additional_keys"] = value
 
     @job_options.setter
     def job_options(self, value):
-        self._job_options = value
+        if self.software == "ORCA":
+            self._orca_settings["job_options"] = value
+        else:
+            self._gaussian_settings["job_options"] = value
 
     @basis_options.setter
     def basis_options(self, value):
-        self._basis_options = value
+        if self.software == "ORCA":
+            self._orca_settings["basis_options"] = value
+        else:
+            self._gaussian_settings["basis_options"] = value
 
     @link0_options.setter
     def link0_options(self, value):
-        self._link0_options = value
+        self._gaussian_settings["link0_options"] = value
+
+    @orca_nprocs.setter
+    def orca_nprocs(self, value):
+        if type(value) == int:
+            self._orca_settings["nprocs"] = value
+
+    @orca_maxcore.setter
+    def orca_maxcore(self, value):
+        if type(value) == int:
+            self._orca_settings["maxcore"] = value
 
     @property
     def default_settings(self):
         return {
-            "functional": "B3LYP",
-            "basis": "6-31G",
-            "basis_diff": None,
-            "basis_pol1": "d",
-            "basis_pol2": "p",
-            "job_type": "Opt",
-            "additional_keys": ["empiricaldispersion=gd3"],
-            "job_mem": 6,
-            "chk": True,
-            "schk": False,
-            "oldchk": False,
-            "job_options": {
-                "Opt": ["noeigentest", "calcfc"],
-                "Opt (TS)": ["noeigentest", "calcfc"],
-                "Freq": [],
-                "IRC": [],
-                "IRCMax": [],
-                "Single point": [],
+            "software": "Gaussian",
+            "gaussian_settings": {
+                "functional": "B3LYP",
+                "basis": "6-31G",
+                "basis_diff": None,
+                "basis_pol1": "d",
+                "basis_pol2": "p",
+                "job_type": "Opt",
+                "additional_keys": ["empiricaldispersion=gd3"],
+                "job_mem": 6,
+                "chk": True,
+                "job_options": {
+                    "Opt": ["noeigentest", "calcfc"],
+                    "Opt (TS)": ["noeigentest", "calcfc"],
+                    "Freq": [],
+                    "IRC": [],
+                    "IRCMax": [],
+                    "Single point": [],
+                },
+                "link0_options": ["chk", "mem=6GB"],
+                "basis_options": {
+                    "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
+                    "6-21G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
+                    "4-31G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
+                    "6-31G": {
+                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
+                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
+                        "diff": ["", "+", "++"],
+                    },
+                    "6-311G": {
+                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
+                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
+                        "diff": ["", "+", "++"],
+                    },
+                    "D95": {
+                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
+                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
+                        "diff": ["", "+", "++"],
+                    },
+                },
+                "functional_options": ["B3LYP", "rB3LYP", "M062X"],
             },
-            "link0_options": ["chk", "mem=6GB"],
-            "basis_options": {
-                "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
-                "6-21G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-                "4-31G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-                "6-31G": {
-                    "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                    "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                    "diff": ["", "+", "++"],
+            "orca_settings": {
+                "functional": "B3LYP",
+                "basis": "def2-SVP",
+                "basis_diff": None,
+                "basis_pol1": None,
+                "basis_pol2": None,
+                "job_type": "Opt",
+                "additional_keys": [],
+                "job_options": {
+                    "Opt": ["TightOPT"],
+                    "Opt (TS)": ["TightOPT"],
+                    "Freq": [],
+                    "IRC": [],
+                    "IRCMax": [],
+                    "Single point": [],
                 },
-                "6-311G": {
-                    "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                    "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                    "diff": ["", "+", "++"],
+                "blocks": {},
+                "basis_options": {
+                    # def2 basis sets (no separate polarization/diffuse - built into name)
+                    "def2-SVP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-SV(P)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-TZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-TZVP(-f)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-TZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-QZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-QZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    # Minimally augmented def2
+                    "ma-def2-SVP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "ma-def2-TZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "ma-def2-TZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    # Diffuse def2
+                    "def2-SVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-TZVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-TZVPPD": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-QZVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "def2-QZVPPD": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    # Correlation-consistent
+                    "cc-pVDZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "cc-pVTZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "cc-pVQZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "cc-pV5Z": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "aug-cc-pVDZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "aug-cc-pVTZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "aug-cc-pVQZ": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    # Pople basis sets (support polarization and diffuse like Gaussian)
+                    "STO-3G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
+                    "6-31G": {
+                        "pol1": ["", "d", "2d", "2df", "3df"],
+                        "pol2": ["", "p", "2p", "2df", "3pd"],
+                        "diff": ["", "+", "++"],
+                    },
+                    "6-311G": {
+                        "pol1": ["", "d", "2d", "2df", "3df"],
+                        "pol2": ["", "p", "2p", "2df", "3pd"],
+                        "diff": ["", "+", "++"],
+                    },
                 },
-                "D95": {
-                    "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                    "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                    "diff": ["", "+", "++"],
-                },
+                "functional_options": [
+                    "B3LYP",
+                    "PBE0",
+                    "M06-2X",
+                    "wB97X-D3",
+                    "B97-D3",
+                    "TPSS",
+                ],
             },
-            "functional_options": ["B3LYP", "rB3LYP", "M062X"],
         }
 
     def set_default_settings(self):
@@ -225,49 +377,15 @@ class Settings:
         self.pymolpath = None
         self.pymol_at_launch = True
         self.UI_mode = True
+        self.software = "Gaussian"
 
-        # DFT settings
-        self.functional = "B3LYP"
-        self.basis = "6-31G"
-        self.basis_diff = None
-        self.basis_pol1 = "d"
-        self.basis_pol2 = "p"
-        self.job_type = "Opt"
-        self.additional_keys = ["empiricaldispersion=gd3"]
-        self.job_mem = 6
-        self.chk = True
-        self.schk = False
-        self.oldchk = False
-        self.job_options = {
-            "Opt": ["noeigentest", "calcfc"],
-            "Opt (TS)": ["noeigentest", "calcfc"],
-            "Freq": [],
-            "IRC": [],
-            "IRCMax": [],
-            "Single point": [],
-        }
-        self.link0_options = ["chk", "mem=6GB"]
-        self.basis_options = {
-            "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
-            "6-21G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-            "4-31G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-            "6-31G": {
-                "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                "diff": ["", "+", "++"],
-            },
-            "6-311G": {
-                "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                "diff": ["", "+", "++"],
-            },
-            "D95": {
-                "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                "diff": ["", "+", "++"],
-            },
-        }
-        self.functional_options = ["B3LYP", "rB3LYP", "M062X"]
+        # Gaussian DFT settings
+        self._gaussian_settings = copy.deepcopy(
+            self.default_settings["gaussian_settings"]
+        )
+
+        # ORCA DFT settings
+        self._orca_settings = copy.deepcopy(self.default_settings["orca_settings"])
 
     def load_custom_settings(self, settings):
         for key in [
@@ -275,19 +393,9 @@ class Settings:
             "pymolpath",
             "pymol_at_launch",
             "UI_mode",
-            "functional",
-            "basis",
-            "basis_diff",
-            "basis_pol1",
-            "basis_pol2",
-            "additional_keys",
-            "job_mem",
-            "chk",
-            "job_options",
-            "link0_options",
-            "basis_options",
-            "functional_options",
-            "job_type",
+            "software",
+            "gaussian_settings",
+            "orca_settings",
         ]:
             self._load_custom_settings(settings, key)
 
@@ -297,40 +405,33 @@ class Settings:
 
             if key == "workdir":
                 self.workdir = item
-            if key == "pymolpath":
+            elif key == "pymolpath":
                 self.pymolpath = item
-            if key == "pymol_at_launch":
+            elif key == "pymol_at_launch":
                 self.pymol_at_launch = item
-            if key == "UI_mode":
+            elif key == "UI_mode":
                 self.UI_mode = item
-            if key == "functional":
-                self.functional = item
-            if key == "basis":
-                self.basis = item
-            if key == "basis_diff":
-                self.basis_diff = item
-            if key == "basis_pol1":
-                self.basis_pol1 = item
-            if key == "basis_pol2":
-                self.basis_pol2 = item
-            if key == "additional_keys":
-                self.additional_keys = item
-            if key == "job_mem":
-                self.job_mem = item
-            if key == "chk":
-                self.chk = item
-            if key == "job_options":
-                self.job_options = item
-            if key == "link0_options":
-                self.link0_options = item
-            if key == "basis_options":
-                self.basis_options = item
-            if key == "functional_options":
-                self.functional_options = item
-            if key == "job_type":
-                self.job_type = item
-        except:
-            self.react.append_text(f'Failed to load "{key}" from custom settings')
+            elif key == "software":
+                self.software = item
+            elif key == "gaussian_settings":
+                self._gaussian_settings = item
+            elif key == "orca_settings":
+                self._orca_settings = item
+        except KeyError:
+            # Key doesn't exist in settings file, use defaults
+            if key == "gaussian_settings":
+                self._gaussian_settings = copy.deepcopy(
+                    self.default_settings["gaussian_settings"]
+                )
+            elif key == "orca_settings":
+                self._orca_settings = copy.deepcopy(
+                    self.default_settings["orca_settings"]
+                )
+        except Exception as e:
+            if self.react:
+                self.react.append_text(
+                    f'Failed to load "{key}" from custom settings: {e}'
+                )
 
     def save_custom_settings(self):
         settings = {}
@@ -339,22 +440,12 @@ class Settings:
         settings["pymolpath"] = self.pymolpath
         settings["pymol_at_launch"] = self.pymol_at_launch
         settings["UI_mode"] = self.UI_mode
-        settings["functional"] = self.functional
-        settings["basis"] = self.basis
-        settings["basis_diff"] = self.basis_diff
-        settings["basis_pol1"] = self.basis_pol1
-        settings["basis_pol2"] = self.basis_pol2
-        settings["additional_keys"] = self.additional_keys
-        settings["job_mem"] = self.job_mem
-        settings["chk"] = self.chk
-        settings["job_options"] = self.job_options
-        settings["link0_options"] = self.link0_options
-        settings["basis_options"] = self.basis_options
-        settings["functional_options"] = self.functional_options
-        settings["job_type"] = self.job_type
+        settings["software"] = self.software
+        settings["gaussian_settings"] = self._gaussian_settings
+        settings["orca_settings"] = self._orca_settings
 
         with open(self.settingspath, "w+") as f:
-            json.dump(settings, f)
+            json.dump(settings, f, indent=2)
 
 
 class SettingsTheWindow(QtWidgets.QMainWindow):
