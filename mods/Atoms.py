@@ -3,17 +3,47 @@ class Atom:
     Class to store information for atoms.
     Coordinates, mass, name, pdb name, type etc.
     """
+
     def __init__(self, atom, x, y, z, index=None):
         # Atom number to atom dictionary - only most common elements. Maybe complete at some point later ... maybe not.
-        self.atomnr_atom = {1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O", 9: "F", 10: "Ne",
-                             11: "Na", 12: "Mg", 13: "Al", 14: "Si", 15: "P", 16: "S", 17: "Cl", 18: "Ar", 19: "K",
-                             20: "Ca", 24: "Cr", 25: "Mn", 26: "Fe", 27: "Co", 28: "Ni", 29: "Cu", 30: "Zn", 34: "Se",
-                             35: "Br", 36: "Kr", 53: "I"}
+        self.atomnr_atom = {
+            1: "H",
+            2: "He",
+            3: "Li",
+            4: "Be",
+            5: "B",
+            6: "C",
+            7: "N",
+            8: "O",
+            9: "F",
+            10: "Ne",
+            11: "Na",
+            12: "Mg",
+            13: "Al",
+            14: "Si",
+            15: "P",
+            16: "S",
+            17: "Cl",
+            18: "Ar",
+            19: "K",
+            20: "Ca",
+            24: "Cr",
+            25: "Mn",
+            26: "Fe",
+            27: "Co",
+            28: "Ni",
+            29: "Cu",
+            30: "Zn",
+            34: "Se",
+            35: "Br",
+            36: "Kr",
+            53: "I",
+        }
 
         # Atom name to atom number dictionary
         self.atom_atomnr = {atom: atomnr for atomnr, atom in self.atomnr_atom.items()}
 
-        #atom can be passed to Atom class either as atomic number or atomic name:
+        # atom can be passed to Atom class either as atomic number or atomic name:
         if atom.isdigit():
             self._atom_nr = int(atom)
             self._atom_name = self.atomnr_atom[self.atom_nr]
@@ -69,7 +99,12 @@ class Atom:
 
     @property
     def formatted_xyz_line(self):
-        return " %15s%14.8f%14.8f%14.8f" % (self.atom_name.ljust(15), self.x, self.y, self.z)
+        return " %15s%14.8f%14.8f%14.8f" % (
+            self.atom_name.ljust(15),
+            self.x,
+            self.y,
+            self.z,
+        )
 
     @property
     def formatted_pdb_line(self):
@@ -125,8 +160,10 @@ class Atom:
 
     def make_pdb_line(self):
         occupancy_etc = " 0.00  0.00           "
-        pdb_line = f"ATOM {self.pdb_atom_nr:6d}  {self.pdb_atom_name:3s} {self.residue_name:4s}{self.residue_nr:5d}    " \
-                   f"{self.x:8.3f}{self.y:8.3f}{self.z:8.3f} {occupancy_etc}{self.atom_name}"
+        pdb_line = (
+            f"ATOM {self.pdb_atom_nr:6d}  {self.pdb_atom_name:3s} {self.residue_name:4s}{self.residue_nr:5d}    "
+            f"{self.x:8.3f}{self.y:8.3f}{self.z:8.3f} {occupancy_etc}{self.atom_name}"
+        )
         return pdb_line
 
 
@@ -134,6 +171,7 @@ class XYZAtom(Atom):
     """
     Takes a line from a xyz file and creates an Atom object from it
     """
+
     def __init__(self, atom_line=None, index=None):
         if atom_line:
             atom = atom_line.split()[0]
@@ -151,6 +189,7 @@ class GaussianAtom(Atom):
     Number     Number       Type             X           Y           Z
      1          6           0       -3.809685    3.412407   -1.222092
     """
+
     def __init__(self, atom_line=None):
         if atom_line:
             # Gaussian atom attributes:
@@ -163,7 +202,9 @@ class GaussianAtom(Atom):
             x_coordinate = float(atom_line.split()[3])
             y_coordinate = float(atom_line.split()[4])
             z_coordinate = float(atom_line.split()[5])
-            super(GaussianAtom, self).__init__(atom, x_coordinate, y_coordinate, z_coordinate, center_number)
+            super(GaussianAtom, self).__init__(
+                atom, x_coordinate, y_coordinate, z_coordinate, center_number
+            )
 
         # atom = {index: int, name: C:str, X:float, Y:float, Z:float}
 
@@ -173,15 +214,32 @@ class PDBAtom(Atom):
     Subclass of the Atom class with additional info required by the PDB file format TODO
     Takes a line from a pdb file at init
     """
+
     def __init__(self, atom_line=None):
         if atom_line:
             atom_index = int(atom_line[6:11])
             atom = atom_line[76:79].strip()
             atom = "".join([i for i in atom if not i.isdigit()])
-            x_coordinate = float(atom_line[26:].split()[0])
-            y_coordinate = float(atom_line[26:].split()[1])
-            z_coordinate = float(atom_line[26:].split()[2])
-            super(PDBAtom, self).__init__(atom, x_coordinate, y_coordinate, z_coordinate, atom_index)
+            # PDB format: X is at columns 30-38, Y at 38-46, Z at 46-54
+            try:
+                x_coordinate = float(atom_line[30:38].strip())
+                y_coordinate = float(atom_line[38:46].strip())
+                z_coordinate = float(atom_line[46:54].strip())
+            except (ValueError, IndexError):
+                # Fallback for non-standard PDB files
+                try:
+                    coords = atom_line[26:].split()
+                    x_coordinate = float(coords[0])
+                    y_coordinate = float(coords[1])
+                    z_coordinate = float(coords[2])
+                except (ValueError, IndexError):
+                    raise ValueError(
+                        f"Could not parse coordinates from PDB line: {atom_line}"
+                    )
+
+            super(PDBAtom, self).__init__(
+                atom, x_coordinate, y_coordinate, z_coordinate, atom_index
+            )
 
             # setters pdb info:
             self.pdb_atom_nr = int(atom_line[6:11])

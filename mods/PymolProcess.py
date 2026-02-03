@@ -12,8 +12,12 @@ class PymolSession(QObject):
     importSavedPDB = pyqtSignal(str)
     # atomClickedSignal = pyqtSignal(list)
     overallChargeSignal = pyqtSignal(str)
-
-
+    # Signal for text messages to avoid cross-thread GUI calls
+    textMessageSignal = pyqtSignal(str, bool)  # (message, date_time)
+    # Signal to safely disconnect PyMOL from main thread
+    disconnectSignal = pyqtSignal()
+    # Signal when PyMOL process finishes
+    pymolFinishedSignal = pyqtSignal()
 
     def __init__(self, parent=None, home=None, pymol_path=None):
         super(QObject, self).__init__(parent)
@@ -24,10 +28,14 @@ class PymolSession(QObject):
         self.session.setInputChannelMode(QProcess.ManagedInputChannel)
         self.session.setProcessChannelMode(QProcess.MergedChannels)
 
-        # Connect Qprocess signals:
-        self.session.finished.connect(self.pymol_finished)
-        self.session.readyReadStandardOutput.connect(self.handle_stdout)
-        self.session.stateChanged.connect(self.handle_state)
+        # Connect Qprocess signals
+        # Use QueuedConnection for frequently-emitting signals to avoid cross-thread issues on Linux
+        # finished and stateChanged use AutoConnection since they emit infrequently and Qt handles threading
+        self.session.finished.connect(self._on_process_finished)
+        self.session.readyReadStandardOutput.connect(
+            self.handle_stdout, Qt.QueuedConnection
+        )
+        self.session.stateChanged.connect(self._on_process_state_changed)
 
         # Delete file of loaded molecule after loading it:
         self.files_to_delete = list()
@@ -39,52 +47,67 @@ class PymolSession(QObject):
         self.neg_charge = None
         self.pos_charge = None
 
-        self.stdout_handler = {"iterate sele, ID": {"collect": False,
-                                                    "process": self.collect_iterate,
-                                                    "return": "iterated",
-                                                    "signal": self.return_sel_atomnr},
-                               "iterate included, ID": {"collect": False,
-                                                        "process": self.collect_iterate,
-                                                        "return": "iterated",
-                                                        "signal": self.return_sel_atomnr},
-                               "iterate nterm": {"collect": False,
-                                                 "process": self.collect_iterate,
-                                                 "return": "iterated",
-                                                 "signal": self.return_nterm},
-                               "iterate cterm": {"collect": False,
-                                                 "process": self.collect_iterate,
-                                                 "return": "iterated",
-                                                 "signal": self.return_cterm},
-                               "get_dihedral ": {"collect": False,
-                                                 "process": self.collect_dihedral,
-                                                 "return": "cmd.get_dihedral:",
-                                                 "signal": self.return_dihedral},
-                               "count_atoms ": {"collect": False,
-                                                 "process": self.return_atom_count,
-                                                 "return": "count_atoms:",
-                                                 "signal": None},
-                               "Save: wrote ": {"collect": False,
-                                                 "process": self.pdb_written,
-                                                 "return": "Save: wrote",
-                                                 "signal": None
-                                                },
-                                "Selector": {"collect": False,
-                                                 "process": self.print_selector,
-                                                 "return": "Selector",
-                                                 "signal": None
-                                                },
-                                
-                               }
+        self.stdout_handler = {
+            "iterate sele, ID": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_sel_atomnr,
+            },
+            "iterate included, ID": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_sel_atomnr,
+            },
+            "iterate nterm": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_nterm,
+            },
+            "iterate cterm": {
+                "collect": False,
+                "process": self.collect_iterate,
+                "return": "iterated",
+                "signal": self.return_cterm,
+            },
+            "get_dihedral ": {
+                "collect": False,
+                "process": self.collect_dihedral,
+                "return": "cmd.get_dihedral:",
+                "signal": self.return_dihedral,
+            },
+            "count_atoms ": {
+                "collect": False,
+                "process": self.return_atom_count,
+                "return": "count_atoms:",
+                "signal": None,
+            },
+            "Save: wrote ": {
+                "collect": False,
+                "process": self.pdb_written,
+                "return": "Save: wrote",
+                "signal": None,
+            },
+            "Selector": {
+                "collect": False,
+                "process": self.print_selector,
+                "return": "Selector",
+                "signal": None,
+            },
+        }
 
         self.start_pymol()
-        self.set_pymol_settings()
+        # Wait for PyMOL to be ready before sending commands
+        QTimer.singleShot(1000, self.set_pymol_settings)
 
     def monitor_clicks(self):
         self.stdout_handler["You clicked "] = {
             "collect": False,
             "process": self.iterate_sele,
             "return": "You clicked ",
-            "signal": None
+            "signal": None,
         }
         print("Now monitoring all pymol atom clicks!")
 
@@ -110,7 +133,20 @@ class PymolSession(QObject):
         if not file_:
             print("PymolProcess load_structure - No file given")
             return
-        self.pymol_cmd("load %s" % file_)
+
+        # Extract object name from filename (without extension)
+        import os
+
+        object_name = os.path.basename(file_).rsplit(".", 1)[0]
+
+        # Verify file exists
+        if not os.path.exists(file_):
+            print(f"ERROR: File does not exist: {file_}")
+            return
+
+        # Quote the file path and specify object name explicitly
+        self.pymol_cmd('load "%s", %s' % (file_, object_name))
+        print(f'PyMOL command: load "{file_}", {object_name}')
 
     def start_pymol(self, external_gui=False):
         startup = ["-p"]
@@ -126,8 +162,18 @@ class PymolSession(QObject):
         :param cmd: pymol command
         :return:
         """
+        if not self.session or self.session.state() != QProcess.Running:
+            return
+
         cmd += "\n"
-        self.session.write(cmd.encode())
+        try:
+            self.session.write(cmd.encode())
+            # Wait briefly for bytes to be written, but don't block too long
+            # Use a short timeout to avoid deadlocks on Linux
+            self.session.waitForBytesWritten(30)
+        except Exception as e:
+            # If write fails, don't crash - just log it
+            pass
 
     def set_pymol_settings(self):
         """
@@ -135,7 +181,12 @@ class PymolSession(QObject):
         """
         if not self.session:
             return
-        settings = ["space cmyk\n", "set stick_radius, 0.17\n", "set spec_power, 250\n", "set spec_reflect, 2\n"]
+        settings = [
+            "space cmyk\n",
+            "set stick_radius, 0.17\n",
+            "set spec_power, 250\n",
+            "set spec_reflect, 2\n",
+        ]
         for setting in settings:
             self.pymol_cmd(setting)
 
@@ -164,9 +215,14 @@ class PymolSession(QObject):
         if len(residues) > 0:
             sel_str += " or resname ".join(residues)
 
-        self.pymol_cmd("hide sticks, %s and %s and not %s" % (group, pymol_name, sel_str))
+        self.pymol_cmd(
+            "hide sticks, %s and %s and not %s" % (group, pymol_name, sel_str)
+        )
         self.pymol_cmd("color gray, %s and %s and name C*" % (group, pymol_name))
-        self.pymol_cmd("color chartreuse, %s and %s and %s and name C*" % (group, pymol_name, sel_str))
+        self.pymol_cmd(
+            "color chartreuse, %s and %s and %s and name C*"
+            % (group, pymol_name, sel_str)
+        )
         self.pymol_cmd("zoom %s and %s and %s, 10" % (group, pymol_name, sel_str))
 
     def highlight_atoms(self, atoms=list, color=str, name=str, group=None):
@@ -195,8 +251,17 @@ class PymolSession(QObject):
         self.pymol_cmd("disable *")
         if group:
             self.pymol_cmd("group %s, toggle, open" % group)
-        self.pymol_cmd("enable %s or %s" % (group, name))
-        self.pymol_cmd("zoom %s and %s" % (group, name))
+
+        # Build enable command only if we have valid name or group
+        if name and group:
+            self.pymol_cmd("enable %s or %s" % (group, name))
+            self.pymol_cmd("zoom %s and %s" % (group, name))
+        elif name:
+            self.pymol_cmd("enable %s" % name)
+            self.pymol_cmd("zoom %s" % name)
+        elif group:
+            self.pymol_cmd("enable %s" % group)
+            self.pymol_cmd("zoom %s" % group)
 
     def set_selection(self, atoms, sele_name, object_name, group):
         """
@@ -209,10 +274,20 @@ class PymolSession(QObject):
         self.pymol_cmd("delete %s" % sele_name)
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
-        self.pymol_cmd("select %s, %s and %s and (%s)" % (sele_name, group, object_name, sel_str))
+        self.pymol_cmd(
+            "select %s, %s and %s and (%s)" % (sele_name, group, object_name, sel_str)
+        )
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
-    def expand_sele(self, selection="sele", sele_name="new", group="", radius=5, by_res=True, include_solv=True):
+    def expand_sele(
+        self,
+        selection="sele",
+        sele_name="new",
+        group="",
+        radius=5,
+        by_res=True,
+        include_solv=True,
+    ):
         """
         :param selection:
         :param radius: radius around selection to select
@@ -245,7 +320,6 @@ class PymolSession(QObject):
         self.pymol_cmd("unpick")
 
     def set_overall_charge(self):
-
         self.pymol_cmd("select negative_charge, visible and formal_charge < 0")
         QTimer.singleShot(500, lambda: None)
         self.pymol_cmd("select positive_charge, visible and formal_charge > 0")
@@ -281,8 +355,10 @@ class PymolSession(QObject):
         :param group:
         :return:
         """
-        selector = {"nterm": "and (elem n and (neighbor name CA and not neighbor name C))",
-                    "cterm": "and (elem C and (neighbor name O and not neighbor name N))"}
+        selector = {
+            "nterm": "and (elem n and (neighbor name CA and not neighbor name C))",
+            "cterm": "and (elem C and (neighbor name O and not neighbor name N))",
+        }
 
         cmd = "select %s, %s " % (type, pymol_name)
         if group:
@@ -304,9 +380,19 @@ class PymolSession(QObject):
         if group:
             self.pymol_cmd("group %s, %s" % (group, target_name))
 
+    def _on_process_finished(self, exitCode, exitStatus):
+        """Wrapper for QProcess.finished signal - handles the exit status enum"""
+        self.pymol_finished()
+
     def pymol_finished(self):
-        self.parent.pymol = None
-        print("Pymol session completed")
+        # Emit signal instead of direct attribute access to avoid cross-thread issues
+        self.pymolFinishedSignal.emit()
+        # Disable print to prevent recursive repaint on Linux
+        # print("Pymol session completed")
+
+    def _on_process_state_changed(self, state):
+        """Wrapper for QProcess.stateChanged signal"""
+        self.handle_state(state)
 
     def delete_all_files(self):
         """
@@ -324,7 +410,17 @@ class PymolSession(QObject):
         """
         data = self.session.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
+
+        # Only print for debugging errors, not all output (prevents repaint issues)
+        # Uncomment next line for full PyMOL output debugging:
         # print(stdout)
+
+        # Check for errors and print those
+        if "Error:" in stdout or "ExecutiveLoad-Error:" in stdout:
+            # Disable print to prevent recursive repaint on Linux
+            # print(f"PyMOL Error detected: {stdout}")
+            pass
+
         if "CmdLoad:" in stdout:
             if len(self.files_to_delete) > 0:
                 try:
@@ -402,17 +498,16 @@ class PymolSession(QObject):
 
     def handle_state(self, state):
         states = {
-            QProcess.NotRunning: 'Exited',
-            QProcess.Starting: 'Starting',
-            QProcess.Running: 'Running',
+            QProcess.NotRunning: "Exited",
+            QProcess.Starting: "Starting",
+            QProcess.Running: "Running",
         }
         state_name = states[state]
-        print(f"Pymol: {state_name}")
-        try:
-            self.react.append_text(f"Pymol: {state_name}", date_time=True)
-        except:
-            pass
-        if QProcess.NotRunning:
+        # Disable print to prevent recursive repaint on Linux
+        # print(f"Pymol: {state_name}")
+        # Use signal instead of direct GUI call to avoid cross-thread issues
+        self.textMessageSignal.emit(f"Pymol: {state_name}", True)
+        if state == QProcess.NotRunning:
             self.disconnect_pymol()
 
     def handle_stderr(self):
@@ -433,28 +528,48 @@ class PymolSession(QObject):
             pass
 
     def disconnect_pymol(self):
-        self.react.tabWidget.tabBar().currentChanged.disconnect(self.react.pymol_view_current_state)
-        self.react.connect_pymol_structures(connect=False)
+        # Emit signal to handle GUI disconnection in main thread
+        self.disconnectSignal.emit()
         self.delete_all_files()
+
+    def _do_disconnect_pymol(self):
+        """Actual GUI disconnection - must be called from main thread"""
+        try:
+            self.react.tabWidget.tabBar().currentChanged.disconnect(
+                self.react.pymol_view_current_state
+            )
+        except:
+            pass  # May already be disconnected
+        try:
+            self.react.connect_pymol_structures(connect=False)
+        except:
+            pass
 
     @pyqtSlot()
     def print_selector(self, stdout):
         if "negative_charge" in stdout:
             self.neg_charge = stdout.split()[5]
-            print("got neg charge", self.neg_charge)
+            # Disable print to prevent recursive repaint on Linux
+            # print("got neg charge", self.neg_charge)
         if "positive_charge" in stdout:
             self.pos_charge = stdout.split()[5]
-            print("got pos charge", self.pos_charge)
+            # Disable print to prevent recursive repaint on Linux
+            # print("got pos charge", self.pos_charge)
         else:
             return
-        
+
         try:
             if self.neg_charge and self.pos_charge:
-                print("got both charges")
+                # Disable print to prevent recursive repaint on Linux
+                # print("got both charges")
                 overall_charge = int(self.pos_charge) - int(self.neg_charge)
-                print("Overall charge:", overall_charge)
+                # Disable print to prevent recursive repaint on Linux
+                # print("Overall charge:", overall_charge)
                 self.overallChargeSignal.emit(str(overall_charge))
                 self.pymol_cmd("delete %s" % "negative_charge")
                 self.pymol_cmd("delete %s" % "positive_charge")
         except:
-            self.react.append_text('Something went wrong while calculating charge of the system..')
+            # Use signal instead of direct GUI call to avoid cross-thread issues
+            self.textMessageSignal.emit(
+                "Something went wrong while calculating charge of the system..", False
+            )

@@ -27,36 +27,38 @@ class Ui_SettingsWindow(object):
         self.frame = QtWidgets.QFrame(self.centralwidget)
         self.frame.setMinimumSize(QtCore.QSize(375, 565))
         self.frame.setMaximumSize(QtCore.QSize(5000000, 16777215))
-        self.frame.setStyleSheet("QPushButton {\n"
-"    background-color: rgb(143, 23, 119);\n"
-"      color: white;\n"
-"\n"
-"}\n"
-"\n"
-"QPushButton:hover\n"
-"{\n"
-"       background-color:rgb(143, 23, 119);\n"
-"\n"
-"    border-style: outset;\n"
-"    border-width: 0px;\n"
-"    border-radius:10px;\n"
-"\n"
-"    \n"
-"    /*border-color: rgb(12, 103, 213);*/\n"
-"}\n"
-"QPushButton:pressed\n"
-"{\n"
-"       /*background-color:rgb(17, 145, 255);\n"
-"    color: black*/\n"
-"    background-color: rgb(42, 42, 42);\n"
-"}\n"
-"QListWidget{    \n"
-" background-color: rgb(20,20,20);        \n"
-"  border:None;\n"
-"  margin-top:0px;    \n"
-"  margin-left:0px;\n"
-"  margin-right:0px;    \n"
-" }")
+        self.frame.setStyleSheet(
+            "QPushButton {\n"
+            "    background-color: rgb(143, 23, 119);\n"
+            "      color: white;\n"
+            "\n"
+            "}\n"
+            "\n"
+            "QPushButton:hover\n"
+            "{\n"
+            "       background-color:rgb(143, 23, 119);\n"
+            "\n"
+            "    border-style: outset;\n"
+            "    border-width: 0px;\n"
+            "    border-radius:10px;\n"
+            "\n"
+            "    \n"
+            "    /*border-color: rgb(12, 103, 213);*/\n"
+            "}\n"
+            "QPushButton:pressed\n"
+            "{\n"
+            "       /*background-color:rgb(17, 145, 255);\n"
+            "    color: black*/\n"
+            "    background-color: rgb(42, 42, 42);\n"
+            "}\n"
+            "QListWidget{    \n"
+            " background-color: rgb(20,20,20);        \n"
+            "  border:None;\n"
+            "  margin-top:0px;    \n"
+            "  margin-left:0px;\n"
+            "  margin-right:0px;    \n"
+            " }"
+        )
         self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
@@ -64,10 +66,14 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.gridLayout_7 = QtWidgets.QGridLayout()
         self.gridLayout_7.setObjectName("gridLayout_7")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_7.addItem(spacerItem, 0, 0, 1, 1)
         self.DFT_label = QtWidgets.QLabel(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(100)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.DFT_label.sizePolicy().hasHeightForWidth())
@@ -80,7 +86,9 @@ class Ui_SettingsWindow(object):
         self.DFT_label.setAlignment(QtCore.Qt.AlignCenter)
         self.DFT_label.setObjectName("DFT_label")
         self.gridLayout_7.addWidget(self.DFT_label, 0, 1, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_7.addItem(spacerItem1, 0, 2, 1, 1)
         self.verticalLayout_3.addLayout(self.gridLayout_7)
         self.gridLayout_6 = QtWidgets.QGridLayout()
@@ -96,17 +104,12 @@ class Ui_SettingsWindow(object):
         self.comboBox_funct.setEditable(True)
         self.comboBox_funct.setObjectName("comboBox_funct")
         self.gridLayout_6.addWidget(self.comboBox_funct, 0, 1, 1, 1)
-        self.add_DFT_button_0 = QtWidgets.QPushButton(self.frame)
-        self.add_DFT_button_0.setMinimumSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setMaximumSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/24x24/resources/icons/arrow-plus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.add_DFT_button_0.setIcon(icon)
-        self.add_DFT_button_0.setIconSize(QtCore.QSize(24, 24))
-        self.add_DFT_button_0.setFlat(True)
-        self.add_DFT_button_0.setObjectName("add_DFT_button_0")
-        self.gridLayout_6.addWidget(self.add_DFT_button_0, 0, 2, 1, 1)
+        icon.addPixmap(
+            QtGui.QPixmap(":/24x24/resources/icons/arrow-plus.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.basis_label_1 = QtWidgets.QLabel(self.frame)
         self.basis_label_1.setMinimumSize(QtCore.QSize(70, 0))
         self.basis_label_1.setMaximumSize(QtCore.QSize(70, 16777215))
@@ -118,17 +121,12 @@ class Ui_SettingsWindow(object):
         self.basis1_comboBox_3.setEditable(True)
         self.basis1_comboBox_3.setObjectName("basis1_comboBox_3")
         self.gridLayout_6.addWidget(self.basis1_comboBox_3, 1, 1, 1, 1)
-        self.del_DFT_button_0 = QtWidgets.QPushButton(self.frame)
-        self.del_DFT_button_0.setMinimumSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setMaximumSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/24x24/resources/icons/arrow-minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.del_DFT_button_0.setIcon(icon1)
-        self.del_DFT_button_0.setIconSize(QtCore.QSize(24, 24))
-        self.del_DFT_button_0.setFlat(True)
-        self.del_DFT_button_0.setObjectName("del_DFT_button_0")
-        self.gridLayout_6.addWidget(self.del_DFT_button_0, 1, 2, 1, 1)
+        icon1.addPixmap(
+            QtGui.QPixmap(":/24x24/resources/icons/arrow-minus.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.gridLayout_5 = QtWidgets.QGridLayout()
         self.gridLayout_5.setObjectName("gridLayout_5")
         self.basis2_comboBox_4 = QtWidgets.QComboBox(self.frame)
@@ -143,14 +141,20 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setPointSize(24)
         self.label_5.setFont(font)
-        self.label_5.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.label_5.setAlignment(
+            QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft
+        )
         self.label_5.setObjectName("label_5")
         self.gridLayout_5.addWidget(self.label_5, 0, 1, 1, 1)
         self.basis3_comboBox_6 = QtWidgets.QComboBox(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.basis3_comboBox_6.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.basis3_comboBox_6.sizePolicy().hasHeightForWidth()
+        )
         self.basis3_comboBox_6.setSizePolicy(sizePolicy)
         self.basis3_comboBox_6.setMinimumSize(QtCore.QSize(65, 0))
         self.basis3_comboBox_6.setMaximumSize(QtCore.QSize(65, 16777215))
@@ -163,14 +167,20 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setPointSize(24)
         self.label_7.setFont(font)
-        self.label_7.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.label_7.setAlignment(
+            QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft
+        )
         self.label_7.setObjectName("label_7")
         self.gridLayout_5.addWidget(self.label_7, 0, 3, 1, 1)
         self.basis4_comboBox_5 = QtWidgets.QComboBox(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.basis4_comboBox_5.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.basis4_comboBox_5.sizePolicy().hasHeightForWidth()
+        )
         self.basis4_comboBox_5.setSizePolicy(sizePolicy)
         self.basis4_comboBox_5.setMinimumSize(QtCore.QSize(65, 0))
         self.basis4_comboBox_5.setMaximumSize(QtCore.QSize(51, 16777215))
@@ -186,7 +196,9 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setPointSize(24)
         self.label_6.setFont(font)
-        self.label_6.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.label_6.setAlignment(
+            QtCore.Qt.AlignBottom | QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft
+        )
         self.label_6.setObjectName("label_6")
         self.gridLayout_5.addWidget(self.label_6, 0, 5, 1, 1)
         self.gridLayout_6.addLayout(self.gridLayout_5, 2, 1, 1, 2)
@@ -199,7 +211,9 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setItalic(True)
         self.additionalKeys_label_1.setFont(font)
-        self.additionalKeys_label_1.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.additionalKeys_label_1.setAlignment(
+            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
+        )
         self.additionalKeys_label_1.setObjectName("additionalKeys_label_1")
         self.gridLayout_8.addWidget(self.additionalKeys_label_1, 0, 0, 2, 1)
         self.additionalKeys_1 = QtWidgets.QLineEdit(self.frame)
@@ -245,7 +259,9 @@ class Ui_SettingsWindow(object):
         self.line_7.setObjectName("line_7")
         self.gridLayout_9.addWidget(self.line_7, 0, 0, 1, 1)
         self.DFT_label_5 = QtWidgets.QLabel(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(150)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.DFT_label_5.sizePolicy().hasHeightForWidth())
@@ -277,7 +293,9 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setItalic(True)
         self.additionalKeys_label_3.setFont(font)
-        self.additionalKeys_label_3.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.additionalKeys_label_3.setAlignment(
+            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
+        )
         self.additionalKeys_label_3.setObjectName("additionalKeys_label_3")
         self.gridLayout_9.addWidget(self.additionalKeys_label_3, 2, 0, 2, 1)
         self.additionalKeys_3 = QtWidgets.QLineEdit(self.frame)
@@ -323,7 +341,9 @@ class Ui_SettingsWindow(object):
         self.line_9.setObjectName("line_9")
         self.gridLayout_10.addWidget(self.line_9, 0, 0, 1, 1)
         self.DFT_label_6 = QtWidgets.QLabel(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(150)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.DFT_label_6.sizePolicy().hasHeightForWidth())
@@ -349,7 +369,9 @@ class Ui_SettingsWindow(object):
         font = QtGui.QFont()
         font.setItalic(True)
         self.additionalKeys_label_2.setFont(font)
-        self.additionalKeys_label_2.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.additionalKeys_label_2.setAlignment(
+            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
+        )
         self.additionalKeys_label_2.setObjectName("additionalKeys_label_2")
         self.gridLayout_10.addWidget(self.additionalKeys_label_2, 1, 0, 2, 1)
         self.additionalKeys_2 = QtWidgets.QLineEdit(self.frame)
@@ -405,9 +427,13 @@ class Ui_SettingsWindow(object):
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 2, 1)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout.addItem(spacerItem2, 0, 1, 1, 1)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout.addItem(spacerItem3, 1, 1, 2, 1)
         self.label_3 = QtWidgets.QLabel(self.frame_2)
         self.label_3.setMaximumSize(QtCore.QSize(125, 16777215))
@@ -426,10 +452,14 @@ class Ui_SettingsWindow(object):
         self.change_cwd_button.setMaximumSize(QtCore.QSize(120, 16777215))
         self.change_cwd_button.setObjectName("change_cwd_button")
         self.gridLayout.addWidget(self.change_cwd_button, 4, 0, 1, 1)
-        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout.addItem(spacerItem4, 4, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
-        spacerItem5 = QtWidgets.QSpacerItem(155, 15, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem5 = QtWidgets.QSpacerItem(
+            155, 15, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_2.addItem(spacerItem5)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
@@ -440,25 +470,21 @@ class Ui_SettingsWindow(object):
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
         self.gridLayout_2.addWidget(self.label_4, 0, 0, 1, 1)
-        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem6 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_2.addItem(spacerItem6, 0, 1, 1, 2)
         self.pymol_lineEdit_2 = QtWidgets.QLineEdit(self.frame_2)
         self.pymol_lineEdit_2.setMinimumSize(QtCore.QSize(50, 0))
         self.pymol_lineEdit_2.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.pymol_lineEdit_2.setObjectName("pymol_lineEdit_2")
         self.gridLayout_2.addWidget(self.pymol_lineEdit_2, 1, 0, 1, 3)
-        self.checkBox = QtWidgets.QCheckBox(self.frame_2)
-        self.checkBox.setMinimumSize(QtCore.QSize(130, 0))
-        self.checkBox.setMaximumSize(QtCore.QSize(130, 310))
         font = QtGui.QFont()
         font.setItalic(True)
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        self.checkBox.setFont(font)
-        self.checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.checkBox.setAutoFillBackground(False)
-        self.checkBox.setObjectName("checkBox")
-        self.gridLayout_2.addWidget(self.checkBox, 3, 0, 1, 2)
-        spacerItem7 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem7 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_2.addItem(spacerItem7, 3, 2, 1, 1)
         self.open_pymol_checkBox = QtWidgets.QCheckBox(self.frame_2)
         self.open_pymol_checkBox.setMinimumSize(QtCore.QSize(130, 0))
@@ -471,7 +497,9 @@ class Ui_SettingsWindow(object):
         self.open_pymol_checkBox.setAutoFillBackground(False)
         self.open_pymol_checkBox.setObjectName("open_pymol_checkBox")
         self.gridLayout_2.addWidget(self.open_pymol_checkBox, 4, 0, 1, 2)
-        spacerItem8 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem8 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_2.addItem(spacerItem8, 4, 2, 1, 1)
         self.change_pymol_button = QtWidgets.QPushButton(self.frame_2)
         self.change_pymol_button.setMinimumSize(QtCore.QSize(100, 0))
@@ -479,7 +507,9 @@ class Ui_SettingsWindow(object):
         self.change_pymol_button.setObjectName("change_pymol_button")
         self.gridLayout_2.addWidget(self.change_pymol_button, 2, 0, 1, 3)
         self.verticalLayout_2.addLayout(self.gridLayout_2)
-        spacerItem9 = QtWidgets.QSpacerItem(193, 18, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem9 = QtWidgets.QSpacerItem(
+            193, 18, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_2.addItem(spacerItem9)
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
@@ -489,7 +519,9 @@ class Ui_SettingsWindow(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 2)
-        spacerItem10 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem10 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_3.addItem(spacerItem10, 0, 2, 1, 1)
         self.light_button = QtWidgets.QRadioButton(self.frame_2)
         self.light_button.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -499,7 +531,9 @@ class Ui_SettingsWindow(object):
         self.dark_button.setChecked(True)
         self.dark_button.setObjectName("dark_button")
         self.gridLayout_3.addWidget(self.dark_button, 1, 1, 1, 1)
-        spacerItem11 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem11 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_3.addItem(spacerItem11, 1, 2, 1, 1)
         self.reset_button = QtWidgets.QPushButton(self.frame_2)
         self.reset_button.setMinimumSize(QtCore.QSize(150, 0))
@@ -509,7 +543,9 @@ class Ui_SettingsWindow(object):
         self.reset_button.setFont(font)
         self.reset_button.setObjectName("reset_button")
         self.gridLayout_3.addWidget(self.reset_button, 2, 0, 1, 2)
-        spacerItem12 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem12 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.gridLayout_3.addItem(spacerItem12, 2, 2, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout_3)
         self.gridLayout_11.addWidget(self.frame_2, 0, 1, 1, 1)
@@ -530,59 +566,63 @@ class Ui_SettingsWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.save_button.setFont(font)
-        self.save_button.setStyleSheet("QPushButton {\n"
-"     background-color: rgb(143, 23, 119);\n"
-"       color: white;\n"
-" }\n"
-" QPushButton:hover{\n"
-" background-color:rgb(143, 23, 119);\n"
-" border-style: outset;\n"
-" border-width: 0px;\n"
-" /*border-color: rgb(12, 103, 213);*/\n"
-" }\n"
-" QPushButton:pressed\n"
-" {\n"
-" /*background-color:rgb(17, 145, 255);\n"
-"  color: black*/\n"
-"  background-color: rgb(42, 42, 42);\n"
-" }\n"
-" QListWidget{\n"
-" background-color: rgb(20,20,20);\n"
-" border:None;\n"
-" margin-top:0px;\n"
-" margin-left:0px;\n"
-" margin-right:0px;\n"
-" }")
+        self.save_button.setStyleSheet(
+            "QPushButton {\n"
+            "     background-color: rgb(143, 23, 119);\n"
+            "       color: white;\n"
+            " }\n"
+            " QPushButton:hover{\n"
+            " background-color:rgb(143, 23, 119);\n"
+            " border-style: outset;\n"
+            " border-width: 0px;\n"
+            " /*border-color: rgb(12, 103, 213);*/\n"
+            " }\n"
+            " QPushButton:pressed\n"
+            " {\n"
+            " /*background-color:rgb(17, 145, 255);\n"
+            "  color: black*/\n"
+            "  background-color: rgb(42, 42, 42);\n"
+            " }\n"
+            " QListWidget{\n"
+            " background-color: rgb(20,20,20);\n"
+            " border:None;\n"
+            " margin-top:0px;\n"
+            " margin-left:0px;\n"
+            " margin-right:0px;\n"
+            " }"
+        )
         self.save_button.setObjectName("save_button")
         self.verticalLayout_5.addWidget(self.save_button)
         self.cancel_button = QtWidgets.QPushButton(self.frame_4)
         self.cancel_button.setMinimumSize(QtCore.QSize(100, 25))
         self.cancel_button.setMaximumSize(QtCore.QSize(16777215, 25))
-        self.cancel_button.setStyleSheet("\n"
-"\n"
-"QPushButton {\n"
-"    /*background-color:rgb(98, 114, 164);*/\n"
-"    background-color: rgb(30,30,30);\n"
-"    color: rgb(143,23,119);\n"
-"    \n"
-"\n"
-"}\n"
-"\n"
-"QPushButton:hover\n"
-"{\n"
-"       background-color: rgb(40, 40, 40);\n"
-"    /*color:rgb(20,20,20);*/\n"
-"    border-style: outset;\n"
-"    border-width: 2px;\n"
-"    border-color: rgb(143,23,119);\n"
-"\n"
-"}\n"
-"QPushButton:pressed\n"
-"{\n"
-"    color: rgb(143, 23, 119);\n"
-"    background-color: rgb(20, 20, 20);\n"
-"}\n"
-"")
+        self.cancel_button.setStyleSheet(
+            "\n"
+            "\n"
+            "QPushButton {\n"
+            "    /*background-color:rgb(98, 114, 164);*/\n"
+            "    background-color: rgb(30,30,30);\n"
+            "    color: rgb(143,23,119);\n"
+            "    \n"
+            "\n"
+            "}\n"
+            "\n"
+            "QPushButton:hover\n"
+            "{\n"
+            "       background-color: rgb(40, 40, 40);\n"
+            "    /*color:rgb(20,20,20);*/\n"
+            "    border-style: outset;\n"
+            "    border-width: 2px;\n"
+            "    border-color: rgb(143,23,119);\n"
+            "\n"
+            "}\n"
+            "QPushButton:pressed\n"
+            "{\n"
+            "    color: rgb(143, 23, 119);\n"
+            "    background-color: rgb(20, 20, 20);\n"
+            "}\n"
+            ""
+        )
         self.cancel_button.setObjectName("cancel_button")
         self.verticalLayout_5.addWidget(self.cancel_button)
         self.verticalLayout.addLayout(self.verticalLayout_5)
@@ -602,27 +642,33 @@ class Ui_SettingsWindow(object):
         self.label_5.setText(_translate("SettingsWindow", "("))
         self.label_7.setText(_translate("SettingsWindow", " ,"))
         self.label_6.setText(_translate("SettingsWindow", " )"))
-        self.additionalKeys_label_1.setText(_translate("SettingsWindow", "Additional \n"
-"keywords:"))
+        self.additionalKeys_label_1.setText(
+            _translate("SettingsWindow", "Additional \nkeywords:")
+        )
         self.DFT_label_5.setText(_translate("SettingsWindow", "Job-type specific"))
-        self.additionalKeys_label_3.setText(_translate("SettingsWindow", "Additional\n"
-"keywords:"))
+        self.additionalKeys_label_3.setText(
+            _translate("SettingsWindow", "Additional\nkeywords:")
+        )
         self.DFT_label_6.setText(_translate("SettingsWindow", "Link 0 commands"))
-        self.additionalKeys_label_2.setText(_translate("SettingsWindow", "Additional\n"
-"keywords:"))
+        self.additionalKeys_label_2.setText(
+            _translate("SettingsWindow", "Additional\nkeywords:")
+        )
         self.label.setText(_translate("SettingsWindow", "General "))
         self.label_3.setText(_translate("SettingsWindow", "  Working directory:"))
         self.change_cwd_button.setText(_translate("SettingsWindow", "Change"))
         self.label_4.setText(_translate("SettingsWindow", "  PyMOL path:"))
-        self.checkBox.setText(_translate("SettingsWindow", "  Use integrated\n"
-"  PyMOL"))
-        self.open_pymol_checkBox.setText(_translate("SettingsWindow", "  Open Pymol\n"
-"  at launch "))
+        self.open_pymol_checkBox.setText(
+            _translate("SettingsWindow", "  Open Pymol\n  at launch ")
+        )
         self.change_pymol_button.setText(_translate("SettingsWindow", "Change"))
         self.label_2.setText(_translate("SettingsWindow", "Color mode:"))
         self.light_button.setText(_translate("SettingsWindow", "Light"))
         self.dark_button.setText(_translate("SettingsWindow", "Dark"))
-        self.reset_button.setText(_translate("SettingsWindow", "Reset default settings"))
+        self.reset_button.setText(
+            _translate("SettingsWindow", "Reset default settings")
+        )
         self.save_button.setText(_translate("SettingsWindow", "Save"))
         self.cancel_button.setText(_translate("SettingsWindow", "Cancel"))
-#import icons_rc
+
+
+# import icons_rc

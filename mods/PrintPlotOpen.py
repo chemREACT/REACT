@@ -19,15 +19,27 @@ class PrintPlotOpen:
     classes than MainWindow!
     """
 
-    def import_files(self, title_="Import files", filter_type="Any files (*.*)", path=os.getcwd()):
+    def import_files(
+        self, title_="Import files", filter_type="Any files (*.*)", path=os.getcwd()
+    ):
         """
         Opens file dialog where multiple files can be selected.
         Return: files_ --> list of files (absolute path)
         Return: files_type --> string with the chosen filter_type
         """
-        #  DontUseNativeDialog is stable on linux...
-        files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(self, title_, path, filter_type,
-                                                                    options=QtWidgets.QFileDialog.DontUseNativeDialog)
+        #  DontUseNativeDialog is required on Linux to avoid crashes
+        if sys.platform == "linux":
+            files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(
+                self,
+                title_,
+                path,
+                filter_type,
+                options=QtWidgets.QFileDialog.DontUseNativeDialog,
+            )
+        else:
+            files_, files_type = QtWidgets.QFileDialog.getOpenFileNames(
+                self, title_, path, filter_type
+            )
 
         return files_, files_type
 
@@ -39,7 +51,9 @@ class PrintPlotOpen:
         if date_time:
             text = "\n%s\n%s" % (time.asctime(time.localtime(time.time())), text)
         self.textBrowser.appendPlainText(text)
-        self.textBrowser.verticalScrollBar().setValue(self.textBrowser.verticalScrollBar().maximum())
+        self.textBrowser.verticalScrollBar().setValue(
+            self.textBrowser.verticalScrollBar().maximum()
+        )
 
     def print_energy(self):
         """
@@ -47,15 +61,17 @@ class PrintPlotOpen:
         :return:
         """
         filepath = self.tabWidget.currentWidget().currentItem().text()
-        filename = filepath.split('/')[-1]
+        filename = filepath.split("/")[-1]
 
-        if filename.split('.')[-1] not in  ["out", "log"]:
-            self.append_text("%s does not seem to be a Gaussian output file." % filename)
+        if filename.split(".")[-1] not in ["out", "log"]:
+            self.append_text(
+                "%s does not seem to be a Gaussian output file." % filename
+            )
             return
 
-        #this file --> State
+        # this file --> State
         state_energy = self.states[self.tabWidget.currentIndex()].get_energy(filepath)
-        #energy_kcal = superfile.connvert_to_kcal(energy_au) TODO ?
+        # energy_kcal = superfile.connvert_to_kcal(energy_au) TODO ?
 
         energy_kcal = cf.hartree_to_kcal(state_energy)
 
@@ -75,10 +91,15 @@ class PrintPlotOpen:
                 file_path = self.tabWidget.widget(tab_index).currentItem().text()
                 if file_path.split(".")[-1] in ["out", "log"]:
                     energies.append(self.states[tab_index].get_energy(file_path))
-                    d_energies[tab_index + 1] = {"dE": energies[tab_index]-energies[0], "file": file_path}
+                    d_energies[tab_index + 1] = {
+                        "dE": energies[tab_index] - energies[0],
+                        "file": file_path,
+                    }
 
                 else:
-                    self.append_text("%s does not seem to be Gaussian output" % file_path)
+                    self.append_text(
+                        "%s does not seem to be Gaussian output" % file_path
+                    )
             else:
                 self.append_text("No files selected for state %d" % (tab_index + 1))
 
@@ -94,9 +115,15 @@ class PrintPlotOpen:
         d_energies = self.get_relative_energies()
 
         for state in sorted(d_energies.keys()):
-            self.append_text("%sE(%d): %.4f kcal/mol (%s)" % (cf.unicode_symbols["Delta"], state,
-                                                              cf.hartree_to_kcal(d_energies[state]["dE"]),
-                                                              d_energies[state]["file"].split("/")[-1]))
+            self.append_text(
+                "%sE(%d): %.4f kcal/mol (%s)"
+                % (
+                    cf.unicode_symbols["Delta"],
+                    state,
+                    cf.hartree_to_kcal(d_energies[state]["dE"]),
+                    d_energies[state]["file"].split("/")[-1],
+                )
+            )
 
     def plot_energy_diagram(self):
         """
@@ -104,18 +131,18 @@ class PrintPlotOpen:
         """
         d_ene = self.get_relative_energies()
 
-        #Convert d_ene dict to list of energies in kcal/mol
+        # Convert d_ene dict to list of energies in kcal/mol
         d_ene = [cf.hartree_to_kcal(d_ene[x]["dE"]) for x in sorted(d_ene.keys())]
 
-        plot = PlotEnergyDiagram(d_ene, x_title="State", y_title="Relative energy", plot_legend=False)
-    
-
+        plot = PlotEnergyDiagram(
+            d_ene, x_title="State", y_title="Relative energy", plot_legend=False
+        )
 
     def open_settings(self):
-
         if self.settings_window:
-            self.append_text("\nSettings window is already running."
-                             "\nPerhaps the window is hidden?")
+            self.append_text(
+                "\nSettings window is already running.\nPerhaps the window is hidden?"
+            )
             self.settings_window.raise_()
         else:
             self.settings_window = GlobalSettings(self)
@@ -127,7 +154,9 @@ class PrintPlotOpen:
         :return:
         """
         if self.analyse_window:
-            self.append_text("\nAnalyse Calculation is already running. \nPerhaps the window is hidden?")
+            self.append_text(
+                "\nAnalyse Calculation is already running. \nPerhaps the window is hidden?"
+            )
             self.analyse_window.raise_()
             return
 
@@ -138,10 +167,9 @@ class PrintPlotOpen:
         self.analyse_window.show()
 
     def create_cluster(self):
-        """
-        """
-        #dialog = DialogMessage(self, "Create Cluster not yet available:(")
-        #dialog.exec_()
+        """ """
+        # dialog = DialogMessage(self, "Create Cluster not yet available:(")
+        # dialog.exec_()
         if self.cluster_window:
             self.cluster_window.raise_()
         else:
