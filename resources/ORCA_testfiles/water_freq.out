@@ -55,6 +55,14 @@ ITER       Energy         Delta-E        Max-DP      RMS-DP      [F,P]     Damp
 FINAL SINGLE POINT ENERGY       -76.425890123
 -------------------------   ----------------
 
+---------------------------------
+CARTESIAN COORDINATES (ANGSTROEM)
+---------------------------------
+  O      0.000000    0.000000    0.117790
+  H      0.000000    0.755453   -0.471161
+  H      0.000000   -0.755453   -0.471161
+
+
 -----------------------
 VIBRATIONAL FREQUENCIES
 -----------------------
@@ -136,6 +144,14 @@ Thermal rotational correction    ...      0.00141627 Eh       0.89 kcal/mol
 Thermal translational correction ...      0.00141627 Eh       0.89 kcal/mol
 -----------------------------------------------------------------------
 Total thermal energy                    -76.40159846 Eh
+
+
+Summary of corrections to the electronic energy:
+(perhaps to be used in another calculation)
+Total thermal correction                  0.02429166 Eh      15.24 kcal/mol
+Non-thermal (ZPE) correction              0.02134567 Eh      13.39 kcal/mol
+-----------------------------------------------------------------------
+Total correction                          0.02429166 Eh      15.24 kcal/mol
 
 
 Summary of corrections to the electronic energy:
