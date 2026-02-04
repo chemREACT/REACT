@@ -8,11 +8,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_SetupWindow(object):
     def setupUi(self, SetupWindow):
         SetupWindow.setObjectName("SetupWindow")
-        SetupWindow.resize(823, 795)
+        SetupWindow.resize(805, 806)
         font = QtGui.QFont()
         font.setPointSize(13)
         SetupWindow.setFont(font)
@@ -21,25 +20,23 @@ class Ui_SetupWindow(object):
         self.gridLayout_6 = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout_6.setObjectName("gridLayout_6")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.tabWidget.setStyleSheet(
-            "\n"
-            "QListWidget\n"
-            "{\n"
-            "border : 2px solid rgb(143, 23, 119);\n"
-            "}\n"
-            "\n"
-            "QPlainTextEdit\n"
-            "{\n"
-            "border : 2px solid rgb(143, 23, 119);\n"
-            "background-color: rgb(20,20,20);\n"
-            "}\n"
-            "\n"
-            "QLineEdit {\n"
-            "background-color: rgb(20,20,20);\n"
-            "}\n"
-            "\n"
-            ""
-        )
+        self.tabWidget.setStyleSheet("\n"
+"QListWidget\n"
+"{\n"
+"border : 2px solid rgb(143, 23, 119);\n"
+"}\n"
+"\n"
+"QPlainTextEdit\n"
+"{\n"
+"border : 2px solid rgb(143, 23, 119);\n"
+"background-color: rgb(20,20,20);\n"
+"}\n"
+"\n"
+"QLineEdit {\n"
+"background-color: rgb(20,20,20);\n"
+"}\n"
+"\n"
+"")
         self.tabWidget.setObjectName("tabWidget")
         self.tab_main = QtWidgets.QWidget()
         self.tab_main.setObjectName("tab_main")
@@ -50,7 +47,7 @@ class Ui_SetupWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 751, 648))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 733, 659))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -67,15 +64,11 @@ class Ui_SetupWindow(object):
         self.lineEdit_filename.setPlaceholderText("")
         self.lineEdit_filename.setObjectName("lineEdit_filename")
         self.horizontalLayout_9.addWidget(self.lineEdit_filename)
-        self.checkBox_cp_to_reactmain = QtWidgets.QCheckBox(
-            self.scrollAreaWidgetContents_2
-        )
+        self.checkBox_cp_to_reactmain = QtWidgets.QCheckBox(self.scrollAreaWidgetContents_2)
         self.checkBox_cp_to_reactmain.setChecked(True)
         self.checkBox_cp_to_reactmain.setObjectName("checkBox_cp_to_reactmain")
         self.horizontalLayout_9.addWidget(self.checkBox_cp_to_reactmain)
-        spacerItem = QtWidgets.QSpacerItem(
-            162, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem = QtWidgets.QSpacerItem(162, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_9.addItem(spacerItem)
         self.frame = QtWidgets.QFrame(self.scrollAreaWidgetContents_2)
         self.frame.setMaximumSize(QtCore.QSize(127, 96))
@@ -131,14 +124,12 @@ class Ui_SetupWindow(object):
         self.funct_label_1.setObjectName("funct_label_1")
         self.horizontalLayout_7.addWidget(self.funct_label_1)
         self.comboBox_funct = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        self.comboBox_funct.setMinimumSize(QtCore.QSize(100, 0))
+        self.comboBox_funct.setMinimumSize(QtCore.QSize(120, 0))
         self.comboBox_funct.setMaximumSize(QtCore.QSize(120, 16777215))
         self.comboBox_funct.setEditable(False)
         self.comboBox_funct.setObjectName("comboBox_funct")
         self.horizontalLayout_7.addWidget(self.comboBox_funct)
-        spacerItem1 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem1)
         self.verticalLayout_4.addLayout(self.horizontalLayout_7)
         self.horizontalLayout_8 = QtWidgets.QHBoxLayout()
@@ -149,84 +140,12 @@ class Ui_SetupWindow(object):
         self.basis_label_1.setObjectName("basis_label_1")
         self.horizontalLayout_8.addWidget(self.basis_label_1)
         self.comboBox_basis1 = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        self.comboBox_basis1.setMinimumSize(QtCore.QSize(100, 0))
+        self.comboBox_basis1.setMinimumSize(QtCore.QSize(120, 0))
         self.comboBox_basis1.setMaximumSize(QtCore.QSize(120, 16777215))
         self.comboBox_basis1.setEditable(False)
         self.comboBox_basis1.setObjectName("comboBox_basis1")
         self.horizontalLayout_8.addWidget(self.comboBox_basis1)
-        self.comboBox_basis2 = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        self.comboBox_basis2.setMinimumSize(QtCore.QSize(65, 0))
-        self.comboBox_basis2.setMaximumSize(QtCore.QSize(65, 16777215))
-        self.comboBox_basis2.setEditable(False)
-        self.comboBox_basis2.setObjectName("comboBox_basis2")
-        self.horizontalLayout_8.addWidget(self.comboBox_basis2)
-        self.label_5 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
-        self.label_5.setMinimumSize(QtCore.QSize(13, 26))
-        self.label_5.setMaximumSize(QtCore.QSize(13, 16))
-        font = QtGui.QFont()
-        font.setPointSize(18)
-        self.label_5.setFont(font)
-        self.label_5.setScaledContents(False)
-        self.label_5.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        )
-        self.label_5.setObjectName("label_5")
-        self.horizontalLayout_8.addWidget(self.label_5)
-        self.comboBox_basis3 = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.comboBox_basis3.sizePolicy().hasHeightForWidth()
-        )
-        self.comboBox_basis3.setSizePolicy(sizePolicy)
-        self.comboBox_basis3.setMinimumSize(QtCore.QSize(65, 0))
-        self.comboBox_basis3.setMaximumSize(QtCore.QSize(65, 16777215))
-        self.comboBox_basis3.setEditable(False)
-        self.comboBox_basis3.setObjectName("comboBox_basis3")
-        self.horizontalLayout_8.addWidget(self.comboBox_basis3)
-        self.label_7 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
-        self.label_7.setMinimumSize(QtCore.QSize(16, 26))
-        self.label_7.setMaximumSize(QtCore.QSize(16, 16))
-        font = QtGui.QFont()
-        font.setPointSize(18)
-        self.label_7.setFont(font)
-        self.label_7.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
-        )
-        self.label_7.setObjectName("label_7")
-        self.horizontalLayout_8.addWidget(self.label_7)
-        self.comboBox_basis4 = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-        )
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.comboBox_basis4.sizePolicy().hasHeightForWidth()
-        )
-        self.comboBox_basis4.setSizePolicy(sizePolicy)
-        self.comboBox_basis4.setMinimumSize(QtCore.QSize(65, 0))
-        self.comboBox_basis4.setMaximumSize(QtCore.QSize(65, 16777215))
-        self.comboBox_basis4.setEditable(False)
-        self.comboBox_basis4.setObjectName("comboBox_basis4")
-        self.horizontalLayout_8.addWidget(self.comboBox_basis4)
-        self.label_6 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
-        self.label_6.setMinimumSize(QtCore.QSize(12, 26))
-        self.label_6.setMaximumSize(QtCore.QSize(12, 16))
-        font = QtGui.QFont()
-        font.setPointSize(18)
-        self.label_6.setFont(font)
-        self.label_6.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        )
-        self.label_6.setObjectName("label_6")
-        self.horizontalLayout_8.addWidget(self.label_6)
-        spacerItem2 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem2)
         self.verticalLayout_4.addLayout(self.horizontalLayout_8)
         self.horizontalLayout_10 = QtWidgets.QHBoxLayout()
@@ -244,35 +163,24 @@ class Ui_SetupWindow(object):
         self.comboBox_job_type.setMaximumSize(QtCore.QSize(120, 16777215))
         self.comboBox_job_type.setObjectName("comboBox_job_type")
         self.horizontalLayout_10.addWidget(self.comboBox_job_type)
-        spacerItem3 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_10.addItem(spacerItem3)
         self.checkbox_freq = QtWidgets.QCheckBox(self.scrollAreaWidgetContents_2)
         self.checkbox_freq.setEnabled(True)
         self.checkbox_freq.setObjectName("checkbox_freq")
         self.horizontalLayout_10.addWidget(self.checkbox_freq)
-        self.checkBox_raman = QtWidgets.QCheckBox(self.scrollAreaWidgetContents_2)
-        self.checkBox_raman.setObjectName("checkBox_raman")
-        self.horizontalLayout_10.addWidget(self.checkBox_raman)
-        spacerItem4 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_10.addItem(spacerItem4)
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_10.addItem(spacerItem3)
         self.verticalLayout_4.addLayout(self.horizontalLayout_10)
-        self.gridLayout_9 = QtWidgets.QGridLayout()
-        self.gridLayout_9.setObjectName("gridLayout_9")
+        self.horizontalLayout_16 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_16.setObjectName("horizontalLayout_16")
         self.additional_job_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
         self.additional_job_2.setMinimumSize(QtCore.QSize(150, 15))
         self.additional_job_2.setMaximumSize(QtCore.QSize(100, 15))
         font = QtGui.QFont()
         font.setItalic(True)
         self.additional_job_2.setFont(font)
-        self.additional_job_2.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        )
+        self.additional_job_2.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.additional_job_2.setObjectName("additional_job_2")
-        self.gridLayout_9.addWidget(self.additional_job_2, 0, 0, 1, 1)
+        self.horizontalLayout_16.addWidget(self.additional_job_2)
         self.LineEdit_add_job_2 = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_2)
         self.LineEdit_add_job_2.setMinimumSize(QtCore.QSize(100, 21))
         self.LineEdit_add_job_2.setMaximumSize(QtCore.QSize(600, 21))
@@ -281,132 +189,58 @@ class Ui_SetupWindow(object):
         self.LineEdit_add_job_2.setFont(font)
         self.LineEdit_add_job_2.setText("")
         self.LineEdit_add_job_2.setObjectName("LineEdit_add_job_2")
-        self.gridLayout_9.addWidget(self.LineEdit_add_job_2, 1, 0, 1, 1)
+        self.horizontalLayout_16.addWidget(self.LineEdit_add_job_2)
+        self.Button_add_job_2 = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
+        self.Button_add_job_2.setMinimumSize(QtCore.QSize(130, 0))
+        self.Button_add_job_2.setMaximumSize(QtCore.QSize(130, 16777215))
+        self.Button_add_job_2.setObjectName("Button_add_job_2")
+        self.horizontalLayout_16.addWidget(self.Button_add_job_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_16)
+        self.horizontalLayout_17 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_17.setObjectName("horizontalLayout_17")
         self.List_add_job_2 = QtWidgets.QListWidget(self.scrollAreaWidgetContents_2)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.List_add_job_2.sizePolicy().hasHeightForWidth()
-        )
+        sizePolicy.setHeightForWidth(self.List_add_job_2.sizePolicy().hasHeightForWidth())
         self.List_add_job_2.setSizePolicy(sizePolicy)
         self.List_add_job_2.setMinimumSize(QtCore.QSize(0, 0))
         self.List_add_job_2.setMaximumSize(QtCore.QSize(600, 888888))
-        self.List_add_job_2.setStyleSheet(
-            "QListWidget{    \n"
-            " background-color: rgb(20,20,20);        \n"
-            "  border:None;\n"
-            "  margin-top:0px;    \n"
-            "  margin-left:0px;\n"
-            "  margin-right:0px;    \n"
-            " }"
-        )
+        self.List_add_job_2.setStyleSheet("QListWidget{    \n"
+" background-color: rgb(20,20,20);        \n"
+"  border:None;\n"
+"  margin-top:0px;    \n"
+"  margin-left:0px;\n"
+"  margin-right:0px;    \n"
+" }")
         self.List_add_job_2.setObjectName("List_add_job_2")
-        self.gridLayout_9.addWidget(self.List_add_job_2, 2, 0, 1, 1)
-        self.verticalLayout_10 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_10.setObjectName("verticalLayout_10")
-        self.Button_add_job_2 = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
-        self.Button_add_job_2.setMinimumSize(QtCore.QSize(24, 24))
-        self.Button_add_job_2.setMaximumSize(QtCore.QSize(24, 24))
-        self.Button_add_job_2.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
-        self.Button_add_job_2.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(
-            QtGui.QPixmap(":/24x24/resources/icons/arrow-plus.png"),
-            QtGui.QIcon.Normal,
-            QtGui.QIcon.Off,
-        )
-        self.Button_add_job_2.setIcon(icon)
-        self.Button_add_job_2.setIconSize(QtCore.QSize(24, 24))
-        self.Button_add_job_2.setFlat(True)
-        self.Button_add_job_2.setObjectName("Button_add_job_2")
-        self.verticalLayout_10.addWidget(self.Button_add_job_2)
+        self.horizontalLayout_17.addWidget(self.List_add_job_2)
         self.Button_del_job_2 = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
-        self.Button_del_job_2.setMinimumSize(QtCore.QSize(24, 24))
-        self.Button_del_job_2.setMaximumSize(QtCore.QSize(24, 24))
-        self.Button_del_job_2.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
-        self.Button_del_job_2.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(
-            QtGui.QPixmap(":/24x24/resources/icons/arrow-minus.png"),
-            QtGui.QIcon.Normal,
-            QtGui.QIcon.Off,
-        )
-        self.Button_del_job_2.setIcon(icon1)
-        self.Button_del_job_2.setIconSize(QtCore.QSize(24, 24))
-        self.Button_del_job_2.setFlat(True)
+        self.Button_del_job_2.setMinimumSize(QtCore.QSize(130, 0))
+        self.Button_del_job_2.setMaximumSize(QtCore.QSize(130, 16777215))
         self.Button_del_job_2.setObjectName("Button_del_job_2")
-        self.verticalLayout_10.addWidget(self.Button_del_job_2)
-        self.gridLayout_9.addLayout(self.verticalLayout_10, 2, 1, 1, 1)
-        self.verticalLayout_4.addLayout(self.gridLayout_9)
+        self.horizontalLayout_17.addWidget(self.Button_del_job_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_17)
         self.line_2 = QtWidgets.QFrame(self.scrollAreaWidgetContents_2)
         self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_2.setObjectName("line_2")
         self.verticalLayout_4.addWidget(self.line_2)
-        self.gridLayout_7 = QtWidgets.QGridLayout()
-        self.gridLayout_7.setObjectName("gridLayout_7")
+        self.horizontalLayout_18 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_18.setObjectName("horizontalLayout_18")
         self.additional_job = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
         self.additional_job.setMinimumSize(QtCore.QSize(50, 0))
         self.additional_job.setMaximumSize(QtCore.QSize(100, 50))
         font = QtGui.QFont()
         font.setItalic(True)
         self.additional_job.setFont(font)
-        self.additional_job.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        )
+        self.additional_job.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.additional_job.setObjectName("additional_job")
-        self.gridLayout_7.addWidget(self.additional_job, 0, 0, 1, 1)
+        self.horizontalLayout_18.addWidget(self.additional_job)
+        self.comboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
+        self.comboBox.setMaximumSize(QtCore.QSize(120, 16777215))
+        self.comboBox.setObjectName("comboBox")
+        self.horizontalLayout_18.addWidget(self.comboBox)
         self.LineEdit_add_job = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_2)
         self.LineEdit_add_job.setMinimumSize(QtCore.QSize(100, 21))
         self.LineEdit_add_job.setMaximumSize(QtCore.QSize(500, 21))
@@ -415,115 +249,38 @@ class Ui_SetupWindow(object):
         self.LineEdit_add_job.setFont(font)
         self.LineEdit_add_job.setText("")
         self.LineEdit_add_job.setObjectName("LineEdit_add_job")
-        self.gridLayout_7.addWidget(self.LineEdit_add_job, 1, 1, 1, 1)
-        self.comboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents_2)
-        self.comboBox.setMaximumSize(QtCore.QSize(120, 16777215))
-        self.comboBox.setObjectName("comboBox")
-        self.gridLayout_7.addWidget(self.comboBox, 0, 1, 1, 1)
+        self.horizontalLayout_18.addWidget(self.LineEdit_add_job)
+        self.Button_add_job = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
+        self.Button_add_job.setMinimumSize(QtCore.QSize(130, 0))
+        self.Button_add_job.setMaximumSize(QtCore.QSize(130, 16777215))
+        self.Button_add_job.setObjectName("Button_add_job")
+        self.horizontalLayout_18.addWidget(self.Button_add_job)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_18)
+        self.horizontalLayout_19 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_19.setObjectName("horizontalLayout_19")
         self.List_add_job = QtWidgets.QListWidget(self.scrollAreaWidgetContents_2)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.List_add_job.sizePolicy().hasHeightForWidth())
         self.List_add_job.setSizePolicy(sizePolicy)
         self.List_add_job.setMinimumSize(QtCore.QSize(0, 0))
         self.List_add_job.setMaximumSize(QtCore.QSize(600, 16777215))
-        self.List_add_job.setStyleSheet(
-            "QListWidget{    \n"
-            " background-color: rgb(20,20,20);        \n"
-            "  border:None;\n"
-            "  margin-top:0px;    \n"
-            "  margin-left:0px;\n"
-            "  margin-right:0px;    \n"
-            " }"
-        )
+        self.List_add_job.setStyleSheet("QListWidget{    \n"
+" background-color: rgb(20,20,20);        \n"
+"  border:None;\n"
+"  margin-top:0px;    \n"
+"  margin-left:0px;\n"
+"  margin-right:0px;    \n"
+" }")
         self.List_add_job.setObjectName("List_add_job")
-        self.gridLayout_7.addWidget(self.List_add_job, 2, 0, 1, 2)
-        self.additional_job_3 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
-        self.additional_job_3.setMinimumSize(QtCore.QSize(50, 0))
-        self.additional_job_3.setMaximumSize(QtCore.QSize(100, 50))
-        font = QtGui.QFont()
-        font.setItalic(True)
-        self.additional_job_3.setFont(font)
-        self.additional_job_3.setAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
-        )
-        self.additional_job_3.setObjectName("additional_job_3")
-        self.gridLayout_7.addWidget(self.additional_job_3, 1, 0, 1, 1)
-        self.verticalLayout_9 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_9.setObjectName("verticalLayout_9")
-        self.Button_add_job = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
-        self.Button_add_job.setMinimumSize(QtCore.QSize(24, 24))
-        self.Button_add_job.setMaximumSize(QtCore.QSize(24, 24))
-        self.Button_add_job.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
-        self.Button_add_job.setText("")
-        self.Button_add_job.setIcon(icon)
-        self.Button_add_job.setIconSize(QtCore.QSize(24, 24))
-        self.Button_add_job.setFlat(True)
-        self.Button_add_job.setObjectName("Button_add_job")
-        self.verticalLayout_9.addWidget(self.Button_add_job)
+        self.horizontalLayout_19.addWidget(self.List_add_job)
         self.Button_del_job = QtWidgets.QPushButton(self.scrollAreaWidgetContents_2)
-        self.Button_del_job.setMinimumSize(QtCore.QSize(24, 24))
-        self.Button_del_job.setMaximumSize(QtCore.QSize(24, 24))
-        self.Button_del_job.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
-        self.Button_del_job.setText("")
-        self.Button_del_job.setIcon(icon1)
-        self.Button_del_job.setIconSize(QtCore.QSize(24, 24))
-        self.Button_del_job.setFlat(True)
+        self.Button_del_job.setMinimumSize(QtCore.QSize(130, 0))
+        self.Button_del_job.setMaximumSize(QtCore.QSize(130, 16777215))
         self.Button_del_job.setObjectName("Button_del_job")
-        self.verticalLayout_9.addWidget(self.Button_del_job)
-        self.gridLayout_7.addLayout(self.verticalLayout_9, 2, 2, 1, 1)
-        self.verticalLayout_4.addLayout(self.gridLayout_7)
+        self.horizontalLayout_19.addWidget(self.Button_del_job)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_19)
         self.line_3 = QtWidgets.QFrame(self.scrollAreaWidgetContents_2)
         self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -540,10 +297,8 @@ class Ui_SetupWindow(object):
         self.checkbox_SCRF.setFont(font)
         self.checkbox_SCRF.setObjectName("checkbox_SCRF")
         self.horizontalLayout_13.addWidget(self.checkbox_SCRF)
-        spacerItem5 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_13.addItem(spacerItem5)
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_13.addItem(spacerItem4)
         self.label_15 = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
         font = QtGui.QFont()
         font.setPointSize(13)
@@ -574,7 +329,7 @@ class Ui_SetupWindow(object):
         self.horizontalLayout_13.addWidget(self.lineEdit_eps)
         self.verticalLayout_4.addLayout(self.horizontalLayout_13)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
-        self.gridLayout_14.addWidget(self.scrollArea, 0, 1, 1, 1)
+        self.gridLayout_14.addWidget(self.scrollArea, 0, 0, 1, 1)
         self.tabWidget.addTab(self.tab_main, "")
         self.tab_movepair = QtWidgets.QWidget()
         self.tab_movepair.setObjectName("tab_movepair")
@@ -636,10 +391,8 @@ class Ui_SetupWindow(object):
         self.gridLayout_21.addLayout(self.verticalLayout_3, 1, 0, 1, 1)
         self.horizontalLayout_14 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_14.setObjectName("horizontalLayout_14")
-        spacerItem6 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_14.addItem(spacerItem6)
+        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_14.addItem(spacerItem5)
         self.gridLayout_21.addLayout(self.horizontalLayout_14, 0, 0, 1, 1)
         self.checkBox_moveboth_mv = QtWidgets.QCheckBox(self.tab_movepair)
         self.checkBox_moveboth_mv.setEnabled(True)
@@ -660,10 +413,8 @@ class Ui_SetupWindow(object):
         self.Button_save_new_geometry.setMinimumSize(QtCore.QSize(400, 50))
         self.Button_save_new_geometry.setObjectName("Button_save_new_geometry")
         self.verticalLayout_5.addWidget(self.Button_save_new_geometry)
-        spacerItem7 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
-        self.verticalLayout_5.addItem(spacerItem7)
+        spacerItem6 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_5.addItem(spacerItem6)
         self.verticalLayout_6.addLayout(self.verticalLayout_5)
         self.gridLayout_15.addLayout(self.verticalLayout_6, 0, 1, 2, 1)
         self.list_model_mv = QtWidgets.QListWidget(self.tab_movepair)
@@ -672,7 +423,9 @@ class Ui_SetupWindow(object):
         font.setFamily("Courier")
         font.setPointSize(11)
         self.list_model_mv.setFont(font)
-        self.list_model_mv.setStyleSheet("border 2px solid rgb(143, 23, 119);\n\n")
+        self.list_model_mv.setStyleSheet("border 2px solid rgb(143, 23, 119);\n"
+"\n"
+"")
         self.list_model_mv.setObjectName("list_model_mv")
         self.gridLayout_15.addWidget(self.list_model_mv, 1, 0, 1, 1)
         self.tabWidget.addTab(self.tab_movepair, "")
@@ -692,10 +445,8 @@ class Ui_SetupWindow(object):
         self.button_auto_freeze = QtWidgets.QPushButton(self.tab_freeze)
         self.button_auto_freeze.setObjectName("button_auto_freeze")
         self.horizontalLayout_5.addWidget(self.button_auto_freeze)
-        spacerItem8 = QtWidgets.QSpacerItem(
-            349, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_5.addItem(spacerItem8)
+        spacerItem7 = QtWidgets.QSpacerItem(349, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem7)
         self.gridLayout_8.addLayout(self.horizontalLayout_5, 0, 0, 1, 2)
         self.gridLayout_4 = QtWidgets.QGridLayout()
         self.gridLayout_4.setObjectName("gridLayout_4")
@@ -705,7 +456,9 @@ class Ui_SetupWindow(object):
         font.setFamily("Courier")
         font.setPointSize(11)
         self.list_model.setFont(font)
-        self.list_model.setStyleSheet("border 2px solid rgb(143, 23, 119);\n\n")
+        self.list_model.setStyleSheet("border 2px solid rgb(143, 23, 119);\n"
+"\n"
+"")
         self.list_model.setObjectName("list_model")
         self.gridLayout_4.addWidget(self.list_model, 1, 0, 1, 1)
         self.label = QtWidgets.QLabel(self.tab_freeze)
@@ -727,14 +480,10 @@ class Ui_SetupWindow(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.gridLayout_5.addWidget(self.label_2, 0, 1, 1, 1)
-        spacerItem9 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.gridLayout_5.addItem(spacerItem9, 0, 0, 1, 1)
-        spacerItem10 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.gridLayout_5.addItem(spacerItem10, 0, 2, 1, 1)
+        spacerItem8 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_5.addItem(spacerItem8, 0, 0, 1, 1)
+        spacerItem9 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_5.addItem(spacerItem9, 0, 2, 1, 1)
         self.verticalLayout_7.addLayout(self.gridLayout_5)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
@@ -751,32 +500,32 @@ class Ui_SetupWindow(object):
         self.button_add_freeze = QtWidgets.QPushButton(self.tab_freeze)
         self.button_add_freeze.setMinimumSize(QtCore.QSize(24, 24))
         self.button_add_freeze.setMaximumSize(QtCore.QSize(24, 24))
-        self.button_add_freeze.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
+        self.button_add_freeze.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(143, 23, 119);\n"
+"      color: white;\n"
+"\n"
+"}\n"
+"\n"
+"QPushButton:hover\n"
+"{\n"
+"       background-color:rgb(143, 23, 119);\n"
+"\n"
+"    border-style: outset;\n"
+"    border-width: 0px;\n"
+"    border-radius:10px;\n"
+"\n"
+"    \n"
+"    /*border-color: rgb(12, 103, 213);*/\n"
+"}\n"
+"QPushButton:pressed\n"
+"{\n"
+"       /*background-color:rgb(17, 145, 255);\n"
+"    color: black*/\n"
+"    background-color: rgb(42, 42, 42);\n"
+"}")
         self.button_add_freeze.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/24x24/resources/icons/arrow-plus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_add_freeze.setIcon(icon)
         self.button_add_freeze.setIconSize(QtCore.QSize(24, 24))
         self.button_add_freeze.setFlat(True)
@@ -785,57 +534,49 @@ class Ui_SetupWindow(object):
         self.button_delete_freeze = QtWidgets.QPushButton(self.tab_freeze)
         self.button_delete_freeze.setMinimumSize(QtCore.QSize(24, 24))
         self.button_delete_freeze.setMaximumSize(QtCore.QSize(24, 24))
-        self.button_delete_freeze.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
+        self.button_delete_freeze.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(143, 23, 119);\n"
+"      color: white;\n"
+"\n"
+"}\n"
+"\n"
+"QPushButton:hover\n"
+"{\n"
+"       background-color:rgb(143, 23, 119);\n"
+"\n"
+"    border-style: outset;\n"
+"    border-width: 0px;\n"
+"    border-radius:10px;\n"
+"\n"
+"    \n"
+"    /*border-color: rgb(12, 103, 213);*/\n"
+"}\n"
+"QPushButton:pressed\n"
+"{\n"
+"       /*background-color:rgb(17, 145, 255);\n"
+"    color: black*/\n"
+"    background-color: rgb(42, 42, 42);\n"
+"}")
         self.button_delete_freeze.setText("")
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/24x24/resources/icons/arrow-minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.button_delete_freeze.setIcon(icon1)
         self.button_delete_freeze.setIconSize(QtCore.QSize(24, 24))
         self.button_delete_freeze.setFlat(True)
         self.button_delete_freeze.setObjectName("button_delete_freeze")
         self.gridLayout_2.addWidget(self.button_delete_freeze, 2, 0, 1, 1)
-        spacerItem11 = QtWidgets.QSpacerItem(
-            21, 13, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
-        self.gridLayout_2.addItem(spacerItem11, 3, 0, 1, 1)
-        spacerItem12 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
-        self.gridLayout_2.addItem(spacerItem12, 0, 0, 1, 1)
+        spacerItem10 = QtWidgets.QSpacerItem(21, 13, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.gridLayout_2.addItem(spacerItem10, 3, 0, 1, 1)
+        spacerItem11 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.gridLayout_2.addItem(spacerItem11, 0, 0, 1, 1)
         self.verticalLayout_7.addLayout(self.gridLayout_2)
         self.gridLayout_8.addLayout(self.verticalLayout_7, 1, 1, 1, 1)
-        spacerItem13 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
-        )
-        self.gridLayout_8.addItem(spacerItem13, 2, 1, 1, 1)
+        spacerItem12 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.gridLayout_8.addItem(spacerItem12, 2, 1, 1, 1)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        spacerItem14 = QtWidgets.QSpacerItem(
-            242, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_4.addItem(spacerItem14)
+        spacerItem13 = QtWidgets.QSpacerItem(242, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem13)
         self.label_27 = QtWidgets.QLabel(self.tab_freeze)
         font = QtGui.QFont()
         font.setBold(True)
@@ -843,10 +584,8 @@ class Ui_SetupWindow(object):
         self.label_27.setFont(font)
         self.label_27.setObjectName("label_27")
         self.horizontalLayout_4.addWidget(self.label_27)
-        spacerItem15 = QtWidgets.QSpacerItem(
-            267, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_4.addItem(spacerItem15)
+        spacerItem14 = QtWidgets.QSpacerItem(267, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem14)
         self.gridLayout_8.addLayout(self.horizontalLayout_4, 3, 1, 1, 1)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
@@ -855,31 +594,29 @@ class Ui_SetupWindow(object):
         self.button_add_scan = QtWidgets.QPushButton(self.tab_freeze)
         self.button_add_scan.setMinimumSize(QtCore.QSize(24, 24))
         self.button_add_scan.setMaximumSize(QtCore.QSize(24, 24))
-        self.button_add_scan.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
+        self.button_add_scan.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(143, 23, 119);\n"
+"      color: white;\n"
+"\n"
+"}\n"
+"\n"
+"QPushButton:hover\n"
+"{\n"
+"       background-color:rgb(143, 23, 119);\n"
+"\n"
+"    border-style: outset;\n"
+"    border-width: 0px;\n"
+"    border-radius:10px;\n"
+"\n"
+"    \n"
+"    /*border-color: rgb(12, 103, 213);*/\n"
+"}\n"
+"QPushButton:pressed\n"
+"{\n"
+"       /*background-color:rgb(17, 145, 255);\n"
+"    color: black*/\n"
+"    background-color: rgb(42, 42, 42);\n"
+"}")
         self.button_add_scan.setText("")
         self.button_add_scan.setIcon(icon)
         self.button_add_scan.setIconSize(QtCore.QSize(24, 24))
@@ -889,31 +626,29 @@ class Ui_SetupWindow(object):
         self.button_delete_scan = QtWidgets.QPushButton(self.tab_freeze)
         self.button_delete_scan.setMinimumSize(QtCore.QSize(24, 24))
         self.button_delete_scan.setMaximumSize(QtCore.QSize(24, 24))
-        self.button_delete_scan.setStyleSheet(
-            "QPushButton {\n"
-            "    background-color: rgb(143, 23, 119);\n"
-            "      color: white;\n"
-            "\n"
-            "}\n"
-            "\n"
-            "QPushButton:hover\n"
-            "{\n"
-            "       background-color:rgb(143, 23, 119);\n"
-            "\n"
-            "    border-style: outset;\n"
-            "    border-width: 0px;\n"
-            "    border-radius:10px;\n"
-            "\n"
-            "    \n"
-            "    /*border-color: rgb(12, 103, 213);*/\n"
-            "}\n"
-            "QPushButton:pressed\n"
-            "{\n"
-            "       /*background-color:rgb(17, 145, 255);\n"
-            "    color: black*/\n"
-            "    background-color: rgb(42, 42, 42);\n"
-            "}"
-        )
+        self.button_delete_scan.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(143, 23, 119);\n"
+"      color: white;\n"
+"\n"
+"}\n"
+"\n"
+"QPushButton:hover\n"
+"{\n"
+"       background-color:rgb(143, 23, 119);\n"
+"\n"
+"    border-style: outset;\n"
+"    border-width: 0px;\n"
+"    border-radius:10px;\n"
+"\n"
+"    \n"
+"    /*border-color: rgb(12, 103, 213);*/\n"
+"}\n"
+"QPushButton:pressed\n"
+"{\n"
+"       /*background-color:rgb(17, 145, 255);\n"
+"    color: black*/\n"
+"    background-color: rgb(42, 42, 42);\n"
+"}")
         self.button_delete_scan.setText("")
         self.button_delete_scan.setIcon(icon1)
         self.button_delete_scan.setIconSize(QtCore.QSize(24, 24))
@@ -994,10 +729,8 @@ class Ui_SetupWindow(object):
         self.verticalLayout_11.addLayout(self.gridLayout_3)
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
-        spacerItem16 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_15.addItem(spacerItem16)
+        spacerItem15 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_15.addItem(spacerItem15)
         self.radioButton_plus = QtWidgets.QRadioButton(self.tab_freeze)
         self.radioButton_plus.setFocusPolicy(QtCore.Qt.NoFocus)
         self.radioButton_plus.setObjectName("radioButton_plus")
@@ -1011,10 +744,8 @@ class Ui_SetupWindow(object):
         self.radioButton_both.setChecked(True)
         self.radioButton_both.setObjectName("radioButton_both")
         self.horizontalLayout_15.addWidget(self.radioButton_both)
-        spacerItem17 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_15.addItem(spacerItem17)
+        spacerItem16 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_15.addItem(spacerItem16)
         self.verticalLayout_11.addLayout(self.horizontalLayout_15)
         self.checkBox_switchXB = QtWidgets.QCheckBox(self.tab_freeze)
         self.checkBox_switchXB.setEnabled(True)
@@ -1032,22 +763,16 @@ class Ui_SetupWindow(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout_12 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_12.setObjectName("horizontalLayout_12")
-        spacerItem18 = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
-        )
-        self.horizontalLayout_12.addItem(spacerItem18)
+        spacerItem17 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_12.addItem(spacerItem17)
         self.label_file_number = QtWidgets.QLabel(self.tab_view)
         self.label_file_number.setObjectName("label_file_number")
         self.horizontalLayout_12.addWidget(self.label_file_number)
         self.ComboBox_files = QtWidgets.QComboBox(self.tab_view)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed
-        )
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.ComboBox_files.sizePolicy().hasHeightForWidth()
-        )
+        sizePolicy.setHeightForWidth(self.ComboBox_files.sizePolicy().hasHeightForWidth())
         self.ComboBox_files.setSizePolicy(sizePolicy)
         self.ComboBox_files.setObjectName("ComboBox_files")
         self.horizontalLayout_12.addWidget(self.ComboBox_files)
@@ -1092,9 +817,7 @@ class Ui_SetupWindow(object):
         _translate = QtCore.QCoreApplication.translate
         SetupWindow.setWindowTitle(_translate("SetupWindow", "MainWindow"))
         self.label_4.setText(_translate("SetupWindow", "Filename:"))
-        self.checkBox_cp_to_reactmain.setText(
-            _translate("SetupWindow", "Add to project table")
-        )
+        self.checkBox_cp_to_reactmain.setText(_translate("SetupWindow", "Add to project table"))
         self.label_33.setText(_translate("SetupWindow", "Charge:"))
         self.lineEdit_charge.setText(_translate("SetupWindow", "0"))
         self.label_34.setText(_translate("SetupWindow", "Multiplicity:"))
@@ -1102,40 +825,29 @@ class Ui_SetupWindow(object):
         self.label_32.setText(_translate("SetupWindow", "Molecule"))
         self.funct_label_1.setText(_translate("SetupWindow", "Functional:"))
         self.basis_label_1.setText(_translate("SetupWindow", "Basis set:"))
-        self.label_5.setText(_translate("SetupWindow", "("))
-        self.label_7.setText(_translate("SetupWindow", " ,"))
-        self.label_6.setText(_translate("SetupWindow", " )"))
         self.label_3.setText(_translate("SetupWindow", "Job type:"))
         self.checkbox_freq.setText(_translate("SetupWindow", "Freq   "))
-        self.checkBox_raman.setText(_translate("SetupWindow", "Raman"))
-        self.additional_job_2.setText(
-            _translate("SetupWindow", "Additional job keywords:")
-        )
+        self.additional_job_2.setText(_translate("SetupWindow", "Additional job keywords:"))
+        self.Button_add_job_2.setText(_translate("SetupWindow", "Add"))
+        self.Button_del_job_2.setText(_translate("SetupWindow", "Remove selected"))
         self.additional_job.setText(_translate("SetupWindow", "% Block:"))
-        self.additional_job_3.setText(_translate("SetupWindow", "Content:"))
+        self.LineEdit_add_job.setPlaceholderText(_translate("SetupWindow", "Write block content here ..."))
+        self.Button_add_job.setText(_translate("SetupWindow", "Add"))
+        self.Button_del_job.setText(_translate("SetupWindow", "Remove selected"))
         self.checkbox_SCRF.setText(_translate("SetupWindow", "Continuum solvation"))
         self.label_15.setText(_translate("SetupWindow", "Method:"))
         self.label_16.setText(_translate("SetupWindow", "Solvent:"))
         self.checkbox_eps.setText(_translate("SetupWindow", "Eps:"))
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_main), _translate("SetupWindow", "Main")
-        )
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_main), _translate("SetupWindow", "Main"))
         self.label_21.setText(_translate("SetupWindow", "Atoms in model"))
         self.label_24.setText(_translate("SetupWindow", "Move atom pair"))
         self.radioButton_plus_mv.setText(_translate("SetupWindow", "+"))
         self.radioButton_minus_mv.setText(_translate("SetupWindow", "-"))
         self.label_9.setText(_translate("SetupWindow", "Current distance:"))
         self.checkBox_moveboth_mv.setText(_translate("SetupWindow", "Move both"))
-        self.pushButton_create_mv.setText(
-            _translate("SetupWindow", "Create new geometry")
-        )
-        self.Button_save_new_geometry.setText(
-            _translate("SetupWindow", "Save new geometry as xyz file")
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_movepair),
-            _translate("SetupWindow", "Move atom pair"),
-        )
+        self.pushButton_create_mv.setText(_translate("SetupWindow", "Create new geometry"))
+        self.Button_save_new_geometry.setText(_translate("SetupWindow", "Save new geometry as xyz file"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_movepair), _translate("SetupWindow", "Move atom pair"))
         self.comboBox_freezetype.setItemText(0, _translate("SetupWindow", "Atom"))
         self.comboBox_freezetype.setItemText(1, _translate("SetupWindow", "Bond"))
         self.comboBox_freezetype.setItemText(2, _translate("SetupWindow", "Angle"))
@@ -1153,22 +865,12 @@ class Ui_SetupWindow(object):
         self.radioButton_plus.setText(_translate("SetupWindow", "+"))
         self.radioButton_minus.setText(_translate("SetupWindow", "-"))
         self.radioButton_both.setText(_translate("SetupWindow", "+/-"))
-        self.checkBox_switchXB.setText(
-            _translate("SetupWindow", "Constrain atoms instead of bond")
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_freeze),
-            _translate("SetupWindow", "Constraints"),
-        )
+        self.checkBox_switchXB.setText(_translate("SetupWindow", "Constrain atoms instead of bond"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_freeze), _translate("SetupWindow", "Constraints"))
         self.label_file_number.setText(_translate("SetupWindow", "File:"))
-        self.text_preview.setPlainText(
-            _translate("SetupWindow", "< insert preview of gaussian input file here >")
-        )
-        self.tabWidget.setTabText(
-            self.tabWidget.indexOf(self.tab_view), _translate("SetupWindow", "Preview")
-        )
+        self.text_preview.setPlainText(_translate("SetupWindow", "< insert preview of gaussian input file here >"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_view), _translate("SetupWindow", "Preview"))
         self.button_close.setText(_translate("SetupWindow", "Close"))
         self.button_write.setText(_translate("SetupWindow", "Write"))
 
-
-# import icons_rc
+import icons_rc

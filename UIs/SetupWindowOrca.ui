@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>823</width>
-    <height>795</height>
+    <width>805</width>
+    <height>806</height>
    </rect>
   </property>
   <property name="font">
@@ -49,7 +49,7 @@ background-color: rgb(20,20,20);
         <string>Main</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_14">
-        <item row="0" column="1">
+        <item row="0" column="0">
          <widget class="QScrollArea" name="scrollArea">
           <property name="styleSheet">
            <string notr="true"/>
@@ -62,8 +62,8 @@ background-color: rgb(20,20,20);
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>751</width>
-             <height>648</height>
+             <width>733</width>
+             <height>659</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -264,7 +264,7 @@ background-color: rgb(20,20,20);
                <widget class="QComboBox" name="comboBox_funct">
                 <property name="minimumSize">
                  <size>
-                  <width>100</width>
+                  <width>120</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -319,7 +319,7 @@ background-color: rgb(20,20,20);
                <widget class="QComboBox" name="comboBox_basis1">
                 <property name="minimumSize">
                  <size>
-                  <width>100</width>
+                  <width>120</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -331,159 +331,6 @@ background-color: rgb(20,20,20);
                 </property>
                 <property name="editable">
                  <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="comboBox_basis2">
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>65</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="editable">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_5">
-                <property name="minimumSize">
-                 <size>
-                  <width>13</width>
-                  <height>26</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>13</width>
-                  <height>16</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>18</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>(</string>
-                </property>
-                <property name="scaledContents">
-                 <bool>false</bool>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="comboBox_basis3">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>65</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="editable">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_7">
-                <property name="minimumSize">
-                 <size>
-                  <width>16</width>
-                  <height>26</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16</width>
-                  <height>16</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>18</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string> ,</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="comboBox_basis4">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>65</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>65</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="editable">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_6">
-                <property name="minimumSize">
-                 <size>
-                  <width>12</width>
-                  <height>26</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>12</width>
-                  <height>16</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>18</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string> )</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                 </property>
                </widget>
               </item>
@@ -545,32 +392,12 @@ background-color: rgb(20,20,20);
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_10">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
                <widget class="QCheckBox" name="checkbox_freq">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>Freq   </string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_raman">
-                <property name="text">
-                 <string>Raman</string>
                 </property>
                </widget>
               </item>
@@ -590,8 +417,8 @@ background-color: rgb(20,20,20);
              </layout>
             </item>
             <item>
-             <layout class="QGridLayout" name="gridLayout_9">
-              <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <item>
                <widget class="QLabel" name="additional_job_2">
                 <property name="minimumSize">
                  <size>
@@ -618,7 +445,7 @@ background-color: rgb(20,20,20);
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
+              <item>
                <widget class="QLineEdit" name="LineEdit_add_job_2">
                 <property name="minimumSize">
                  <size>
@@ -642,7 +469,30 @@ background-color: rgb(20,20,20);
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item>
+               <widget class="QPushButton" name="Button_add_job_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Add</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
+              <item>
                <widget class="QListWidget" name="List_add_job_2">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -673,123 +523,24 @@ background-color: rgb(20,20,20);
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <item>
-                 <widget class="QPushButton" name="Button_add_job_2">
-                  <property name="minimumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
-	background-color: rgb(143, 23, 119);
-  	color: white;
-
-}
-
-QPushButton:hover
-{
-   	background-color:rgb(143, 23, 119);
-
-	border-style: outset;
-	border-width: 0px;
-	border-radius:10px;
-
-	
-	/*border-color: rgb(12, 103, 213);*/
-}
-QPushButton:pressed
-{
-   	/*background-color:rgb(17, 145, 255);
-	color: black*/
-	background-color: rgb(42, 42, 42);
-}</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>:/24x24/resources/icons/arrow-plus.png</normaloff>:/24x24/resources/icons/arrow-plus.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="Button_del_job_2">
-                  <property name="minimumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
-	background-color: rgb(143, 23, 119);
-  	color: white;
-
-}
-
-QPushButton:hover
-{
-   	background-color:rgb(143, 23, 119);
-
-	border-style: outset;
-	border-width: 0px;
-	border-radius:10px;
-
-	
-	/*border-color: rgb(12, 103, 213);*/
-}
-QPushButton:pressed
-{
-   	/*background-color:rgb(17, 145, 255);
-	color: black*/
-	background-color: rgb(42, 42, 42);
-}</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>:/24x24/resources/icons/arrow-minus.png</normaloff>:/24x24/resources/icons/arrow-minus.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              <item>
+               <widget class="QPushButton" name="Button_del_job_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Remove selected</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -801,8 +552,8 @@ QPushButton:pressed
              </widget>
             </item>
             <item>
-             <layout class="QGridLayout" name="gridLayout_7">
-              <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <item>
                <widget class="QLabel" name="additional_job">
                 <property name="minimumSize">
                  <size>
@@ -829,7 +580,17 @@ QPushButton:pressed
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item>
+               <widget class="QComboBox" name="comboBox">
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QLineEdit" name="LineEdit_add_job">
                 <property name="minimumSize">
                  <size>
@@ -851,19 +612,35 @@ QPushButton:pressed
                 <property name="text">
                  <string/>
                 </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox">
-                <property name="maximumSize">
-                 <size>
-                  <width>120</width>
-                  <height>16777215</height>
-                 </size>
+                <property name="placeholderText">
+                 <string>Write block content here ...</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="0" colspan="2">
+              <item>
+               <widget class="QPushButton" name="Button_add_job">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Add</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_19">
+              <item>
                <widget class="QListWidget" name="List_add_job">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -894,150 +671,24 @@ QPushButton:pressed
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="additional_job_3">
+              <item>
+               <widget class="QPushButton" name="Button_del_job">
                 <property name="minimumSize">
                  <size>
-                  <width>50</width>
+                  <width>130</width>
                   <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>50</height>
+                  <width>130</width>
+                  <height>16777215</height>
                  </size>
                 </property>
-                <property name="font">
-                 <font>
-                  <italic>true</italic>
-                 </font>
-                </property>
                 <property name="text">
-                 <string>Content:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                 <string>Remove selected</string>
                 </property>
                </widget>
-              </item>
-              <item row="2" column="2">
-               <layout class="QVBoxLayout" name="verticalLayout_9">
-                <item>
-                 <widget class="QPushButton" name="Button_add_job">
-                  <property name="minimumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
-	background-color: rgb(143, 23, 119);
-  	color: white;
-
-}
-
-QPushButton:hover
-{
-   	background-color:rgb(143, 23, 119);
-
-	border-style: outset;
-	border-width: 0px;
-	border-radius:10px;
-
-	
-	/*border-color: rgb(12, 103, 213);*/
-}
-QPushButton:pressed
-{
-   	/*background-color:rgb(17, 145, 255);
-	color: black*/
-	background-color: rgb(42, 42, 42);
-}</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>:/24x24/resources/icons/arrow-plus.png</normaloff>:/24x24/resources/icons/arrow-plus.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="Button_del_job">
-                  <property name="minimumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QPushButton {
-	background-color: rgb(143, 23, 119);
-  	color: white;
-
-}
-
-QPushButton:hover
-{
-   	background-color:rgb(143, 23, 119);
-
-	border-style: outset;
-	border-width: 0px;
-	border-radius:10px;
-
-	
-	/*border-color: rgb(12, 103, 213);*/
-}
-QPushButton:pressed
-{
-   	/*background-color:rgb(17, 145, 255);
-	color: black*/
-	background-color: rgb(42, 42, 42);
-}</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset>
-                    <normaloff>:/24x24/resources/icons/arrow-minus.png</normaloff>:/24x24/resources/icons/arrow-minus.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </item>
