@@ -126,6 +126,12 @@ class Settings:
         return self._gaussian_settings.get("basis_options", {})
 
     @property
+    def functional_options(self):
+        if self.software == "ORCA":
+            return self._orca_settings.get("functional_options", [])
+        return self._gaussian_settings.get("functional_options", [])
+
+    @property
     def link0_options(self):
         # Gaussian only
         return self._gaussian_settings.get("link0_options", [])
@@ -311,14 +317,54 @@ class Settings:
                 "job_type": "Opt",
                 "additional_keys": [],
                 "job_options": {
-                    "Opt": ["TightOPT"],
-                    "Opt (TS)": ["TightOPT"],
+                    "Opt": [],
+                    "OptTS": [],
+                    "NEB-TS": [],
                     "Freq": [],
+                    "NumFreq": [],
                     "IRC": [],
-                    "IRCMax": [],
                     "Single point": [],
                 },
                 "blocks": {},
+                "blocks_available": {
+                    "autoci": None,
+                    "basis": None,
+                    "casresp": None,
+                    "casscf": None,
+                    "cipsi": None,
+                    "cim": None,
+                    "cis": None,
+                    "coords": None,
+                    "compound": None,
+                    "cosmors": None,
+                    "cpcm": None,
+                    "elprop": None,
+                    "eprnmr": None,
+                    "esd": None,
+                    "freq": None,
+                    "geom": None,
+                    "irc": None,
+                    "loc": None,
+                    "mcrpa": None,
+                    "md": None,
+                    "mdci": None,
+                    "method": None,
+                    "mp2": None,
+                    "mrcc": None,
+                    "mrci": None,
+                    "neb": None,
+                    "numgrad": None,
+                    "nbo": None,
+                    "output": None,
+                    "pal": None,
+                    "paras": None,
+                    "plots": None,
+                    "rel": None,
+                    "rocis": None,
+                    "rr": None,
+                    "scf": None,
+                    "symmetry": None,
+                },
                 "basis_options": {
                     # def2 basis sets (no separate polarization/diffuse - built into name)
                     "def2-SVP": {"pol1": [""], "pol2": [""], "diff": [""]},
@@ -346,19 +392,28 @@ class Settings:
                     "aug-cc-pVDZ": {"pol1": [""], "pol2": [""], "diff": [""]},
                     "aug-cc-pVTZ": {"pol1": [""], "pol2": [""], "diff": [""]},
                     "aug-cc-pVQZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    # Pople basis sets (support polarization and diffuse like Gaussian)
+                    # Pople basis sets (each combination as separate basis set)
                     "STO-3G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
-                    "6-31G": {
-                        "pol1": ["", "d", "2d", "2df", "3df"],
-                        "pol2": ["", "p", "2p", "2df", "3pd"],
-                        "diff": ["", "+", "++"],
-                    },
-                    "6-311G": {
-                        "pol1": ["", "d", "2d", "2df", "3df"],
-                        "pol2": ["", "p", "2p", "2df", "3pd"],
-                        "diff": ["", "+", "++"],
-                    },
+                    "3-21G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "3-21+G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31+G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31+G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31+G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31++G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31++G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-31++G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311+G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311+G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311+G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311++G": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311++G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
+                    "6-311++G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
                 },
                 "functional_options": [
                     "B3LYP",
@@ -450,7 +505,7 @@ class Settings:
 
 class SettingsTheWindow(QtWidgets.QMainWindow):
     """
-    User window to interact with instanse of Settings
+    User window to interact with instance of Settings with separate ORCA and Gaussian tabs
     """
 
     def __init__(self, parent):
@@ -460,79 +515,53 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         self.ui = Ui_SettingsWindow()
         self.ui.setupUi(self)
 
-        self.job_options = copy.deepcopy(self.settings.job_options)
-        self.basis_options = copy.deepcopy(self.settings.basis_options)
-        self.functional_options = copy.deepcopy(self.settings.functional_options)
+        # Separate settings for Gaussian and ORCA
+        self.gaussian_job_options = copy.deepcopy(
+            self.settings._gaussian_settings["job_options"]
+        )
+        self.gaussian_basis_options = copy.deepcopy(
+            self.settings._gaussian_settings["basis_options"]
+        )
+        self.gaussian_functional_options = copy.deepcopy(
+            self.settings._gaussian_settings["functional_options"]
+        )
 
-        # fill functional and basis set comboboxes
+        self.orca_job_options = copy.deepcopy(
+            self.settings._orca_settings["job_options"]
+        )
+        self.orca_basis_options = copy.deepcopy(
+            self.settings._orca_settings["basis_options"]
+        )
+        self.orca_functional_options = copy.deepcopy(
+            self.settings._orca_settings["functional_options"]
+        )
 
+        # Fill comboboxes
         try:
             self.add_items_to_window()
-        except:
+        except Exception as e:
+            print(f"Error adding items to window: {e}")
             self.settings.set_default_settings()
             self.add_items_to_window()
 
+        # General tab
         self.ui.cwd_lineEdit.setText(self.settings.workdir)
 
-        if self.settings.pymolpath != bool:
-            self.ui.pymol_lineEdit_2.setText(self.settings.pymolpath)
+        if self.settings.pymolpath and self.settings.pymolpath != bool:
+            self.ui.pymol_lineEdit.setText(self.settings.pymolpath)
 
         if self.settings.pymol_at_launch:
             self.ui.open_pymol_checkBox.setChecked(True)
 
-        if self.settings.UI_mode == 1:
-            self.ui.dark_button.setChecked(True)
+        # Set software radio buttons
+        if self.settings.software == "ORCA":
+            self.ui.radioButton_ORCA.setChecked(True)
         else:
-            self.ui.light_button.setChecked(True)
+            self.ui.radioButton_Gaussian.setChecked(True)
 
-        self.ui.label_2.hide()
-        self.ui.dark_button.hide()
-        self.ui.light_button.hide()
-
-        self.ui.add_DFT_button_1.clicked.connect(
-            lambda: self.add_item_to_list(
-                self.ui.additionalKeys_1, self.ui.add_DFT_list_1, "additional keys"
-            )
-        )
-        self.ui.del_DFT_button_1.clicked.connect(
-            lambda: self.del_item_from_list(self.ui.add_DFT_list_1, "additional keys")
-        )
-        self.ui.add_DFT_button_2.clicked.connect(
-            lambda: self.add_item_to_list(
-                self.ui.additionalKeys_2, self.ui.add_DFT_list_2, "link 0"
-            )
-        )
-        self.ui.del_DFT_button_2.clicked.connect(
-            lambda: self.del_item_from_list(self.ui.add_DFT_list_2, "link 0")
-        )
-        self.ui.add_DFT_button_4.clicked.connect(
-            lambda: self.add_item_to_list(
-                self.ui.additionalKeys_3, self.ui.add_DFT_list_3, "job keys"
-            )
-        )
-        self.ui.del_DFT_button_4.clicked.connect(
-            lambda: self.del_item_from_list(self.ui.add_DFT_list_3, "job keys")
-        )
-        self.ui.save_button.clicked.connect(self.save_settings)
-        self.ui.cancel_button.clicked.connect(self.close)
-        self.ui.comboBox_funct.textActivated.connect(
-            lambda: self.combobox_update(self.ui.comboBox_funct, "functional")
-        )
-        self.ui.basis1_comboBox_3.textActivated.connect(
-            lambda: self.combobox_update(self.ui.basis1_comboBox_3, "basis")
-        )
-        self.ui.basis2_comboBox_4.textActivated.connect(
-            lambda: self.combobox_update(self.ui.basis2_comboBox_4, "diff")
-        )
-        self.ui.basis3_comboBox_6.textActivated.connect(
-            lambda: self.combobox_update(self.ui.basis3_comboBox_6, "pol1")
-        )
-        self.ui.basis4_comboBox_5.textActivated.connect(
-            lambda: self.combobox_update(self.ui.basis4_comboBox_5, "pol2")
-        )
-        self.ui.job_type_comboBox.textActivated.connect(
-            lambda: self.combobox_update(self.ui.job_type_comboBox, "job type")
-        )
+        # Connect signals - General tab
+        self.ui.save_button_0.clicked.connect(self.save_settings)
+        self.ui.cancel_button_0.clicked.connect(self.close)
         self.ui.change_cwd_button.clicked.connect(
             lambda: self.new_path_from_dialog(
                 self.ui.cwd_lineEdit, "Select working directory"
@@ -540,97 +569,211 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         )
         self.ui.change_pymol_button.clicked.connect(
             lambda: self.new_path_from_dialog(
-                self.ui.pymol_lineEdit_2, "select PyMOL path"
+                self.ui.pymol_lineEdit, "select PyMOL path"
             )
         )
-        self.ui.reset_button.clicked.connect(self.reset_settings)
+        self.ui.radioButton_ORCA.toggled.connect(self.on_software_changed)
+        self.ui.radioButton_Gaussian.toggled.connect(self.on_software_changed)
 
-    def reset_settings(self):
-        for DFT_list in [
-            self.ui.add_DFT_list_1,
-            self.ui.add_DFT_list_2,
-            self.ui.add_DFT_list_3,
-        ]:
-            DFT_list.clear()
-
-        self.job_options = copy.deepcopy(self.settings.default_settings["job_options"])
-        self.basis_options = copy.deepcopy(
-            self.settings.default_settings["basis_options"]
+        # Connect signals - ORCA tab
+        self.ui.save_button_1.clicked.connect(self.save_settings)
+        self.ui.cancel_button_1.clicked.connect(self.close)
+        self.ui.pushButton.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.jobspec_keywords_orca,
+                self.ui.add_jobspec_orca_list,
+                "job keys",
+                "orca",
+            )
         )
-        self.functional_options = copy.deepcopy(
-            self.settings.default_settings["functional_options"]
-        )
-
-        self.ui.comboBox_funct.addItems(
-            self.settings.default_settings["functional_options"]
-        )
-        self.ui.basis1_comboBox_3.addItems(
-            [x for x in self.settings.default_settings["basis_options"]]
-        )
-        self.ui.job_type_comboBox.addItems(
-            ["Opt", "Opt (TS)", "Freq", "IRC", "IRCMax", "Single point"]
-        )
-        self.ui.job_type_comboBox.setCurrentText(
-            self.settings.default_settings["job_type"]
+        self.ui.pushButton_2.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.add_jobspec_orca_list, "job keys", "orca"
+            )
         )
 
-        self.ui.comboBox_funct.setCurrentText(
-            self.settings.default_settings["functional"]
-        )
-        self.ui.basis1_comboBox_3.setCurrentText(
-            self.settings.default_settings["basis"]
-        )
-        self.update_basis_options(self.settings.default_settings["basis"])
-
-        self.ui.basis2_comboBox_4.setCurrentText(
-            self.settings.default_settings["basis_diff"]
-        )
-        self.ui.basis3_comboBox_6.setCurrentText(
-            self.settings.default_settings["basis_pol1"]
-        )
-        self.ui.basis4_comboBox_5.setCurrentText(
-            self.settings.default_settings["basis_pol2"]
+        self.ui.pushButton_3.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.additionalblock_orca,
+                self.ui.add_list2_orca,
+                "input blocks",
+                "orca",
+            )
         )
 
-        self.ui.add_DFT_list_1.addItems(
-            self.settings.default_settings["additional_keys"]
+        self.ui.pushButton_4.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.add_list2_orca, "input blocks", "orca"
+            )
         )
-        self.ui.add_DFT_list_2.addItems(self.settings.default_settings["link0_options"])
-        self.ui.add_DFT_list_3.addItems(
-            self.settings.default_settings["job_options"][
-                self.ui.job_type_comboBox.currentText()
+
+        self.ui.comboBox_funct_orca.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.comboBox_funct_orca, "functional", "orca"
+            )
+        )
+        self.ui.basis1_comboBox_orca.textActivated.connect(
+            lambda: self.combobox_update(self.ui.basis1_comboBox_orca, "basis", "orca")
+        )
+        self.ui.job_type_comboBox_orca.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.job_type_comboBox_orca, "job type", "orca"
+            )
+        )
+
+        # Connect signals - Gaussian tab
+        self.ui.save_button_2.clicked.connect(self.save_settings)
+        self.ui.cancel_button_3.clicked.connect(self.close)
+        self.ui.add_1_gauss.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.additionalKeys1_gauss,
+                self.ui.add_DFT_list1_gauss,
+                "additional keys",
+                "gaussian",
+            )
+        )
+        self.ui.del_1_gauss.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.add_DFT_list1_gauss, "additional keys", "gaussian"
+            )
+        )
+        self.ui.add_2_gauss.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.additionalKeys2_gauss,
+                self.ui.add_DFT_list2_gauss,
+                "link 0",
+                "gaussian",
+            )
+        )
+        self.ui.del_2_gauss.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.add_DFT_list2_gauss, "link 0", "gaussian"
+            )
+        )
+        self.ui.add_3_gauss.clicked.connect(
+            lambda: self.add_item_to_list(
+                self.ui.additionalKeys3_gauss,
+                self.ui.add_DFT_list3_gauss,
+                "job keys",
+                "gaussian",
+            )
+        )
+        self.ui.del_3_gauss.clicked.connect(
+            lambda: self.del_item_from_list(
+                self.ui.add_DFT_list3_gauss, "job keys", "gaussian"
+            )
+        )
+        self.ui.comboBox_funct_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.comboBox_funct_gauss, "functional", "gaussian"
+            )
+        )
+        self.ui.basis1_comboBox_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.basis1_comboBox_gauss, "basis", "gaussian"
+            )
+        )
+        self.ui.basis2_comboBox_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.basis2_comboBox_gauss, "diff", "gaussian"
+            )
+        )
+        self.ui.basis3_comboBox_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.basis3_comboBox_gauss, "pol1", "gaussian"
+            )
+        )
+        self.ui.basis4_comboBox_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.basis4_comboBox_gauss, "pol2", "gaussian"
+            )
+        )
+        self.ui.job_type_comboBox_gauss.textActivated.connect(
+            lambda: self.combobox_update(
+                self.ui.job_type_comboBox_gauss, "job type", "gaussian"
+            )
+        )
+
+    def on_software_changed(self):
+        """Update software setting when radio button changes"""
+        if self.ui.radioButton_ORCA.isChecked():
+            self.settings.software = "ORCA"
+        else:
+            self.settings.software = "Gaussian"
+
+    def add_items_to_window(self):
+        """Fill all comboboxes and lists with current settings"""
+        # ORCA tab
+        self.ui.comboBox_funct_orca.addItems(self.orca_functional_options)
+        self.ui.basis1_comboBox_orca.addItems([x for x in self.orca_basis_options])
+        self.ui.job_type_comboBox_orca.addItems(
+            ["Opt", "OptTS", "NEB-TS", "Freq", "NumFreq", "IRC", "Single point"]
+        )
+        self.ui.job_type_comboBox_orca.setCurrentText(
+            self.settings._orca_settings["job_type"]
+        )
+        self.ui.comboBox_funct_orca.setCurrentText(
+            self.settings._orca_settings["functional"]
+        )
+        self.ui.basis1_comboBox_orca.setCurrentText(
+            self.settings._orca_settings["basis"]
+        )
+        self.ui.add_jobspec_orca_list.addItems(
+            self.orca_job_options[self.ui.job_type_comboBox_orca.currentText()]
+        )
+
+        self.ui.inputblock_orca.addItems(
+            self.settings._orca_settings["blocks_available"].keys()
+        )
+        self.ui.add_list2_orca.addItems(
+            [
+                f"%{k}\n   {v}\nEND\n"
+                for k, v in self.settings._orca_settings["blocks"].items()
             ]
         )
 
-    def add_items_to_window(self):
-        self.ui.comboBox_funct.addItems(self.settings.functional_options)
-        self.ui.basis1_comboBox_3.addItems([x for x in self.settings.basis_options])
-        self.ui.job_type_comboBox.addItems(
+        # Gaussian tab
+        self.ui.comboBox_funct_gauss.addItems(self.gaussian_functional_options)
+        self.ui.basis1_comboBox_gauss.addItems([x for x in self.gaussian_basis_options])
+        self.ui.job_type_comboBox_gauss.addItems(
             ["Opt", "Opt (TS)", "Freq", "IRC", "IRCMax", "Single point"]
         )
-        self.ui.job_type_comboBox.setCurrentText(self.settings.job_type)
+        self.ui.job_type_comboBox_gauss.setCurrentText(
+            self.settings._gaussian_settings["job_type"]
+        )
+        self.ui.comboBox_funct_gauss.setCurrentText(
+            self.settings._gaussian_settings["functional"]
+        )
+        self.ui.basis1_comboBox_gauss.setCurrentText(
+            self.settings._gaussian_settings["basis"]
+        )
 
-        self.ui.comboBox_funct.setCurrentText(self.settings.functional)
-        self.ui.basis1_comboBox_3.setCurrentText(self.settings.basis)
+        # Update basis options for Gaussian
+        self.update_basis_options(self.settings._gaussian_settings["basis"], "gaussian")
 
-        self.update_basis_options(self.settings.basis)
+        self.ui.basis2_comboBox_gauss.setCurrentText(
+            self.settings._gaussian_settings["basis_diff"]
+        )
+        self.ui.basis3_comboBox_gauss.setCurrentText(
+            self.settings._gaussian_settings["basis_pol1"]
+        )
+        self.ui.basis4_comboBox_gauss.setCurrentText(
+            self.settings._gaussian_settings["basis_pol2"]
+        )
 
-        self.ui.basis2_comboBox_4.setCurrentText(self.settings.basis_diff)
-        self.ui.basis3_comboBox_6.setCurrentText(self.settings.basis_pol1)
-        self.ui.basis4_comboBox_5.setCurrentText(self.settings.basis_pol2)
-
-        self.ui.add_DFT_list_1.addItems(self.settings.additional_keys)
-        self.ui.add_DFT_list_2.addItems(self.settings.link0_options)
-        self.ui.add_DFT_list_3.addItems(
-            self.settings.job_options[self.ui.job_type_comboBox.currentText()]
+        self.ui.add_DFT_list1_gauss.addItems(
+            self.settings._gaussian_settings["additional_keys"]
+        )
+        self.ui.add_DFT_list2_gauss.addItems(
+            self.settings._gaussian_settings["link0_options"]
+        )
+        self.ui.add_DFT_list3_gauss.addItems(
+            self.gaussian_job_options[self.ui.job_type_comboBox_gauss.currentText()]
         )
 
     def new_path_from_dialog(self, textwidget, title_):
-        """
-        Changes text in work directory field using file dialog.
-        No change saved in self.settings, this is handeled in save_settings.
-        """
-        if textwidget == self.ui.pymol_lineEdit_2:
+        """Changes text in work directory field using file dialog"""
+        if textwidget == self.ui.pymol_lineEdit:
             new_dir = QtWidgets.QFileDialog.getOpenFileName(
                 parent=self,
                 caption=title_,
@@ -645,206 +788,259 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         if new_dir:
             textwidget.setText(new_dir)
 
-    #    def check_box_update(self, checkbox, key):
-    #
-    #        if checkbox.isChecked():
-    #            self.settings[key] = True
-    #        else:
-    #            self.settings[key] = False
-
-    def combobox_update(self, widget, key):
-        """
-        :param combobox: QComboBox
-        :param key: str: key to identifu what combobox is changed
-
-        Update window after a combobox is changed.
-        """
+    def combobox_update(self, widget, key, software):
+        """Update window after a combobox is changed"""
         text = widget.currentText()
 
+        # Select the right dictionaries based on software
+        if software == "orca":
+            job_options = self.orca_job_options
+            basis_options = self.orca_basis_options
+            functional_options = self.orca_functional_options
+            job_list = self.ui.add_jobspec_orca_list
+            job_type_combo = self.ui.job_type_comboBox_orca
+        else:
+            job_options = self.gaussian_job_options
+            basis_options = self.gaussian_basis_options
+            functional_options = self.gaussian_functional_options
+            job_list = self.ui.add_DFT_list3_gauss
+            job_type_combo = self.ui.job_type_comboBox_gauss
+
         if key == "job type":
-            self.settings.job_type = text
-            self.ui.add_DFT_list_3.clear()
-            self.ui.add_DFT_list_3.addItems(self.job_options[text])
+            job_list.clear()
+            job_list.addItems(job_options[text])
 
-        if key == "functional":
-            if text not in self.functional_options:
-                # new functional not listed in settings from before
-                self.functional_options.append(text)
+        elif key == "functional":
+            if text not in functional_options:
+                functional_options.append(text)
 
-        if key == "basis":
-            if text not in self.basis_options:
-                # new basis not listed in settings from before
+        elif key == "basis":
+            if text not in basis_options:
+                basis_options[text] = {"pol1": [""], "pol2": [""], "diff": [""]}
+            if software == "gaussian":
+                self.update_basis_options(text, software)
 
-                self.basis_options[text] = {"pol1": [], "pol2": [], "diff": []}
-            self.update_basis_options(text)
-
-        elif key in ["diff", "pol1", "pol2"]:
-            basis = self.ui.basis1_comboBox_3.currentText()
-
+        elif key in ["diff", "pol1", "pol2"] and software == "gaussian":
+            basis = self.ui.basis1_comboBox_gauss.currentText()
             try:
-                if text not in self.basis_options[basis][key]:
-                    # diff, pol1 or pol2 not listed for current basis
-                    self.basis_options[basis][key].append(text)
+                if text and text not in basis_options[basis][key]:
+                    basis_options[basis][key].append(text)
             except KeyError:
                 self.react.append_text(
-                    f"ERROR: cannot add custom options before basis {basis} has been properly added to REACT. Select {basis}, then click on the add button."
+                    f"ERROR: cannot add custom options before basis {basis} has been properly added to REACT"
                 )
 
-    def add_item_to_list(self, Qtextinput, Qlist, DFT_key):
-        """
-        :param Qtextinput: QLineEdit
-        :param Qlist: QListWidget
-        :param DFT_key: str: key to access correct variable in self.settings
-        Adds the text input from user (past to Qtextinput) to correct
-        QlistWidget and updates self.settings accordingly.
-        """
-
+    def add_item_to_list(self, Qtextinput, Qlist, DFT_key, software):
+        """Adds text input to list widget"""
         user_input = Qtextinput.text()
+        if not user_input:
+            return
 
-        all_values_in_list = []
+        if DFT_key == "input blocks" and software == "orca":
+            block_type = self.ui.inputblock_orca.currentText()
 
-        for i in range(Qlist.count()):
-            item = Qlist.item(i).text()
-            all_values_in_list.append(item)
+            self.settings._orca_settings["blocks"][block_type] = user_input
+
+            user_input = f"%{block_type}\n    {user_input}\nEND\n"
+
+        all_values_in_list = [Qlist.item(i).text() for i in range(Qlist.count())]
 
         if user_input not in all_values_in_list:
             Qlist.addItem(user_input)
 
         if DFT_key == "job keys":
-            job_type = self.ui.job_type_comboBox.currentText()
-            self.job_options[job_type].append(user_input)
+            if software == "orca":
+                job_type = self.ui.job_type_comboBox_orca.currentText()
+                self.orca_job_options[job_type].append(user_input)
+            else:
+                job_type = self.ui.job_type_comboBox_gauss.currentText()
+                self.gaussian_job_options[job_type].append(user_input)
 
-    def del_item_from_list(self, Qlist, DFT_key):
-        """
-        :param Qlist: QListWidget
-        :param DFT_key: str: key to access correct variable in self.settings
-        Removes item in QlistWdiget and updates self.settings accordingly.
-        """
-
+    def del_item_from_list(self, Qlist, DFT_key, software):
+        """Removes item from list widget"""
         try:
             item = Qlist.currentItem().text()
             Qlist.takeItem(Qlist.currentRow())
         except:
-            # User tried to delete item from list before selecting
-            # an item in the list, or some other stupid thing
             return
 
         if DFT_key == "job keys":
-            job_type = self.ui.job_type_comboBox.currentText()
-            try:
-                self.job_options[job_type].remove(item)
-            except ValueError:
-                pass
+            if software == "orca":
+                job_type = self.ui.job_type_comboBox_orca.currentText()
+                try:
+                    self.orca_job_options[job_type].remove(item)
+                except ValueError:
+                    pass
+            else:
+                job_type = self.ui.job_type_comboBox_gauss.currentText()
+                try:
+                    self.gaussian_job_options[job_type].remove(item)
+                except ValueError:
+                    pass
 
-    def update_basis_options(self, basis):
-        """
-        :param basis: str: name current basis
-        Updates polarization and diffuse functions avail for basis set
-        """
+    def update_basis_options(self, basis, software):
+        """Updates polarization and diffuse functions available for basis set"""
+        if software != "gaussian":
+            return
 
-        self.block_all_combo_signals(True)
+        self.block_gaussian_combo_signals(True)
 
-        self.ui.basis2_comboBox_4.clear()
-        self.ui.basis3_comboBox_6.clear()
-        self.ui.basis4_comboBox_5.clear()
+        self.ui.basis2_comboBox_gauss.clear()
+        self.ui.basis3_comboBox_gauss.clear()
+        self.ui.basis4_comboBox_gauss.clear()
 
         try:
-            self.ui.basis2_comboBox_4.addItems(self.basis_options[basis]["diff"])
-            self.ui.basis3_comboBox_6.addItems(self.basis_options[basis]["pol1"])
-            self.ui.basis4_comboBox_5.addItems(self.basis_options[basis]["pol2"])
+            self.ui.basis2_comboBox_gauss.addItems(
+                self.gaussian_basis_options[basis]["diff"]
+            )
+            self.ui.basis3_comboBox_gauss.addItems(
+                self.gaussian_basis_options[basis]["pol1"]
+            )
+            self.ui.basis4_comboBox_gauss.addItems(
+                self.gaussian_basis_options[basis]["pol2"]
+            )
         except KeyError:
-            # exception: when the basis set has been removed by user.
-            # nothing to do when there is no basis!
             pass
 
-        self.block_all_combo_signals(False)
+        self.block_gaussian_combo_signals(False)
 
-    def block_all_combo_signals(self, bool_):
-        self.ui.comboBox_funct.blockSignals(bool_)
-        self.ui.basis1_comboBox_3.blockSignals(bool_)
-        self.ui.job_type_comboBox.blockSignals(bool_)
-        self.ui.basis2_comboBox_4.blockSignals(bool_)
-        self.ui.basis3_comboBox_6.blockSignals(bool_)
-        self.ui.basis4_comboBox_5.blockSignals(bool_)
+    def block_gaussian_combo_signals(self, bool_):
+        """Block/unblock signals for Gaussian comboboxes"""
+        self.ui.comboBox_funct_gauss.blockSignals(bool_)
+        self.ui.basis1_comboBox_gauss.blockSignals(bool_)
+        self.ui.job_type_comboBox_gauss.blockSignals(bool_)
+        self.ui.basis2_comboBox_gauss.blockSignals(bool_)
+        self.ui.basis3_comboBox_gauss.blockSignals(bool_)
+        self.ui.basis4_comboBox_gauss.blockSignals(bool_)
 
     def save_settings(self):
-        # Get current values from UI
-        functional_name = self.ui.comboBox_funct.currentText()
-        basis_name = self.ui.basis1_comboBox_3.currentText()
-        basis_diff = self.ui.basis2_comboBox_4.currentText()
-        basis_pol1 = self.ui.basis3_comboBox_6.currentText()
-        basis_pol2 = self.ui.basis4_comboBox_5.currentText()
+        """Save all settings to custom_settings.json"""
+        # Save software selection
+        if self.ui.radioButton_ORCA.isChecked():
+            self.settings.software = "ORCA"
+        else:
+            self.settings.software = "Gaussian"
 
-        # Add functional to list if it's new
-        if functional_name and functional_name not in self.functional_options:
-            self.functional_options.append(functional_name)
+        # Save general settings
+        if os.path.exists(self.ui.cwd_lineEdit.text()):
+            self.settings.workdir = self.ui.cwd_lineEdit.text()
 
-        # Ensure basis exists in basis_options with proper structure
-        if basis_name and basis_name not in self.basis_options:
-            # Create default structure for new basis set
-            self.basis_options[basis_name] = {
+        pymol_path = self.ui.pymol_lineEdit.text()
+        if pymol_path and os.path.exists(pymol_path):
+            self.settings.pymolpath = pymol_path
+
+        self.settings.pymol_at_launch = self.ui.open_pymol_checkBox.isChecked()
+
+        # Save Gaussian settings
+        gaussian_functional = self.ui.comboBox_funct_gauss.currentText()
+        gaussian_basis = self.ui.basis1_comboBox_gauss.currentText()
+
+        if (
+            gaussian_functional
+            and gaussian_functional not in self.gaussian_functional_options
+        ):
+            self.gaussian_functional_options.append(gaussian_functional)
+
+        if gaussian_basis and gaussian_basis not in self.gaussian_basis_options:
+            self.gaussian_basis_options[gaussian_basis] = {
                 "pol1": ["", "d", "2d", "3d"],
                 "pol2": ["", "p", "2p", "3p"],
                 "diff": ["", "+", "++"],
             }
 
-        # Add custom polarization/diffuse functions if they're new
-        if basis_name and basis_name in self.basis_options:
-            if basis_diff and basis_diff not in self.basis_options[basis_name]["diff"]:
-                self.basis_options[basis_name]["diff"].append(basis_diff)
-            if basis_pol1 and basis_pol1 not in self.basis_options[basis_name]["pol1"]:
-                self.basis_options[basis_name]["pol1"].append(basis_pol1)
-            if basis_pol2 and basis_pol2 not in self.basis_options[basis_name]["pol2"]:
-                self.basis_options[basis_name]["pol2"].append(basis_pol2)
+        # Update Gaussian basis polarization/diffuse if custom values
+        gaussian_diff = self.ui.basis2_comboBox_gauss.currentText()
+        gaussian_pol1 = self.ui.basis3_comboBox_gauss.currentText()
+        gaussian_pol2 = self.ui.basis4_comboBox_gauss.currentText()
 
-        # Save to settings
-        self.settings.functional = functional_name
-        self.settings.basis = basis_name
-        self.settings.basis_diff = basis_diff
-        self.settings.basis_pol1 = basis_pol1
-        self.settings.basis_pol2 = basis_pol2
-        self.settings.job_type = self.ui.job_type_comboBox.currentText()
-        self.settings.additional_keys = [
-            self.ui.add_DFT_list_1.item(x).text()
-            for x in range(self.ui.add_DFT_list_1.count())
+        if gaussian_basis in self.gaussian_basis_options:
+            if (
+                gaussian_diff
+                and gaussian_diff
+                not in self.gaussian_basis_options[gaussian_basis]["diff"]
+            ):
+                self.gaussian_basis_options[gaussian_basis]["diff"].append(
+                    gaussian_diff
+                )
+            if (
+                gaussian_pol1
+                and gaussian_pol1
+                not in self.gaussian_basis_options[gaussian_basis]["pol1"]
+            ):
+                self.gaussian_basis_options[gaussian_basis]["pol1"].append(
+                    gaussian_pol1
+                )
+            if (
+                gaussian_pol2
+                and gaussian_pol2
+                not in self.gaussian_basis_options[gaussian_basis]["pol2"]
+            ):
+                self.gaussian_basis_options[gaussian_basis]["pol2"].append(
+                    gaussian_pol2
+                )
+
+        self.settings._gaussian_settings["functional"] = gaussian_functional
+        self.settings._gaussian_settings["basis"] = gaussian_basis
+        self.settings._gaussian_settings["basis_diff"] = gaussian_diff
+        self.settings._gaussian_settings["basis_pol1"] = gaussian_pol1
+        self.settings._gaussian_settings["basis_pol2"] = gaussian_pol2
+        self.settings._gaussian_settings["job_type"] = (
+            self.ui.job_type_comboBox_gauss.currentText()
+        )
+        self.settings._gaussian_settings["additional_keys"] = [
+            self.ui.add_DFT_list1_gauss.item(x).text()
+            for x in range(self.ui.add_DFT_list1_gauss.count())
         ]
-        self.settings.job_options = copy.deepcopy(self.job_options)
-        self.settings.link0_options = [
-            self.ui.add_DFT_list_2.item(x).text()
-            for x in range(self.ui.add_DFT_list_2.count())
+        self.settings._gaussian_settings["link0_options"] = [
+            self.ui.add_DFT_list2_gauss.item(x).text()
+            for x in range(self.ui.add_DFT_list2_gauss.count())
         ]
-        self.settings.functional_options = copy.deepcopy(self.functional_options)
-        self.settings.basis_options = copy.deepcopy(self.basis_options)
+        self.settings._gaussian_settings["job_options"] = copy.deepcopy(
+            self.gaussian_job_options
+        )
+        self.settings._gaussian_settings["basis_options"] = copy.deepcopy(
+            self.gaussian_basis_options
+        )
+        self.settings._gaussian_settings["functional_options"] = copy.deepcopy(
+            self.gaussian_functional_options
+        )
 
-        if os.path.exists(self.ui.cwd_lineEdit.text()):
-            self.settings.workdir = self.ui.cwd_lineEdit.text()
-        else:
-            # TODO promt errormessage on screen
-            pass
+        # Save ORCA settings
+        orca_functional = self.ui.comboBox_funct_orca.currentText()
+        orca_basis = self.ui.basis1_comboBox_orca.currentText()
 
-        if os.path.exists(self.ui.pymol_lineEdit_2.text()):
-            self.settings.pymolpath = self.ui.pymol_lineEdit_2.text()
-        else:
-            print("pymol path not found. Please add a path in Settings!")
+        if orca_functional and orca_functional not in self.orca_functional_options:
+            self.orca_functional_options.append(orca_functional)
 
-        if self.ui.open_pymol_checkBox.isChecked():
-            self.settings.pymol_at_launch = True
-        else:
-            self.settings.pymol_at_launch = False
+        if orca_basis and orca_basis not in self.orca_basis_options:
+            self.orca_basis_options[orca_basis] = {
+                "pol1": [""],
+                "pol2": [""],
+                "diff": [""],
+            }
 
+        self.settings._orca_settings["functional"] = orca_functional
+        self.settings._orca_settings["basis"] = orca_basis
+        self.settings._orca_settings["job_type"] = (
+            self.ui.job_type_comboBox_orca.currentText()
+        )
+        self.settings._orca_settings["job_options"] = copy.deepcopy(
+            self.orca_job_options
+        )
+        self.settings._orca_settings["basis_options"] = copy.deepcopy(
+            self.orca_basis_options
+        )
+        self.settings._orca_settings["functional_options"] = copy.deepcopy(
+            self.orca_functional_options
+        )
+        self.settings._orca_settings["blocks"] = self.settings._orca_settings.get(
+            "blocks", {}
+        )
+
+        # Save to file
         self.settings.save_custom_settings()
-
         self.close()
 
-    def switch_Ui_colormode(self, color):
-        """
-        Switch Ui colormode. Darkmode: color = 1, lightmode: color = 0
-        """
-        pass
-
     def closeEvent(self, event):
-        """
-        When closing window, set to settings_window to None.
-        :param event:
-        """
+        """When closing window, set to settings_window to None"""
         self.react.settings_window = None

@@ -13,7 +13,8 @@ from UIs.MainWindow import Ui_MainWindow
 from mods.ReactWidgets import DragDropListWidget
 from mods.State import State
 from mods.DialogsAndExceptions import DialogSaveProject
-from mods.CalcSetupWindow import CalcSetupWindow
+from mods.CalcSetupGaussian import CalcSetupWindowGaussian
+from mods.CalcSetupORCA import CalcSetupWindowORCA
 from mods.ReactPlot import PlotEnergyDiagram
 from mods.Plotter import Plotter
 from mods.Settings import Settings, SettingsTheWindow
@@ -1149,8 +1150,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
             self.setup_window.raise_()
         else:
-            self.setup_window = CalcSetupWindow(self, self.current_file)
-            self.setup_window.show()
+            if self.settings.software == "Gaussian":
+                self.setup_window = CalcSetupWindowGaussian(self, self.current_file)
+                self.setup_window.show()
+            elif self.settings.software == "ORCA":
+                self.setup_window = CalcSetupWindowORCA(self, self.current_file)
+                self.setup_window.show()
 
     def power_off_on(self):
         """

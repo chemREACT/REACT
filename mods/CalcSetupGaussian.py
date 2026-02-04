@@ -28,12 +28,16 @@ from mods.common_functions import atom_distance, random_color, write_file
 import copy
 
 
-class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
+class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
     def __init__(self, parent, filepath):
-        super(CalcSetupWindow, self).__init__(parent)
+        super(CalcSetupWindowGaussian, self).__init__(parent)
         self.react = parent
         self.filepath = filepath
         self.settings = self.react.settings
+
+        # Ensure we're using Gaussian settings
+        if self.settings.software != "Gaussian":
+            self.settings.software = "Gaussian"
 
         # TODO this is temporary solution -> self.mol_obj should have a property state?
         self.state = self.react.get_current_state
@@ -782,26 +786,35 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         :return:
         """
         self.ui.lineEdit_filename.setText(self.filename)
-        self.ui.comboBox_funct.addItems(self.settings.functional_options)
-        self.ui.comboBox_basis1.addItems(self.settings.basis_options)
+
+        # Get software-specific options
+        functional_options = self.settings.functional_options
+        basis_options_dict = self.settings.basis_options
+
+        self.ui.comboBox_funct.addItems(functional_options)
+        self.ui.comboBox_basis1.addItems(list(basis_options_dict.keys()))
 
         # Ensure the current basis exists in basis_options with proper structure
-        if self.basis not in self.settings.basis_options:
-            self.settings.basis_options[self.basis] = {
-                "pol1": ["", "d", "2d", "3d"],
-                "pol2": ["", "p", "2p", "3p"],
-                "diff": ["", "+", "++"],
-            }
+        basis_options_dict = self.settings.basis_options
+        if self.basis not in basis_options_dict:
+            if self.settings.software == "ORCA":
+                # ORCA basis sets don't use separate pol/diff
+                basis_options_dict[self.basis] = {
+                    "pol1": [""],
+                    "pol2": [""],
+                    "diff": [""],
+                }
+            else:
+                # Gaussian basis sets
+                basis_options_dict[self.basis] = {
+                    "pol1": ["", "d", "2d", "3d"],
+                    "pol2": ["", "p", "2p", "3p"],
+                    "diff": ["", "+", "++"],
+                }
 
-        self.ui.comboBox_basis2.addItems(
-            self.settings.basis_options[self.basis]["diff"]
-        )
-        self.ui.comboBox_basis3.addItems(
-            self.settings.basis_options[self.basis]["pol1"]
-        )
-        self.ui.comboBox_basis4.addItems(
-            self.settings.basis_options[self.basis]["pol2"]
-        )
+        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
+        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
+        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
         self.ui.List_add_job_2.addItems(self.additional_keys)
         self.ui.comboBox_job_type.addItems(self.job_options)
         self.ui.List_add_job.addItems(
@@ -998,7 +1011,9 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         filepath is found.
         """
         i = 0
-        new_filepath = self.react.settings.workdir + "/" + filename + ".com"
+        # Gaussian uses .com extension
+        ext = ".com"
+        new_filepath = self.react.settings.workdir + "/" + filename + ext
 
         if path.isfile(new_filepath) == True:
             new_filepath, filter_ = QtWidgets.QFileDialog.getSaveFileName(
@@ -1016,6 +1031,23 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         return new_filepath
 
     def make_input_content(
+        self, filename, extra_job_keywords=False, xyz=False, bond_obj=False
+    ):
+        """
+        Make content (not file) for one inputfile (Gaussian or ORCA).
+        Routes to appropriate method based on software selection.
+        :return: str
+        """
+        if self.settings.software == "ORCA":
+            return self.make_orca_input_content(
+                filename, extra_job_keywords, xyz, bond_obj
+            )
+        else:
+            return self.make_gaussian_input_content(
+                filename, extra_job_keywords, xyz, bond_obj
+            )
+
+    def make_gaussian_input_content(
         self, filename, extra_job_keywords=False, xyz=False, bond_obj=False
     ):
         """
@@ -1242,22 +1274,26 @@ class CalcSetupWindow(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.comboBox_basis4.clear()
 
         # Ensure the basis exists in basis_options with proper structure
-        if self.basis not in self.settings.basis_options:
-            self.settings.basis_options[self.basis] = {
-                "pol1": ["", "d", "2d", "3d"],
-                "pol2": ["", "p", "2p", "3p"],
-                "diff": ["", "+", "++"],
-            }
+        basis_options_dict = self.settings.basis_options
+        if self.basis not in basis_options_dict:
+            if self.settings.software == "ORCA":
+                # ORCA basis sets don't use separate pol/diff
+                basis_options_dict[self.basis] = {
+                    "pol1": [""],
+                    "pol2": [""],
+                    "diff": [""],
+                }
+            else:
+                # Gaussian basis sets
+                basis_options_dict[self.basis] = {
+                    "pol1": ["", "d", "2d", "3d"],
+                    "pol2": ["", "p", "2p", "3p"],
+                    "diff": ["", "+", "++"],
+                }
 
-        self.ui.comboBox_basis2.addItems(
-            self.settings.basis_options[self.basis]["diff"]
-        )
-        self.ui.comboBox_basis3.addItems(
-            self.settings.basis_options[self.basis]["pol1"]
-        )
-        self.ui.comboBox_basis4.addItems(
-            self.settings.basis_options[self.basis]["pol2"]
-        )
+        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
+        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
+        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
 
         # self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
         # self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)

@@ -105,43 +105,6 @@ background-color: rgb(20,20,20);
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_software">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_software">
-                <property name="text">
-                 <string>Software:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_gaussian">
-                <property name="text">
-                 <string>Gaussian</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_orca">
-                <property name="text">
-                 <string>ORCA</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <spacer name="horizontalSpacer_4">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -1205,35 +1168,7 @@ QPushButton:pressed
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="widget_gaussian_options" native="true">
-              <layout class="QVBoxLayout" name="verticalLayout_gaussian">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_gaussian_link0">
-                 <property name="font">
-                  <font>
-                   <weight>75</weight>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Gaussian Link0 Options</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_9">
+             <layout class="QGridLayout" name="gridLayout_9">
               <item row="0" column="0">
                <widget class="QCheckBox" name="checkBox_mem_2">
                 <property name="minimumSize">
@@ -1497,100 +1432,6 @@ QPushButton:pressed
                <widget class="QLineEdit" name="lineEdit_mem_2"/>
               </item>
              </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QWidget" name="widget_orca_options" native="true">
-              <layout class="QVBoxLayout" name="verticalLayout_orca">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_orca_parallel">
-                 <property name="font">
-                  <font>
-                   <weight>75</weight>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>ORCA Parallel Options</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_orca">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_orca_nprocs">
-                   <property name="text">
-                    <string>Number of processors (nprocs):</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QSpinBox" name="spinBox_orca_nprocs">
-                   <property name="minimum">
-                    <number>1</number>
-                   </property>
-                   <property name="maximum">
-                    <number>128</number>
-                   </property>
-                   <property name="value">
-                    <number>4</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_orca_maxcore">
-                   <property name="text">
-                    <string>Memory per core (MB):</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QSpinBox" name="spinBox_orca_maxcore">
-                   <property name="minimum">
-                    <number>100</number>
-                   </property>
-                   <property name="maximum">
-                    <number>100000</number>
-                   </property>
-                   <property name="singleStep">
-                    <number>100</number>
-                   </property>
-                   <property name="value">
-                    <number>2000</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2" rowspan="2">
-                  <spacer name="horizontalSpacer_orca">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
             </item>
            </layout>
           </widget>
