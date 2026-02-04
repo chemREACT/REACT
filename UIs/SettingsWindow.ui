@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="styleSheet">
-       <string notr="true">QListWidget {background-color: rgb(30, 30, 30), color: rgb(220,220,220)}
+       <string notr="true">QListWidget {background-color: rgb(20, 20, 20); color: rgb(220,220,220)}
 QComboBox {color: rgb(220,220,220)}</string>
       </property>
       <property name="currentIndex">
