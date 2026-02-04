@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="styleSheet">
-       <string notr="true">QListWidget {background-color: rbg(20, 20, 20)}
+       <string notr="true">QListWidget {background-color: rbg(30, 30, 30)}
 QComboBox {color: white}</string>
       </property>
       <property name="currentIndex">
@@ -798,7 +798,13 @@ QPushButton:pressed
               <italic>true</italic>
              </font>
             </property>
+            <property name="inputMask">
+             <string/>
+            </property>
             <property name="text">
+             <string/>
+            </property>
+            <property name="placeholderText">
              <string>Write keyword here ...</string>
             </property>
            </widget>
@@ -979,6 +985,9 @@ QPushButton:pressed
              </font>
             </property>
             <property name="text">
+             <string/>
+            </property>
+            <property name="placeholderText">
              <string>Write block content here ...</string>
             </property>
            </widget>
