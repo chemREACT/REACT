@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>690</height>
+    <width>610</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -29,11 +29,11 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="styleSheet">
-       <string notr="true">QListWidget {background-color: black}
+       <string notr="true">QListWidget {background-color: rbg(20, 20, 20)}
 QComboBox {color: white}</string>
       </property>
       <property name="currentIndex">
@@ -43,7 +43,7 @@ QComboBox {color: white}</string>
        <attribute name="title">
         <string>General</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout_35">
           <item row="0" column="0">
@@ -143,35 +143,22 @@ QComboBox {color: white}</string>
          </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="cwd_lineEdit">
-          <property name="minimumSize">
-           <size>
-            <width>50</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+           <widget class="QLineEdit" name="cwd_lineEdit">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>50</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="change_cwd_button">
@@ -193,6 +180,19 @@ QComboBox {color: white}</string>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>130</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -230,35 +230,22 @@ QComboBox {color: white}</string>
          </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="pymol_lineEdit">
-          <property name="minimumSize">
-           <size>
-            <width>50</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+           <widget class="QLineEdit" name="pymol_lineEdit">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>50</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="change_pymol_button">
@@ -331,7 +318,33 @@ QComboBox {color: white}</string>
          </layout>
         </item>
         <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>130</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item>
            <widget class="QLabel" name="DFT_label_21">
             <property name="sizePolicy">
@@ -393,19 +406,6 @@ QComboBox {color: white}</string>
            </spacer>
           </item>
          </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_25">
@@ -513,8 +513,8 @@ QPushButton:pressed
        <attribute name="title">
         <string>ORCA</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
          <layout class="QGridLayout" name="gridLayout_23">
           <item row="0" column="0">
            <spacer name="horizontalSpacer_23">
@@ -577,7 +577,7 @@ QPushButton:pressed
           </item>
          </layout>
         </item>
-        <item row="1" column="0">
+        <item>
          <layout class="QGridLayout" name="gridLayout_24">
           <item row="0" column="0">
            <widget class="QLabel" name="funct_label_5">
@@ -683,7 +683,7 @@ QPushButton:pressed
           </item>
          </layout>
         </item>
-        <item row="2" column="0">
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_17">
           <item>
            <widget class="Line" name="line_25">
@@ -714,13 +714,13 @@ QPushButton:pressed
             </property>
             <property name="minimumSize">
              <size>
-              <width>120</width>
+              <width>180</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
+              <width>180</width>
               <height>14</height>
              </size>
             </property>
@@ -758,8 +758,8 @@ QPushButton:pressed
           </item>
          </layout>
         </item>
-        <item row="3" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_18">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QComboBox" name="job_type_comboBox_orca">
             <property name="minimumSize">
@@ -780,120 +780,90 @@ QPushButton:pressed
            </widget>
           </item>
           <item>
-           <layout class="QGridLayout" name="gridLayout_25">
-            <item row="0" column="0">
-             <widget class="QLineEdit" name="jobspec_keywords_orca">
-              <property name="minimumSize">
-               <size>
-                <width>190</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <italic>true</italic>
-               </font>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QListWidget" name="add_jobspec_orca_list">
-              <property name="minimumSize">
-               <size>
-                <width>190</width>
-                <height>50</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_19">
-              <item>
-               <widget class="QPushButton" name="add_1_orca">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>:/24x24/resources/icons/arrow-plus.png</normaloff>:/24x24/resources/icons/arrow-plus.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="del_1_orca">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>:/24x24/resources/icons/arrow-minus.png</normaloff>:/24x24/resources/icons/arrow-minus.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="jobspec_keywords_orca">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>21</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>21</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>Write keyword here ...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
-        <item row="4" column="0">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QListWidget" name="add_jobspec_orca_list">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Remove selected</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_18">
           <item>
            <widget class="Line" name="line_27">
@@ -930,7 +900,7 @@ QPushButton:pressed
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
+              <width>180</width>
               <height>14</height>
              </size>
             </property>
@@ -968,8 +938,8 @@ QPushButton:pressed
           </item>
          </layout>
         </item>
-        <item row="5" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_20">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QComboBox" name="inputblock_orca">
             <property name="minimumSize">
@@ -990,120 +960,90 @@ QPushButton:pressed
            </widget>
           </item>
           <item>
-           <layout class="QGridLayout" name="gridLayout_26">
-            <item row="0" column="0">
-             <widget class="QLineEdit" name="additionalblock_orca">
-              <property name="minimumSize">
-               <size>
-                <width>190</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>21</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <italic>true</italic>
-               </font>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QListWidget" name="add_list2_orca">
-              <property name="minimumSize">
-               <size>
-                <width>190</width>
-                <height>50</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_21">
-              <item>
-               <widget class="QPushButton" name="add_2_orca">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>:/24x24/resources/icons/arrow-plus.png</normaloff>:/24x24/resources/icons/arrow-plus.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="del_2_orca">
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>:/24x24/resources/icons/arrow-minus.png</normaloff>:/24x24/resources/icons/arrow-minus.png</iconset>
-                </property>
-                <property name="iconSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="additionalblock_orca">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>21</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>21</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>Write block content here ...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_3">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
-        <item row="6" column="0">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QListWidget" name="add_list2_orca">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_4">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Remove selected</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_19">
           <item>
            <widget class="QPushButton" name="save_button_1">
