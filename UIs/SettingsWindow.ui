@@ -32,8 +32,12 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget_2">
+      <property name="styleSheet">
+       <string notr="true">QListWidget {background-color: black}
+QComboBox {color: white}</string>
+      </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
@@ -1551,6 +1555,9 @@ QPushButton:pressed
               <height>200</height>
              </size>
             </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
            </widget>
           </item>
           <item>
@@ -1746,7 +1753,7 @@ QPushButton:pressed
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QListWidget" name="add_DFT_list2_gauss_2">
+             <widget class="QListWidget" name="add_DFT_list2_gauss">
               <property name="minimumSize">
                <size>
                 <width>190</width>

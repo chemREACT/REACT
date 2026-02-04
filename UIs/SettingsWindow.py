@@ -20,6 +20,8 @@ class Ui_SettingsWindow(object):
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.tabWidget_2 = QtWidgets.QTabWidget(self.centralwidget)
+        self.tabWidget_2.setStyleSheet("QListWidget {background-color: black}\n"
+"QComboBox {color: white}")
         self.tabWidget_2.setObjectName("tabWidget_2")
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")
@@ -614,6 +616,7 @@ class Ui_SettingsWindow(object):
         self.add_DFT_list1_gauss = QtWidgets.QListWidget(self.tab_5)
         self.add_DFT_list1_gauss.setMinimumSize(QtCore.QSize(190, 50))
         self.add_DFT_list1_gauss.setMaximumSize(QtCore.QSize(16777215, 200))
+        self.add_DFT_list1_gauss.setStyleSheet("")
         self.add_DFT_list1_gauss.setObjectName("add_DFT_list1_gauss")
         self.horizontalLayout_20.addWidget(self.add_DFT_list1_gauss)
         self.verticalLayout_29 = QtWidgets.QVBoxLayout()
@@ -688,11 +691,11 @@ class Ui_SettingsWindow(object):
         self.additionalKeys2_gauss.setText("")
         self.additionalKeys2_gauss.setObjectName("additionalKeys2_gauss")
         self.gridLayout_33.addWidget(self.additionalKeys2_gauss, 0, 0, 1, 1)
-        self.add_DFT_list2_gauss_2 = QtWidgets.QListWidget(self.tab_5)
-        self.add_DFT_list2_gauss_2.setMinimumSize(QtCore.QSize(190, 50))
-        self.add_DFT_list2_gauss_2.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.add_DFT_list2_gauss_2.setObjectName("add_DFT_list2_gauss_2")
-        self.gridLayout_33.addWidget(self.add_DFT_list2_gauss_2, 1, 0, 1, 1)
+        self.add_DFT_list2_gauss = QtWidgets.QListWidget(self.tab_5)
+        self.add_DFT_list2_gauss.setMinimumSize(QtCore.QSize(190, 50))
+        self.add_DFT_list2_gauss.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.add_DFT_list2_gauss.setObjectName("add_DFT_list2_gauss")
+        self.gridLayout_33.addWidget(self.add_DFT_list2_gauss, 1, 0, 1, 1)
         self.verticalLayout_26 = QtWidgets.QVBoxLayout()
         self.verticalLayout_26.setObjectName("verticalLayout_26")
         self.add_2_gauss = QtWidgets.QPushButton(self.tab_5)
@@ -858,7 +861,7 @@ class Ui_SettingsWindow(object):
         SettingsWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(SettingsWindow)
-        self.tabWidget_2.setCurrentIndex(1)
+        self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(SettingsWindow)
 
     def retranslateUi(self, SettingsWindow):
