@@ -36,6 +36,30 @@ class Ui_SetupWindow(object):
 "background-color: rgb(20,20,20);\n"
 "}\n"
 "\n"
+"QPushButton {\n"
+"    /*background-color:rgb(98, 114, 164);*/\n"
+"    background-color: rgb(30,30,30);\n"
+"    color: rgb(143,23,119);\n"
+"}\n"
+"QPushButton:hover\n"
+"{\n"
+"       background-color: rgb(40, 40, 40);\n"
+"    /*color:rgb(20,20,20);*/\n"
+"    border-style: outset;\n"
+"    border-width: 2px;\n"
+"    border-color: rgb(143,23,119);\n"
+"\n"
+"}\n"
+"QPushButton:pressed\n"
+"{\n"
+"    color: rgb(143, 23, 119);\n"
+"    background-color: rgb(20, 20, 20);\n"
+"}\n"
+"QPushButton:!enabled\n"
+"{\n"
+"    color: rgb(20, 20, 20);\n"
+"}\n"
+"\n"
 "")
         self.tabWidget.setObjectName("tabWidget")
         self.tab_main = QtWidgets.QWidget()
@@ -324,6 +348,7 @@ class Ui_SetupWindow(object):
         self.checkbox_eps.setObjectName("checkbox_eps")
         self.horizontalLayout_13.addWidget(self.checkbox_eps)
         self.lineEdit_eps = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_2)
+        self.lineEdit_eps.setEnabled(False)
         self.lineEdit_eps.setMaximumSize(QtCore.QSize(50, 16777215))
         self.lineEdit_eps.setObjectName("lineEdit_eps")
         self.horizontalLayout_13.addWidget(self.lineEdit_eps)
