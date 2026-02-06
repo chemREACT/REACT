@@ -90,15 +90,14 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         # So that we dont change the attributes in Settings object
         self.functional = copy.deepcopy(self.settings.functional)
         self.basis = copy.deepcopy(self.settings.basis)
-        self.basis_diff = copy.deepcopy(self.settings.basis_diff)
-        self.basis_pol1 = copy.deepcopy(self.settings.basis_pol1)
-        self.basis_pol2 = copy.deepcopy(self.settings.basis_pol2)
-        self.additional_keys = copy.deepcopy(self.settings.additional_keys)
         self.job_type = self.settings.job_type
         self.opt_freq_combi = False
         self.job_options = copy.deepcopy(self.settings.job_options)
-
         self.blocks = copy.deepcopy(self.settings._orca_settings.get("blocks", {}))
+        self.blocks_available = copy.deepcopy(
+            self.settings._orca_settings.get("blocks_available", {})
+        )
+        self.solvents = ["CPM", "SMD"]
 
         self.opt_freq_details = {"checked": False, "keywords": []}
         self.num_files = 1
@@ -117,7 +116,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             lambda: self.add_item_to_list(
                 self.ui.LineEdit_add_job,
                 self.ui.List_add_job,
-                self.job_options[self.job_type],
+                self.blocks,
+                self.ui.comboBox.currentText(),
             )
         )
         self.ui.Button_del_job.clicked.connect(
@@ -125,29 +125,23 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                 self.ui.List_add_job, self.job_options[self.job_type]
             )
         )
-        # ORCA doesn't use link0 - uses %blocks instead
-        # Link0 button connections removed
+
         self.ui.Button_add_job_2.clicked.connect(
             lambda: self.add_item_to_list(
-                self.ui.LineEdit_add_job_2, self.ui.List_add_job_2, self.additional_keys
+                self.ui.LineEdit_add_job_2,
+                self.ui.List_add_job_2,
+                self.job_options[self.job_type],
             )
         )
         self.ui.Button_del_job_2.clicked.connect(
-            lambda: self.del_item_from_list(
-                self.ui.List_add_job_2, self.additional_keys
-            )
+            lambda: self.del_item_from_list(self.ui.List_add_job_2, self.job_options)
         )
         self.ui.comboBox_basis1.currentIndexChanged.connect(self.update_basis1)
-        self.ui.comboBox_basis2.currentIndexChanged.connect(self.update_basis2)
-        self.ui.comboBox_basis3.currentIndexChanged.connect(self.update_basis3)
-        self.ui.comboBox_basis4.currentIndexChanged.connect(self.update_basis4)
         self.ui.comboBox_funct.currentTextChanged.connect(self.update_functional)
         self.ui.comboBox_job_type.currentTextChanged.connect(self.update_job_details)
         self.ui.ComboBox_files.currentTextChanged.connect(self.update_preview_combobox)
         self.ui.button_close.clicked.connect(self.on_close)
         self.ui.button_write.clicked.connect(self.on_write)
-        # ORCA doesn't use checkBox_mem_2, checkBox_chk, checkBox_oldchk
-        # These are Gaussian link0 options - removed
         self.ui.button_add_freeze.clicked.connect(self.add_freeze_atoms)
         self.ui.button_delete_freeze.clicked.connect(self.remove_freeze_atoms)
         self.ui.button_auto_freeze.clicked.connect(self.auto_freeze_atoms)
@@ -157,8 +151,6 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.lineEdit_charge.textChanged.connect(self.update_charge)
         self.ui.lineEdit_multiplicity.textChanged.connect(self.update_multiplicity)
         self.ui.tabWidget.currentChanged.connect(self.update_preview)
-        # ORCA doesn't use print level buttons (#t, #, #p) - that's Gaussian-specific
-        self.ui.checkbox_freq.clicked.connect(self.toggle_raman)
         self.Qbutton_scan_group.buttonClicked.connect(self.on_scan_mode_changed)
         self.ui.spinbox_scan_pm.valueChanged.connect(
             lambda: self.on_spinbox_changed(self.ui.spinbox_scan_pm)
@@ -195,13 +187,13 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.change_selection_mode
         )
 
+        self.ui.checkbox_eps.stateChanged.connect(self.update_eps)
+
         # Keep track of atoms selected (for multiple selection options)
         self.selected_indexes = list()
 
         # Pymol returns ordered atom id list, so we need to keep track of click order
         self.selected_ids = list()
-
-        self.toggle_raman()
 
         # key to get scan bond from list of bonds
         self.scan_bond_key = False
@@ -251,6 +243,12 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.move_bond.move_both = False
 
         self.add_move_atoms()
+
+    def update_eps(self):
+        if self.ui.checkbox_eps.isChecked():
+            self.ui.lineEdit_eps.setEnabled(True)
+        else:
+            self.ui.lineEdit_eps.setEnabled(False)
 
     def change_selection_mode(self):
         if self.ui.comboBox_freezetype.currentText() == "Atoms":
@@ -376,17 +374,19 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
         if len(self.selected_indexes) < 1:
             return
-        type = "F"
-        g_cmd = {"Atom": "X", "Bond": "B", "Angle": "A", "Dihedral": "D"}
-        atoms = ""
+        type = "C"
+        g_cmd = {"Atom": "C", "Bond": "B", "Angle": "A", "Dihedral": "D"}
+        atoms = []
         for i in self.selected_indexes:
             atomnr = self.mol_obj.molecule[i.row() + 1].atom_index
             if self.pymol:
                 self.pymol_spheres(atomnr)
-            atoms += f"{atomnr} "
+            atoms.append(f"{atomnr} (ORCA idx {atomnr - 1})")
+
+        atoms_str = ", ".join(atoms)
 
         self.ui.list_freeze_atoms.insertItem(
-            0, f"{g_cmd[self.ui.comboBox_freezetype.currentText()]} {atoms} {type}"
+            0, f"{self.ui.comboBox_freezetype.currentText()}: {atoms_str}"
         )
 
     def remove_freeze_atoms(self):
@@ -701,46 +701,21 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         self.job_type = self.ui.comboBox_job_type.currentText()
 
-        if self.job_type in ["Opt", "Opt (TS)"]:
-            self.ui.tabWidget.setTabEnabled(1, True)
-        else:
-            self.ui.tabWidget.setTabEnabled(1, False)
-
-        if self.job_type in ["IRC", "IRCMax"]:
-            self.IRC_files[self.filename + "_frwd"] = ["forward"]
-            self.IRC_files[self.filename + "_rev"] = ["reverse"]
-            if "calcfc" not in self.job_options[self.job_type]:
-                self.ui.List_add_job.addItem("calcfc")
-                self.job_options[self.job_type].append("calcfc")
+        if self.job_type in ["Freq"]:
             self.ui.checkbox_freq.setHidden(True)
-            self.ui.checkBox_raman.setHidden(True)
-
-        elif self.job_type in ["Opt", "Opt (TS)", "Single point"]:
+        else:
             self.ui.checkbox_freq.setHidden(False)
-            if "noraman" not in self.job_options["Freq"]:
-                self.ui.checkBox_raman.setEnabled(True)
-                self.toggle_raman()
-        elif self.job_type in ["Freq"]:
-            self.ui.checkbox_freq.setHidden(True)
-            self.ui.checkBox_raman.setHidden(False)
-            if "noraman" not in self.job_options["Freq"]:
-                self.ui.checkBox_raman.setEnabled(True)
-        else:
-            self.ui.checkbox_freq.setHidden(True)
-            self.ui.checkBox_raman.setHidden(True)
 
         self.ui.List_add_job.clear()
-        self.ui.List_add_job.addItems(self.job_options[self.job_type])
+        self.ui.List_add_job_2.clear()
 
-    def toggle_raman(self):
-        if self.ui.checkbox_freq.isChecked():
-            self.ui.checkBox_raman.setHidden(False)
-            if "noraman" not in self.job_options["Freq"]:
-                self.ui.checkBox_raman.setEnabled(True)
-            else:
-                self.ui.checkBox_raman.setChecked(False)
-        else:
-            self.ui.checkBox_raman.setHidden(True)
+        self.ui.List_add_job_2.addItems(self.job_options[self.job_type])
+        self.ui.List_add_job.addItems(
+            [
+                f"%{block_name}\n    {block_content}\nEND\n"
+                for block_name, block_content in self.blocks.items()
+            ]
+        )
 
     def update_functional(self):
         self.functional = self.ui.comboBox_funct.currentText()
@@ -748,70 +723,41 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
     def fill_main_tab(self):
         """
         Fill all widgets in main tab.
-        Every link0 checkboxes is crossed-checked with entries in self.link0_options.
-        If any entry in link0_options has a dedicated checkbox, set the checkbox to True,
-        and omit this entry from the additional link 0 QlistWidget.
+        ORCA doesn't use basis set modifiers - they're built into the basis name.
         :return:
         """
         self.ui.lineEdit_filename.setText(self.filename)
 
         # Get software-specific options
         functional_options = self.settings.functional_options
-        basis_options_dict = self.settings.basis_options
+        basis_options = self.settings.basis_options
 
         self.ui.comboBox_funct.addItems(functional_options)
-        self.ui.comboBox_basis1.addItems(list(basis_options_dict.keys()))
+        self.ui.comboBox_basis1.addItems(basis_options)
 
-        # Ensure the current basis exists in basis_options with proper structure
-        basis_options_dict = self.settings.basis_options
-        if self.basis not in basis_options_dict:
-            if self.settings.software == "ORCA":
-                # ORCA basis sets don't use separate pol/diff
-                basis_options_dict[self.basis] = {
-                    "pol1": [""],
-                    "pol2": [""],
-                    "diff": [""],
-                }
-            else:
-                # Gaussian basis sets
-                basis_options_dict[self.basis] = {
-                    "pol1": ["", "d", "2d", "3d"],
-                    "pol2": ["", "p", "2p", "3p"],
-                    "diff": ["", "+", "++"],
-                }
-
-        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
-        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
-        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
-        self.ui.List_add_job_2.addItems(self.additional_keys)
         self.ui.comboBox_job_type.addItems(self.job_options)
         self.ui.List_add_job.addItems(
-            self.job_options[self.ui.comboBox_job_type.currentText()]
+            [
+                f"%{block_name}\n  {block_content}\nEND\n"
+                for block_name, block_content in self.blocks.items()
+            ]
         )
         self.ui.ComboBox_files.addItem(self.filename)
+
+        self.ui.comboBox.addItems([x for x in self.blocks_available.keys()])
 
         self.ui.comboBox_job_type.setCurrentText(self.settings.job_type)
         self.ui.comboBox_funct.setCurrentText(self.functional)
         self.ui.comboBox_basis1.setCurrentText(self.basis)
-        self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
-        self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
-        self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
-        # ORCA doesn't use Gaussian output print level buttons
+
         self.ui.lineEdit_charge.setText(self.charge)
         self.ui.lineEdit_multiplicity.setText(self.multiplicity)
 
-        # ORCA doesn't use link0 options - skip checkbox setup
-        # The ORCA UI uses different widgets for %blocks
-
-        if self.job_type in ["Opt", "Opt (TS)"]:
-            self.ui.tabWidget.setTabEnabled(1, True)
-        else:
-            self.ui.tabWidget.setTabEnabled(1, False)
+        self.ui.comboBox_SCRF.addItems(self.solvents)
+        self.ui.checkbox_eps.setChecked(False)
+        self.ui.lineEdit_eps.setEnabled(False)
 
         self.update_job_details()
-
-        # ORCA uses different solvation models (CPCM, SMD in %blocks)
-        # No comboBox_SCRF in ORCA UI
 
     def on_scan_mode_changed(self):
         if not hasattr(self, "scan_bond"):
@@ -945,7 +891,11 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
         # Simple input line
         job_keywords = []
+        blocks_str = ""
+
         job_type = self.job_type
+        if self.ui.checkbox_freq.isChecked():
+            job_keywords.append("Freq")
 
         if extra_job_keywords:
             job_keywords.extend(extra_job_keywords)
@@ -954,19 +904,31 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if self.job_type in self.job_options:
             job_keywords.extend(self.job_options[self.job_type])
 
+        if self.ui.checkbox_SCRF.isChecked():
+            scrf_method = self.ui.comboBox_SCRF.currentText()
+            solvent = self.ui.lineEdit_solvent.text()
+
+            if self.ui.checkbox_eps.isChecked():
+                blocks_str += f"\n%cpcm\n  epsilon {self.ui.lineEdit_eps.text()}\nEND\n"
+                solvent = None
+
+            if solvent:
+                job_keywords.append(f"{scrf_method}({solvent})")
+            else:
+                job_keywords.append(f"{scrf_method}")
+
         # Build simple input line
         simple_input = (
             f"! {self.functional} {self.basis} {job_type} {' '.join(job_keywords)}"
         )
 
-        # Add additional keywords
-        if self.additional_keys:
-            simple_input += f" {' '.join(self.additional_keys)}"
-
-        # Blocks (e.g., %pal, %maxcore)
-        blocks_str = ""
-        blocks_str += f"\n%pal nprocs {self.settings.orca_nprocs} end"
-        blocks_str += f"\n%maxcore {self.settings.orca_maxcore}"
+        if self.blocks:
+            blocks_str += "\n" + ("\n").join(
+                [
+                    f"%{block_name}\n  {block_content}\nEND\n"
+                    for block_name, block_content in self.blocks.items()
+                ]
+            )
 
         # Molecule specification
         if not self.charge:
@@ -989,20 +951,35 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             constraints_str += "  Constraints\n"
             for i in range(self.ui.list_freeze_atoms.count()):
                 item = self.ui.list_freeze_atoms.item(i).text()
-                # Convert Gaussian format to ORCA format
-                # Gaussian: "B 1 2 F" -> ORCA: "    { B 0 1 C }"
-                parts = item.split()
-                if len(parts) >= 3:
-                    constraint_type = parts[0]  # X, B, A, D
-                    atoms = " ".join(parts[1:-1])  # atom indices
-                    # ORCA uses 0-based indexing, Gaussian uses 1-based
-                    atom_indices = [str(int(a) - 1) for a in parts[1:-1]]
-                    constraints_str += (
-                        f"    {{ {constraint_type} {' '.join(atom_indices)} C }}\n"
+                # Parse format: "Constraint_type: 1 (ORCA idx 0), 2 (ORCA idx 1)"
+                if ":" in item:
+                    constraint_type_map = {
+                        "Atom": "C",
+                        "Bond": "B",
+                        "Angle": "A",
+                        "Dihedral": "D",
+                    }
+                    constraint_name, atoms_part = item.split(":", 1)
+                    constraint_type = constraint_type_map.get(
+                        constraint_name.strip(), "C"
                     )
-            constraints_str += "  end\nend\n"
 
-        return f"{simple_input}{blocks_str}\n\n{molecule_str}\n\n{constraints_str}\n"
+                    # Extract atom numbers before parentheses
+                    atom_indices = []
+                    for atom_str in atoms_part.split(","):
+                        atom_str = atom_str.strip()
+                        if "(" in atom_str:
+                            # Extract number before parenthesis and convert to 0-based
+                            atom_num = atom_str.split("(")[0].strip()
+                            atom_indices.append(str(int(atom_num) - 1))
+
+                    if atom_indices:
+                        constraints_str += (
+                            f"    {{ {constraint_type} {' '.join(atom_indices)} C }}\n"
+                        )
+            constraints_str += "  END\nEND\n"
+
+        return f"{simple_input}\n{blocks_str}\n{molecule_str}\n{constraints_str}\n"
 
     def _make_file(self, filename, file_content):
         """
@@ -1038,14 +1015,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         Routes to appropriate method based on software selection.
         :return: str
         """
-        if self.settings.software == "ORCA":
-            return self.make_orca_input_content(
-                filename, extra_job_keywords, xyz, bond_obj
-            )
-        else:
-            return self.make_gaussian_input_content(
-                filename, extra_job_keywords, xyz, bond_obj
-            )
+        return self.make_orca_input_content(filename, extra_job_keywords, xyz, bond_obj)
 
     def remove_extra_newline(self, input_string):
         """
@@ -1071,60 +1041,10 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def update_basis1(self):
         """
-        Updates self.basis1 according to basis selected by user
-        On update of main basis comboBox, update all other basis comboBoxes
-
-        :return:
+        Updates self.basis according to basis selected by user.
+        ORCA doesn't use basis set modifiers (diff, pol1, pol2).
         """
         self.basis = self.ui.comboBox_basis1.currentText()
-
-        self.ui.comboBox_basis2.clear()
-        self.ui.comboBox_basis3.clear()
-        self.ui.comboBox_basis4.clear()
-
-        # Ensure the basis exists in basis_options with proper structure
-        basis_options_dict = self.settings.basis_options
-        if self.basis not in basis_options_dict:
-            if self.settings.software == "ORCA":
-                # ORCA basis sets don't use separate pol/diff
-                basis_options_dict[self.basis] = {
-                    "pol1": [""],
-                    "pol2": [""],
-                    "diff": [""],
-                }
-            else:
-                # Gaussian basis sets
-                basis_options_dict[self.basis] = {
-                    "pol1": ["", "d", "2d", "3d"],
-                    "pol2": ["", "p", "2p", "3p"],
-                    "diff": ["", "+", "++"],
-                }
-
-        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
-        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
-        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
-
-        # self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
-        # self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
-        # self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
-
-    def update_basis2(self):
-        """
-        Update basis attribute self.basis_diff
-        """
-        self.basis_diff = self.ui.comboBox_basis2.currentText()
-
-    def update_basis3(self):
-        """
-        Update basis attribute self.basis_pol1
-        """
-        self.basis_pol1 = self.ui.comboBox_basis3.currentText()
-
-    def update_basis4(self):
-        """
-        Update basis attribute self.basis_pol2
-        """
-        self.basis_pol2 = self.ui.comboBox_basis4.currentText()
 
     def filename_update(self):
         self.filename = self.ui.lineEdit_filename.text()
@@ -1169,18 +1089,40 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                             if self.pymol:
                                 self.pymol_spheres(atom_nr)
 
-    def add_item_to_list(self, Qtextinput, Qlist, job_list):
+    def add_item_to_list(self, Qtextinput, Qlist, job_list, block=False):
         """
         :param Qtextinput: QLineEdit
         :param Qlist: QListWidget
-        :param original_list: list to store item
+        :param job_list: list or dict to store item (dict for blocks, list for others)
+        :param block: block name if adding a block, False otherwise
         Adds the text input from user (past to Qtextinput) to correct
         QlistWidget and append item to list.
         """
         user_input = Qtextinput.text()
-        if user_input and user_input not in job_list:
-            job_list.append(user_input)
-            Qlist.addItem(user_input)
+
+        if not user_input:
+            return
+
+        if block:
+            # For blocks: store raw content in dict, display formatted version in UI
+            if block not in self.blocks or self.blocks[block] != user_input:
+                self.blocks[block] = user_input
+                display_text = f"%{block}\n    {user_input}\nEND\n"
+
+                # Check if this block is already in the list, if so update it
+                for i in range(Qlist.count()):
+                    item_text = Qlist.item(i).text()
+                    if item_text.startswith(f"%{block}\n"):
+                        Qlist.takeItem(i)
+                        break
+
+                Qlist.addItem(display_text)
+        else:
+            # For regular lists (not blocks)
+            if user_input not in job_list:
+                job_list.append(user_input)
+                Qlist.addItem(user_input)
+
         Qtextinput.clear()
 
     def del_item_from_list(self, Qlist, job_list):
@@ -1191,10 +1133,26 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         """
         try:
             item_text = Qlist.currentItem().text()
-            if item_text in job_list:
+
+            # For blocks list (List_add_job), extract block name and delete from self.blocks
+            if Qlist == self.ui.List_add_job:
+                # Extract block name from formatted string like "%blockname\n    content\nEND\n"
+                block_name = item_text.split("\n")[0][1:]  # Remove '%' prefix
+                if block_name in self.blocks:
+                    del self.blocks[block_name]
+            # For job options list (List_add_job_2), delete from job_options for current job type
+            elif Qlist == self.ui.List_add_job_2:
+                if (
+                    self.job_type in self.job_options
+                    and item_text in self.job_options[self.job_type]
+                ):
+                    self.job_options[self.job_type].remove(item_text)
+            # For other lists, delete from the passed job_list
+            elif item_text in job_list:
                 job_list.remove(item_text)
+
             Qlist.takeItem(Qlist.currentRow())
-        except AttributeError:
+        except (AttributeError, IndexError):
             pass
 
     def del_tempfiles(self):

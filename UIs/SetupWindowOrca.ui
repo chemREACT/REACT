@@ -63,6 +63,18 @@ QPushButton:!enabled
 	color: rgb(20, 20, 20);
 }
 
+QComboBox QAbstractItemView {
+	background-color: rgb(60, 60, 60);
+}
+
+QComboBox QAbstractItemView::item {
+	background-color: rgb(60, 60, 60);
+}
+
+QComboBox QAbstractItemView::item:hover {
+	background-color: rgb(80, 80, 80);
+}
+
 </string>
       </property>
       <property name="currentIndex">

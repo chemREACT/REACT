@@ -69,20 +69,17 @@ class Settings:
 
     @property
     def basis_diff(self):
-        if self.software == "ORCA":
-            return self._orca_settings.get("basis_diff")
+        # Gaussian only
         return self._gaussian_settings.get("basis_diff")
 
     @property
     def basis_pol1(self):
-        if self.software == "ORCA":
-            return self._orca_settings.get("basis_pol1", "d")
+        # Gaussian only
         return self._gaussian_settings.get("basis_pol1", "d")
 
     @property
     def basis_pol2(self):
-        if self.software == "ORCA":
-            return self._orca_settings.get("basis_pol2", "p")
+        # Gaussian only
         return self._gaussian_settings.get("basis_pol2", "p")
 
     @property
@@ -135,16 +132,6 @@ class Settings:
     def link0_options(self):
         # Gaussian only
         return self._gaussian_settings.get("link0_options", [])
-
-    @property
-    def orca_nprocs(self):
-        # ORCA only
-        return self._orca_settings.get("nprocs", 4)
-
-    @property
-    def orca_maxcore(self):
-        # ORCA only
-        return self._orca_settings.get("maxcore", 2000)
 
     @workdir.setter
     def workdir(self, value):
@@ -200,24 +187,18 @@ class Settings:
 
     @basis_diff.setter
     def basis_diff(self, value):
-        if self.software == "ORCA":
-            self._orca_settings["basis_diff"] = value
-        else:
-            self._gaussian_settings["basis_diff"] = value
+        # Gaussian only
+        self._gaussian_settings["basis_diff"] = value
 
     @basis_pol1.setter
     def basis_pol1(self, value):
-        if self.software == "ORCA":
-            self._orca_settings["basis_pol1"] = value
-        else:
-            self._gaussian_settings["basis_pol1"] = value
+        # Gaussian only
+        self._gaussian_settings["basis_pol1"] = value
 
     @basis_pol2.setter
     def basis_pol2(self, value):
-        if self.software == "ORCA":
-            self._orca_settings["basis_pol2"] = value
-        else:
-            self._gaussian_settings["basis_pol2"] = value
+        # Gaussian only
+        self._gaussian_settings["basis_pol2"] = value
 
     @job_mem.setter
     def job_mem(self, value):
@@ -252,16 +233,6 @@ class Settings:
     @link0_options.setter
     def link0_options(self, value):
         self._gaussian_settings["link0_options"] = value
-
-    @orca_nprocs.setter
-    def orca_nprocs(self, value):
-        if type(value) == int:
-            self._orca_settings["nprocs"] = value
-
-    @orca_maxcore.setter
-    def orca_maxcore(self, value):
-        if type(value) == int:
-            self._orca_settings["maxcore"] = value
 
     @property
     def default_settings(self):
@@ -311,9 +282,6 @@ class Settings:
             "orca_settings": {
                 "functional": "B3LYP",
                 "basis": "def2-SVP",
-                "basis_diff": None,
-                "basis_pol1": None,
-                "basis_pol2": None,
                 "job_type": "Opt",
                 "additional_keys": [],
                 "job_options": {
@@ -365,56 +333,52 @@ class Settings:
                     "scf": None,
                     "symmetry": None,
                 },
-                "basis_options": {
-                    # def2 basis sets (no separate polarization/diffuse - built into name)
-                    "def2-SVP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-SV(P)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-TZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-TZVP(-f)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-TZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-QZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-QZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    # Minimally augmented def2
-                    "ma-def2-SVP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "ma-def2-TZVP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "ma-def2-TZVPP": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    # Diffuse def2
-                    "def2-SVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-TZVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-TZVPPD": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-QZVPD": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "def2-QZVPPD": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    # Correlation-consistent
-                    "cc-pVDZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "cc-pVTZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "cc-pVQZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "cc-pV5Z": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "aug-cc-pVDZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "aug-cc-pVTZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "aug-cc-pVQZ": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    # Pople basis sets (each combination as separate basis set)
-                    "STO-3G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "3-21G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "3-21+G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31+G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31+G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31+G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31++G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31++G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-31++G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311+G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311+G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311+G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311++G": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311++G(d)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                    "6-311++G(d,p)": {"pol1": [""], "pol2": [""], "diff": [""]},
-                },
+                "basis_options": [
+                    # ORCA basis sets - modifiers (pol1, pol2, diff) are built into the basis name
+                    "def2-SVP",
+                    "def2-SV(P)",
+                    "def2-TZVP",
+                    "def2-TZVP(-f)",
+                    "def2-TZVPP",
+                    "def2-QZVP",
+                    "def2-QZVPP",
+                    "ma-def2-SVP",
+                    "ma-def2-TZVP",
+                    "ma-def2-TZVPP",
+                    "def2-SVPD",
+                    "def2-TZVPD",
+                    "def2-TZVPPD",
+                    "def2-QZVPD",
+                    "def2-QZVPPD",
+                    "cc-pVDZ",
+                    "cc-pVTZ",
+                    "cc-pVQZ",
+                    "cc-pV5Z",
+                    "aug-cc-pVDZ",
+                    "aug-cc-pVTZ",
+                    "aug-cc-pVQZ",
+                    "STO-3G",
+                    "3-21G",
+                    "3-21+G",
+                    "6-31G",
+                    "6-31G(d)",
+                    "6-31G(d,p)",
+                    "6-31+G",
+                    "6-31+G(d)",
+                    "6-31+G(d,p)",
+                    "6-31++G",
+                    "6-31++G(d)",
+                    "6-31++G(d,p)",
+                    "6-311G",
+                    "6-311G(d)",
+                    "6-311G(d,p)",
+                    "6-311+G",
+                    "6-311+G(d)",
+                    "6-311+G(d,p)",
+                    "6-311++G",
+                    "6-311++G(d)",
+                    "6-311++G(d,p)",
+                ],
                 "functional_options": [
                     "B3LYP",
                     "PBE0",
@@ -727,7 +691,7 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         )
         self.ui.add_list2_orca.addItems(
             [
-                f"%{k}\n   {v}\nEND\n"
+                f"%{k}\n  {v}\nEND\n"
                 for k, v in self.settings._orca_settings["blocks"].items()
             ]
         )
@@ -815,10 +779,11 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
                 functional_options.append(text)
 
         elif key == "basis":
-            if text not in basis_options:
-                basis_options[text] = {"pol1": [""], "pol2": [""], "diff": [""]}
             if software == "gaussian":
+                if text not in basis_options:
+                    basis_options[text] = {"pol1": [""], "pol2": [""], "diff": [""]}
                 self.update_basis_options(text, software)
+            # ORCA basis_options is a list, no modification needed
 
         elif key in ["diff", "pol1", "pol2"] and software == "gaussian":
             basis = self.ui.basis1_comboBox_gauss.currentText()
@@ -841,7 +806,7 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
 
             self.settings._orca_settings["blocks"][block_type] = user_input
 
-            user_input = f"%{block_type}\n    {user_input}\nEND\n"
+            user_input = f"%{block_type}\n  {user_input}\nEND\n"
 
         all_values_in_list = [Qlist.item(i).text() for i in range(Qlist.count())]
 

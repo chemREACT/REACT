@@ -547,27 +547,43 @@ class PymolSession(QObject):
 
     @pyqtSlot()
     def print_selector(self, stdout):
-        if "negative_charge" in stdout:
-            self.neg_charge = stdout.split()[5]
-            # Disable print to prevent recursive repaint on Linux
-            # print("got neg charge", self.neg_charge)
-        if "positive_charge" in stdout:
-            self.pos_charge = stdout.split()[5]
-            # Disable print to prevent recursive repaint on Linux
-            # print("got pos charge", self.pos_charge)
-        else:
-            return
+        # Parse negative_charge atom count from Selector output
+        if "negative_charge" in stdout and "defined with" in stdout:
+            for line in stdout.split("\n"):
+                if "negative_charge" in line and "defined with" in line:
+                    try:
+                        # Extract number between 'defined with' and 'atoms'
+                        parts = line.split("defined with ")
+                        if len(parts) > 1:
+                            count_str = parts[1].split(" atoms")[0].strip()
+                            self.neg_charge = int(count_str)
+                            # print("got neg charge: ", self.neg_charge)
+                    except (ValueError, IndexError):
+                        pass
 
+        # Parse positive_charge atom count from Selector output
+        if "positive_charge" in stdout and "defined with" in stdout:
+            for line in stdout.split("\n"):
+                if "positive_charge" in line and "defined with" in line:
+                    try:
+                        # Extract number between 'defined with' and 'atoms'
+                        parts = line.split("defined with ")
+                        if len(parts) > 1:
+                            count_str = parts[1].split(" atoms")[0].strip()
+                            self.pos_charge = int(count_str)
+                            # print("got pos charge: ", self.pos_charge)
+                    except (ValueError, IndexError):
+                        pass
+
+        # Calculate overall charge if both values have been parsed
         try:
-            if self.neg_charge and self.pos_charge:
-                # Disable print to prevent recursive repaint on Linux
-                # print("got both charges")
-                overall_charge = int(self.pos_charge) - int(self.neg_charge)
-                # Disable print to prevent recursive repaint on Linux
-                # print("Overall charge:", overall_charge)
+            if self.neg_charge is not None and self.pos_charge is not None:
+                overall_charge = self.pos_charge - self.neg_charge
                 self.overallChargeSignal.emit(str(overall_charge))
                 self.pymol_cmd("delete %s" % "negative_charge")
                 self.pymol_cmd("delete %s" % "positive_charge")
+                self.neg_charge = None
+                self.pos_charge = None
         except:
             # Use signal instead of direct GUI call to avoid cross-thread issues
             self.textMessageSignal.emit(
