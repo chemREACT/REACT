@@ -1078,9 +1078,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def filename_update(self):
         self.filename = self.ui.lineEdit_filename.text()
-
-        self.ui.lineEdit_chk.setText(self.filename + ".chk")
-        self.ui.lineEdit_oldchk.setText(self.filename + "_old.chk")
+        # ORCA doesn't use .chk files like Gaussian
 
     def insert_model_atoms(self):
         """
