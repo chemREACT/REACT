@@ -717,8 +717,31 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             ]
         )
 
+    def is_composite_method(self):
+        """Check if current functional is a composite method"""
+        functional_options = self.settings.functional_options
+        # Ensure functional_options is a dict (not list from old settings)
+        if not isinstance(functional_options, dict):
+            return False
+        if self.functional in functional_options:
+            func_info = functional_options[self.functional]
+            if isinstance(func_info, dict):
+                return func_info.get("Composite method", False)
+        return False
+
     def update_functional(self):
         self.functional = self.ui.comboBox_funct.currentText()
+        # Disable basis selection for composite methods
+        if self.is_composite_method():
+            self.ui.comboBox_basis1.setEnabled(False)
+            # Make it visually grayed out
+            self.ui.comboBox_basis1.setStyleSheet(
+                "QComboBox { color: gray; background-color: rgb(40, 40, 40); }"
+            )
+        else:
+            self.ui.comboBox_basis1.setEnabled(True)
+            # Restore normal appearance
+            self.ui.comboBox_basis1.setStyleSheet("")
 
     def fill_main_tab(self):
         """
@@ -732,7 +755,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         functional_options = self.settings.functional_options
         basis_options = self.settings.basis_options
 
-        self.ui.comboBox_funct.addItems(functional_options)
+        self.ui.comboBox_funct.addItems(list(functional_options.keys()))
         self.ui.comboBox_basis1.addItems(basis_options)
 
         self.ui.comboBox_job_type.addItems(self.job_options)
@@ -758,6 +781,9 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.lineEdit_eps.setEnabled(False)
 
         self.update_job_details()
+
+        # Ensure basis combobox state is set correctly based on functional
+        self.update_functional()
 
     def on_scan_mode_changed(self):
         if not hasattr(self, "scan_bond"):
@@ -918,9 +944,13 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                 job_keywords.append(f"{scrf_method}")
 
         # Build simple input line
-        simple_input = (
-            f"! {self.functional} {self.basis} {job_type} {' '.join(job_keywords)}"
-        )
+        # Composite methods don't need basis set specification
+        if self.is_composite_method():
+            simple_input = f"! {self.functional} {job_type} {' '.join(job_keywords)}"
+        else:
+            simple_input = (
+                f"! {self.functional} {self.basis} {job_type} {' '.join(job_keywords)}"
+            )
 
         if self.blocks:
             blocks_str += "\n" + ("\n").join(

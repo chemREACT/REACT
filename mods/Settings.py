@@ -30,7 +30,20 @@ class Settings:
             with open(self.settingspath, "r") as f:
                 custom_data = json.load(f, object_hook=cf.json_hook_int_bool_converter)
                 self.load_custom_settings(custom_data)
-        except:
+        except FileNotFoundError:
+            # No custom settings file exists, use defaults
+            self.set_default_settings()
+        except Exception as e:
+            # Settings file exists but is corrupted
+            if self.react:
+                self.react.append_text(
+                    "\n" + "=" * 60 + "\n"
+                    f"ERROR: Failed to load .custom_settings.json: {e}\n\n"
+                    "Your settings file appears to be corrupted.\n"
+                    "Please delete the .custom_settings.json file from your REACT directory\n"
+                    "and restart REACT to use the default settings.\n"
+                    "=" * 60 + "\n"
+                )
             self.set_default_settings()
 
     @property
@@ -125,7 +138,7 @@ class Settings:
     @property
     def functional_options(self):
         if self.software == "ORCA":
-            return self._orca_settings.get("functional_options", [])
+            return self._orca_settings.get("functional_options", {})
         return self._gaussian_settings.get("functional_options", [])
 
     @property
@@ -379,14 +392,20 @@ class Settings:
                     "6-311++G(d)",
                     "6-311++G(d,p)",
                 ],
-                "functional_options": [
-                    "B3LYP",
-                    "PBE0",
-                    "M06-2X",
-                    "wB97X-D3",
-                    "B97-D3",
-                    "TPSS",
-                ],
+                "functional_options": {
+                    "B3LYP": {"Composite method": False},
+                    "PBE0": {"Composite method": False},
+                    "M06-2X": {"Composite method": False},
+                    "wB97X-D3": {"Composite method": False},
+                    "B97-D3": {"Composite method": False},
+                    "TPSS": {"Composite method": False},
+                    "HF-3c": {"Composite method": True},
+                    "B97-3c": {"Composite method": True},
+                    "r2SCAN-3c": {"Composite method": True},
+                    "PBEh-3c": {"Composite method": True},
+                    "B3LYP-3c": {"Composite method": True},
+                    "wB97X-3c": {"Composite method": True},
+                },
             },
         }
 
@@ -407,6 +426,23 @@ class Settings:
         self._orca_settings = copy.deepcopy(self.default_settings["orca_settings"])
 
     def load_custom_settings(self, settings):
+        # Validate ORCA settings format before loading
+        if "orca_settings" in settings:
+            orca_funcs = settings["orca_settings"].get("functional_options")
+            if orca_funcs is not None and not isinstance(orca_funcs, dict):
+                if self.react:
+                    self.react.append_text(
+                        "\n" + "=" * 60 + "\n"
+                        "ERROR: Your .custom_settings.json file is incompatible with this version of REACT.\n"
+                        "The ORCA settings format has changed.\n\n"
+                        "Please delete the .custom_settings.json file from your REACT directory\n"
+                        "and restart REACT to use the new default settings.\n"
+                        "=" * 60 + "\n"
+                    )
+                # Use defaults instead
+                self.set_default_settings()
+                return
+
         for key in [
             "workdir",
             "pymolpath",
@@ -668,7 +704,7 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
     def add_items_to_window(self):
         """Fill all comboboxes and lists with current settings"""
         # ORCA tab
-        self.ui.comboBox_funct_orca.addItems(self.orca_functional_options)
+        self.ui.comboBox_funct_orca.addItems(list(self.orca_functional_options.keys()))
         self.ui.basis1_comboBox_orca.addItems([x for x in self.orca_basis_options])
         self.ui.job_type_comboBox_orca.addItems(
             ["Opt", "OptTS", "NEB-TS", "Freq", "NumFreq", "IRC", "Single point"]
@@ -775,8 +811,12 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
             job_list.addItems(job_options[text])
 
         elif key == "functional":
-            if text not in functional_options:
-                functional_options.append(text)
+            if software == "orca":
+                if text not in functional_options:
+                    functional_options[text] = {"Composite method": False}
+            else:
+                if text not in functional_options:
+                    functional_options.append(text)
 
         elif key == "basis":
             if software == "gaussian":
