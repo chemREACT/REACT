@@ -148,7 +148,7 @@ class PymolSession(QObject):
         self.pymol_cmd('load "%s", %s' % (file_, object_name))
         print(f'PyMOL command: load "{file_}", {object_name}')
 
-    def start_pymol(self, external_gui=False):
+    def start_pymol(self, external_gui=True):
         startup = ["-p"]
         if not external_gui:
             startup.append("-x")
