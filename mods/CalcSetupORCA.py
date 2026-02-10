@@ -75,7 +75,17 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.filepath
         )
 
-        if self.mol_obj.charge:
+        # Check if filetype is xyz (no charge information available)
+        filetype = self.filepath.split(".")[-1].lower()
+        self.is_xyz_file = filetype == "xyz"
+
+        if self.is_xyz_file:
+            self.react.append_text(
+                "WARNING: XYZ files do not contain charge information. "
+                "Please set the charge manually in the setup window."
+            )
+            self.charge = ""
+        elif self.mol_obj.charge:
             self.charge = self.mol_obj.charge
         else:
             self.charge = None
@@ -967,18 +977,24 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             )
 
         # Molecule specification
-        if not self.charge:
-            self.react.append_text(
-                "WARNING: No charge is given to the system. Will set it to 0.."
-            )
-            self.charge = "0"
+        charge_value = self.charge
+        if not self.charge or self.charge == "":
+            charge_value = "INSERT_CHARGE_HERE"
+            if self.is_xyz_file:
+                self.react.append_text(
+                    "WARNING: XYZ file - no charge information. Please replace INSERT_CHARGE_HERE in the input file."
+                )
+            else:
+                self.react.append_text(
+                    "WARNING: No charge is found the system. Please replace INSERT_CHARGE_HERE in the input file."
+                )
 
         if xyz:
             coords_str = "\n".join(xyz)
         else:
             coords_str = "\n".join(self.mol_obj.formatted_xyz)
 
-        molecule_str = f"* xyz {self.charge} {self.multiplicity}\n{coords_str}\n*"
+        molecule_str = f"* xyz {charge_value} {self.multiplicity}\n{coords_str}\n*"
 
         # Geometry constraints (modredundant equivalent)
         constraints_str = ""
