@@ -717,6 +717,12 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             ]
         )
 
+        # Automatically select 'neb' block for NEB-TS job type
+        if self.job_type == "NEB-TS":
+            neb_index = self.ui.comboBox.findText("neb")
+            if neb_index >= 0:
+                self.ui.comboBox.setCurrentIndex(neb_index)
+
     def is_composite_method(self):
         """Check if current functional is a composite method"""
         functional_options = self.settings.functional_options
