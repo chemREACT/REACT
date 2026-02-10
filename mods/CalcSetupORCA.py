@@ -1247,6 +1247,10 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.react.setup_window = None
 
     def handle_overall_charge(self, charge):
+        # Don't auto-fill charge for xyz files - user must set it manually
+        if self.is_xyz_file:
+            return
+
         if self.charge:
             return
 
