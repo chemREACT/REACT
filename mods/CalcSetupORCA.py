@@ -347,26 +347,6 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if self.pymol:
             self.update_pymol_selection(atoms=atoms)
 
-    def parse_atom_indices(self, text):
-        indexes = []
-        if "(ORCA" in text:
-            tokens = text.split()
-            for i, token in enumerate(tokens):
-                if token == "(ORCA" and i > 0:
-                    try:
-                        indexes.append(int(tokens[i - 1]))
-                    except ValueError:
-                        pass
-        else:
-            tokens = text.split()
-            if len(tokens) > 2:
-                for x in tokens[1:-1]:
-                    try:
-                        indexes.append(int(x))
-                    except ValueError:
-                        pass
-        return indexes
-
     def freeze_list_clicked(self):
         """
         When entry in "Atoms to freeze" is clicked, update to selected in "Atoms in model" list and pymol
@@ -433,7 +413,17 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         for row in to_del:
             if self.pymol:
                 text = self.ui.list_freeze_atoms.item(row).text()
-                for i in self.parse_atom_indices(text):
+
+                indexes = []
+                tokens = text.split()
+
+                for x in tokens[1:]:
+                    try:
+                        indexes.append(int(x) + 1)
+                    except ValueError:
+                        pass
+
+                for i in indexes:
                     self.pymol_spheres(atom_nr=i, hide=True)
 
             self.ui.list_freeze_atoms.takeItem(row)
