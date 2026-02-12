@@ -272,6 +272,8 @@ class PymolSession(QObject):
         :return:
         """
         self.pymol_cmd("delete %s" % sele_name)
+        if not atoms:
+            return
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
         self.pymol_cmd(

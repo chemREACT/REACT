@@ -347,6 +347,35 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if self.pymol:
             self.update_pymol_selection(atoms=atoms)
 
+    def parse_atom_indices(self, text):
+        indexes = []
+        if ":" in text:
+            try:
+                # Format: "Type: 0, 1, 2"
+                tokens = text.split(":", 1)[1].split(",")
+                for x in tokens:
+                    if x.strip():
+                        indexes.append(int(x.strip()))
+            except ValueError:
+                pass
+        elif "(ORCA" in text:
+            tokens = text.split()
+            for i, token in enumerate(tokens):
+                if token == "(ORCA" and i > 0:
+                    try:
+                        indexes.append(int(tokens[i - 1]))
+                    except ValueError:
+                        pass
+        else:
+            tokens = text.split()
+            if len(tokens) > 2:
+                for x in tokens[1:-1]:
+                    try:
+                        indexes.append(int(x))
+                    except ValueError:
+                        pass
+        return indexes
+
     def freeze_list_clicked(self):
         """
         When entry in "Atoms to freeze" is clicked, update to selected in "Atoms in model" list and pymol
@@ -356,7 +385,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         try:
             text = self.ui.list_freeze_atoms.currentItem().text()
-            indexes = [x - 1 for x in self.parse_atom_indices(text)]
+            # Stored indices are 0-based
+            indexes = self.parse_atom_indices(text)
         except AttributeError:
             return
         freeze_type = {1: "Atom", 2: "Bond", 3: "Angle", 4: "Dihedral"}
@@ -413,18 +443,9 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         for row in to_del:
             if self.pymol:
                 text = self.ui.list_freeze_atoms.item(row).text()
-
-                indexes = []
-                tokens = text.split()
-
-                for x in tokens[1:]:
-                    try:
-                        indexes.append(int(x) + 1)
-                    except ValueError:
-                        pass
-
-                for i in indexes:
-                    self.pymol_spheres(atom_nr=i, hide=True)
+                for i in self.parse_atom_indices(text):
+                    # convert back to 1-based for pymol
+                    self.pymol_spheres(atom_nr=i + 1, hide=True)
 
             self.ui.list_freeze_atoms.takeItem(row)
 
