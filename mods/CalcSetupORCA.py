@@ -724,11 +724,11 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if hide:
             _cmd = "hide"
         self.pymol.pymol_cmd(
-            f"{_cmd} spheres, id {atom_nr} and {group} and {mol_obj_name}"
+            f"{_cmd} spheres, id {atom_nr} and {mol_obj_name}"
         )
         if not hide:
             self.pymol.pymol_cmd(
-                f"set sphere_scale, 0.3, id {atom_nr} and {group} and {mol_obj_name}"
+                f"set sphere_scale, 0.3, id {atom_nr} and {mol_obj_name}"
             )
 
     def update_job_details(self):

@@ -276,9 +276,7 @@ class PymolSession(QObject):
             return
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
-        self.pymol_cmd(
-            "select %s, %s and %s and (%s)" % (sele_name, group, object_name, sel_str)
-        )
+        self.pymol_cmd("select %s, %s and (%s)" % (sele_name, object_name, sel_str))
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
     def expand_sele(
