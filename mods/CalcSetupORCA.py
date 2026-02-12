@@ -347,6 +347,26 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if self.pymol:
             self.update_pymol_selection(atoms=atoms)
 
+    def parse_atom_indices(self, text):
+        indexes = []
+        if "(ORCA" in text:
+            tokens = text.split()
+            for i, token in enumerate(tokens):
+                if token == "(ORCA" and i > 0:
+                    try:
+                        indexes.append(int(tokens[i - 1]))
+                    except ValueError:
+                        pass
+        else:
+            tokens = text.split()
+            if len(tokens) > 2:
+                for x in tokens[1:-1]:
+                    try:
+                        indexes.append(int(x))
+                    except ValueError:
+                        pass
+        return indexes
+
     def freeze_list_clicked(self):
         """
         When entry in "Atoms to freeze" is clicked, update to selected in "Atoms in model" list and pymol
@@ -355,14 +375,13 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.stop_pymol_animation()
 
         try:
-            indexes = [
-                int(x) - 1
-                for x in self.ui.list_freeze_atoms.currentItem().text().split()[1:-1]
-            ]
+            text = self.ui.list_freeze_atoms.currentItem().text()
+            indexes = [x - 1 for x in self.parse_atom_indices(text)]
         except AttributeError:
             return
         freeze_type = {1: "Atom", 2: "Bond", 3: "Angle", 4: "Dihedral"}
-        self.ui.comboBox_freezetype.setCurrentText(freeze_type[len(indexes)])
+        if len(indexes) in freeze_type:
+            self.ui.comboBox_freezetype.setCurrentText(freeze_type[len(indexes)])
 
         self.selected_indexes = indexes
         self.ui.list_model.clearSelection()
@@ -391,13 +410,16 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             atomnr = self.mol_obj.molecule[i.row() + 1].atom_index
             if self.pymol:
                 self.pymol_spheres(atomnr)
-            atoms.append(f"{atomnr} (ORCA idx {atomnr - 1})")
+            atoms.append(f"{atomnr - 1}")
 
         atoms_str = ", ".join(atoms)
+        constraint_str = f"{self.ui.comboBox_freezetype.currentText()}: {atoms_str}"
 
-        self.ui.list_freeze_atoms.insertItem(
-            0, f"{self.ui.comboBox_freezetype.currentText()}: {atoms_str}"
-        )
+        for i in range(self.ui.list_freeze_atoms.count()):
+            if self.ui.list_freeze_atoms.item(i).text() == constraint_str:
+                return
+
+        self.ui.list_freeze_atoms.insertItem(0, constraint_str)
 
     def remove_freeze_atoms(self):
         """
@@ -410,7 +432,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         ]
         for row in to_del:
             if self.pymol:
-                for i in self.ui.list_freeze_atoms.item(row).text().split()[1:-1]:
+                text = self.ui.list_freeze_atoms.item(row).text()
+                for i in self.parse_atom_indices(text):
                     self.pymol_spheres(atom_nr=i, hide=True)
 
             self.ui.list_freeze_atoms.takeItem(row)
@@ -1003,7 +1026,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             constraints_str += "  Constraints\n"
             for i in range(self.ui.list_freeze_atoms.count()):
                 item = self.ui.list_freeze_atoms.item(i).text()
-                # Parse format: "Constraint_type: 1 (ORCA idx 0), 2 (ORCA idx 1)"
+                # Parse format: "Constraint_type: 1, 2, 3"
                 if ":" in item:
                     constraint_type_map = {
                         "Atom": "C",
@@ -1020,10 +1043,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                     atom_indices = []
                     for atom_str in atoms_part.split(","):
                         atom_str = atom_str.strip()
-                        if "(" in atom_str:
-                            # Extract number before parenthesis and convert to 0-based
-                            atom_num = atom_str.split("(")[0].strip()
-                            atom_indices.append(str(int(atom_num) - 1))
+
+                        atom_indices.append(atom_str)
 
                     if atom_indices:
                         constraints_str += (
@@ -1115,7 +1136,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         for atom_list in [self.ui.list_model, self.ui.list_model_mv]:
             for i in range(len(atoms)):
-                atom_list.insertItem(i, atoms[i])
+                atom_list.insertItem(i, f"{i}  {atoms[i]}")
 
     def auto_freeze_atoms(self):
         """

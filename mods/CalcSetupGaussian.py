@@ -1336,7 +1336,7 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         for atom_list in [self.ui.list_model, self.ui.list_model_mv]:
             for i in range(len(atoms)):
-                atom_list.insertItem(i, atoms[i])
+                atom_list.insertItem(i, f"{i + 1}  {atoms[i]}")
 
     def auto_freeze_atoms(self):
         """
