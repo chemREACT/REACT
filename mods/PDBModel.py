@@ -42,6 +42,11 @@ class ModelPDB(QtWidgets.QMainWindow):
         self.auto_added = False
         self.atom_count = dict()
 
+        # Initialize timer for delayed atom fetching during slider movements
+        self.timer = QtCore.QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.delayed_get_atoms)
+
         # Connect signals from pymol:
         self.pymol.atomsSelectedSignal.connect(self.update_selected_atoms)
         self.pymol.ntermResidues.connect(self.update_nterm)
@@ -334,22 +339,32 @@ class ModelPDB(QtWidgets.QMainWindow):
 
         if self.selected_atoms["central"]:
             self.selected_atoms["included"].clear()
+            # Cancel any pending iterate command BEFORE deleting/recreating the selection
+            if self.timer.isActive():
+                self.timer.stop()
+                print("[DEBUG] Cancelled pending get_atoms timer before expand_sele")
+            # Pass atom IDs directly to avoid relying on persistent 'central' selection
             self.pymol.expand_sele(
-                selection="central",
                 sele_name="included",
                 group="pdb_model",
                 radius=expand_radius,
                 by_res=self.ui.select_byres.isChecked(),
                 include_solv=self.ui.include_solvent.isChecked(),
+                atoms=self.selected_atoms["central"],
             )
             # Delay this in case user does rappid changes...
-            self.timer = QtCore.QTimer()
-            self.timer.timeout.connect(self.delayed_get_atoms)
-            # Timer in milliseconds:
-            self.timer.start(500)
+            # Restart timer - this automatically cancels any pending timeout
+            # Increased delay to ensure PyMOL has time to process the selection
+            self.timer.start(800)
 
     def delayed_get_atoms(self):
         self.timer.stop()
+        print(
+            f"[DEBUG] delayed_get_atoms called - requesting atoms from 'included' selection"
+        )
+        print(
+            f"[DEBUG] Central atoms stored: {len(self.selected_atoms['central'])} atoms"
+        )
         self.pymol.get_selected_atoms(sele="included")
 
     def create_model(self):
@@ -486,12 +501,12 @@ class ModelPDB(QtWidgets.QMainWindow):
         # Use cmd.save() with object selection - PyMOL will infer format from .pdb extension
         self.pymol.pymol_cmd('cmd.save("%s", "model_final", 0)' % pdb_path)
         self.react.append_text(f"\n{pdb_path} written.")
-        
+
         # Check if user wants to copy to project table
         if self.ui.copy_to_project.isChecked():
             # Add a small delay to ensure file is written before importing
             QTimer.singleShot(300, lambda: self._import_to_project(pdb_path))
-    
+
     def _import_to_project(self, pdb_path):
         """Import the saved PDB file into the project table"""
         try:
