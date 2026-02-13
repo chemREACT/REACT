@@ -144,7 +144,9 @@ class ModelPDB(QtWidgets.QMainWindow):
             self.pymol.pymol_cmd("enable included or central")
             self.pymol.pymol_cmd("set mouse_selection_mode, 1")
             self.pymol.pymol_cmd("config_mouse three_button_viewing")
-            self.update_inclusion_size()
+            # Recreate included selection from source only if central atoms are selected
+            if self.selected_atoms["central"]:
+                self.update_inclusion_size()
         elif tab_index == 1:
             if not self.model_tmp:
                 self.create_model()
@@ -334,37 +336,29 @@ class ModelPDB(QtWidgets.QMainWindow):
         Sets radius of residues to include in lineEdit
         :return:
         """
+        # Don't update if we're working with a model - included should point to model_tmp
+        if self.model_tmp:
+            return
+
         expand_radius = self.ui.slider_inclusion_size.value()
         self.ui.lineEdit_inclusion_radius.setText(str(expand_radius))
 
         if self.selected_atoms["central"]:
             self.selected_atoms["included"].clear()
-            # Cancel any pending iterate command BEFORE deleting/recreating the selection
-            if self.timer.isActive():
-                self.timer.stop()
-                print("[DEBUG] Cancelled pending get_atoms timer before expand_sele")
-            # Pass atom IDs directly to avoid relying on persistent 'central' selection
             self.pymol.expand_sele(
+                selection="central",
                 sele_name="included",
                 group="pdb_model",
                 radius=expand_radius,
                 by_res=self.ui.select_byres.isChecked(),
                 include_solv=self.ui.include_solvent.isChecked(),
-                atoms=self.selected_atoms["central"],
             )
-            # Delay this in case user does rappid changes...
+            # Delay this in case user does rapid changes...
             # Restart timer - this automatically cancels any pending timeout
-            # Increased delay to ensure PyMOL has time to process the selection
-            self.timer.start(800)
+            self.timer.start(500)
 
     def delayed_get_atoms(self):
         self.timer.stop()
-        print(
-            f"[DEBUG] delayed_get_atoms called - requesting atoms from 'included' selection"
-        )
-        print(
-            f"[DEBUG] Central atoms stored: {len(self.selected_atoms['central'])} atoms"
-        )
         self.pymol.get_selected_atoms(sele="included")
 
     def create_model(self):
@@ -427,6 +421,19 @@ class ModelPDB(QtWidgets.QMainWindow):
         if self.auto_added:
             return
 
+        # Ensure included selection exists and points to model_tmp
+        self.pymol.pymol_cmd("select included, model_tmp")
+
+        # Add hydrogens to terminal residues before capping
+        # This ensures proper attachment points for ACE/NME fragments
+        # self.pymol.pymol_cmd("cmd.h_add('nterm')")
+        # self.pymol.pymol_cmd("cmd.h_add('cterm')")
+
+        # Delay to allow h_add to complete before getting terminal dihedrals
+        QtCore.QTimer.singleShot(100, lambda: self._start_terminal_capping())
+
+    def _start_terminal_capping(self):
+        """Helper function to start terminal capping after h_add completes"""
         for selection in ["nterm", "cterm"]:
             self.pymol.get_selected_atoms(sele=selection, type="int(resi)")
 

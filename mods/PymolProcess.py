@@ -40,11 +40,6 @@ class PymolSession(QObject):
         # Delete file of loaded molecule after loading it:
         self.files_to_delete = list()
 
-        # Timer for delayed group command in expand_sele
-        self.group_timer = QTimer()
-        self.group_timer.setSingleShot(True)
-        self.pending_group_cmd = None
-
         # Handling standard output:
         self.atoms_selected = list()
         self.atom_count = dict()
@@ -297,36 +292,24 @@ class PymolSession(QObject):
         radius=5,
         by_res=True,
         include_solv=True,
-        atoms=None,
     ):
         """
-        :param selection: name of existing selection to expand around (if atoms is None)
+        :param selection: name of existing selection to expand around
         :param sele_name: name for the new expanded selection
         :param group: group to restrict selection to
         :param radius: radius around selection to select
         :param by_res: expand by residue
         :param include_solv: include solvent
-        :param atoms: optional list of atom IDs to expand around (instead of using named selection)
         :return:
         """
-        # self.pymol_cmd("delete %s" % sele_name)
+        self.pymol_cmd("delete %s" % sele_name)
         cmd = "select %s, " % sele_name
         if by_res:
             cmd += "byres "
 
-        # Build the selection to expand around
-        if atoms:
-            # Use atom IDs directly to avoid dependency on named selections
-            atom_selection = "(id %s)" % " or id ".join([str(a) for a in atoms])
-            cmd += "%s around %s" % (atom_selection, str(radius))
-        else:
-            # Use named selection
-            cmd += "(%s) around %s" % (selection, str(radius))
+        # Include both the original selection AND atoms around it
+        cmd += "((%s) or ((%s) around %s))" % (selection, selection, str(radius))
 
-        if group:
-            # Restrict expansion results to the same group/object context if needed
-            # or simply ensure the result is put IN the group (which is done by the next command)
-            pass
         if include_solv:
             if group:
                 cmd += " and %s" % group
@@ -337,38 +320,14 @@ class PymolSession(QObject):
                 cmd += " and not sol."
 
         self.pymol_cmd(cmd)
-        print(f"[DEBUG] expand_sele: sent select command for '{sele_name}'")
-        # Delay the group command to ensure the selection has been created
         if group:
-            # Cancel any pending group command
-            if self.group_timer.isActive():
-                self.group_timer.stop()
-            # Store the command and schedule it
-            self.pending_group_cmd = "group %s, %s" % (group, sele_name)
-            # Disconnect old connections to avoid multiple calls
-            try:
-                self.group_timer.timeout.disconnect()
-            except:
-                pass
-            self.group_timer.timeout.connect(self._execute_pending_group)
-            self.group_timer.start(100)
-            print(
-                f"[DEBUG] expand_sele: scheduled group command for '{sele_name}' in 100ms"
-            )
-
-    def _execute_pending_group(self):
-        """Execute the pending group command"""
-        if self.pending_group_cmd:
-            print(f"[DEBUG] Executing delayed group command: {self.pending_group_cmd}")
-            self.pymol_cmd(self.pending_group_cmd)
-            self.pending_group_cmd = None
+            self.pymol_cmd("group %s, %s" % (group, sele_name))
 
     def get_selected_atoms(self, sele="sele", type="ID"):
         """
         Get PDB atom numbers/residue numbers of selection
         :return:
         """
-        print(f"[DEBUG] get_selected_atoms: sending iterate command for '{sele}'")
         self.pymol_cmd("iterate %s, %s" % (sele, type))
 
     def get_dihedral(self, a1, a2, a3, a4):
@@ -515,6 +474,19 @@ class PymolSession(QObject):
         :param stdout:
         :return:
         """
+        # Skip PyMOL status messages that contain numbers but aren't atom IDs
+        if any(
+            keyword in stdout
+            for keyword in [
+                "Selector:",
+                "defined with",
+                "ExecutiveIterate:",
+                "atoms",
+                "Error:",
+            ]
+        ):
+            return
+
         # Strip whitespace to handle lines with just numbers cleanly
         clean_line = stdout.strip()
         if clean_line.isnumeric():
@@ -524,10 +496,6 @@ class PymolSession(QObject):
             for junk in stdout.split():
                 if junk.isnumeric():
                     self.atoms_selected.append(junk)
-                elif "atoms" in junk and len(self.atoms_selected) > 0:
-                    # This logic was trying to handle "X atoms slected" messages?
-                    # Ideally we shouldn't rely on this if we have robust triggers
-                    pass
 
     def collect_dihedral(self, stdout):
         if "get_dihedral " in stdout:

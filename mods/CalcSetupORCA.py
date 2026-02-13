@@ -284,10 +284,15 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         if not ids or None in ids:
             return
 
+        atom_list = None
         if self.ui.tabWidget.currentIndex() == 1:
             atom_list = self.ui.list_model_mv
-        if self.ui.tabWidget.currentIndex() == 2:
+        elif self.ui.tabWidget.currentIndex() == 2:
             atom_list = self.ui.list_model
+        
+        # If not on a relevant tab, ignore the signal
+        if atom_list is None:
+            return
 
         ids = [int(x) - 1 for x in ids]
 
@@ -295,11 +300,14 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         unsele = list(set(self.selected_ids) - set(ids))
         try:
             for id in unsele:
-                if atom_list is None:
+                # Check if id is within range before accessing
+                if id < 0 or id >= atom_list.count():
                     continue
-                atom_list.item(id).setSelected(False)
-                self.selected_ids.pop(self.selected_ids.index(id))
-        except UnboundLocalError:
+                item = atom_list.item(id)
+                if item is not None:
+                    item.setSelected(False)
+                    self.selected_ids.pop(self.selected_ids.index(id))
+        except (UnboundLocalError, ValueError):
             pass
 
         # Effective when len(ids) < len(self.selected_ids)
@@ -308,10 +316,11 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             self.selected_ids.append(id)
             if len(self.selected_ids) > self.atoms_to_select:
                 self.selected_ids.pop(0)
-            try:
-                atom_list.item(id).setSelected(True)
-            except:
-                pass
+            # Check if id is within range before accessing
+            if id >= 0 and id < atom_list.count():
+                item = atom_list.item(id)
+                if item is not None:
+                    item.setSelected(True)
 
     def model_atom_clicked(self, atom_list):
         """
