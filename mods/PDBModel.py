@@ -70,6 +70,16 @@ class ModelPDB(QtWidgets.QMainWindow):
         self.ui.button_load_pdb.clicked.connect(self.load_pdb)
         self.ui.button_finalize.clicked.connect(self.copy_model)
         self.ui.button_export_model.clicked.connect(self.save_pdb_model)
+        self.ui.pushButton.clicked.connect(self.add_hydrogens)
+
+    def add_hydrogens(self):
+        if not self.model_tmp:
+            print("No model to add hydrogens to. Please create a model first.")
+            self.react.append_text(
+                "No model to add hydrogens to. Please create a model first."
+            )
+            return
+        self.pymol.pymol_cmd("h_add model_tmp")
 
     def load_pdb(self):
         file_, file_type = self.react.import_files(
@@ -125,6 +135,8 @@ class ModelPDB(QtWidgets.QMainWindow):
         :return:
         """
         if self.model_tmp:
+            # Ensure included selection exists and points to model_tmp
+            self.pymol.pymol_cmd("select included, model_tmp")
             self.pymol.pymol_cmd("count_atoms included")
             self.pymol.pymol_cmd("count_atoms included and not sol.")
         tab_index = self.ui.tabWidget.currentIndex()
@@ -412,6 +424,19 @@ class ModelPDB(QtWidgets.QMainWindow):
         if self.auto_added:
             return
 
+        # Ensure included selection exists and points to model_tmp
+        self.pymol.pymol_cmd("select included, model_tmp")
+
+        # Use PyMOL builder to complete C-terminal residues (adds OXT if missing)
+        # This provides the proper geometry for NME attachment
+        self.pymol.pymol_cmd("cmd.builder.complete_backbone('cterm')")
+        self.pymol.pymol_cmd("h_add cterm")
+
+        # Delay to allow geometry completion before getting terminal dihedrals
+        QtCore.QTimer.singleShot(200, lambda: self._start_terminal_capping())
+
+    def _start_terminal_capping(self):
+        """Helper function to start terminal capping after h_add completes"""
         for selection in ["nterm", "cterm"]:
             self.pymol.get_selected_atoms(sele=selection, type="int(resi)")
 
@@ -486,12 +511,12 @@ class ModelPDB(QtWidgets.QMainWindow):
         # Use cmd.save() with object selection - PyMOL will infer format from .pdb extension
         self.pymol.pymol_cmd('cmd.save("%s", "model_final", 0)' % pdb_path)
         self.react.append_text(f"\n{pdb_path} written.")
-        
+
         # Check if user wants to copy to project table
         if self.ui.copy_to_project.isChecked():
             # Add a small delay to ensure file is written before importing
             QTimer.singleShot(300, lambda: self._import_to_project(pdb_path))
-    
+
     def _import_to_project(self, pdb_path):
         """Import the saved PDB file into the project table"""
         try:

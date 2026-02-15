@@ -154,7 +154,10 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.button_write.clicked.connect(self.on_write)
         self.ui.button_add_freeze.clicked.connect(self.add_freeze_atoms)
         self.ui.button_delete_freeze.clicked.connect(self.remove_freeze_atoms)
-        self.ui.button_auto_freeze.clicked.connect(self.auto_freeze_atoms)
+        self.ui.pushButton_add_carbons_freeze.clicked.connect(self.auto_freeze_carbons)
+        self.ui.pushButton_add_carbons_hydrogens_freeze.clicked.connect(
+            self.auto_freeze_hydrogens
+        )
         self.ui.button_add_scan.clicked.connect(self.add_scan_atoms)
         self.ui.button_delete_scan.clicked.connect(self.remove_scan_atoms)
         self.ui.lineEdit_filename.textChanged.connect(self.filename_update)
@@ -288,6 +291,10 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             atom_list = self.ui.list_model_mv
         if self.ui.tabWidget.currentIndex() == 2:
             atom_list = self.ui.list_model
+
+        # If not on a relevant tab, ignore the signal
+        if atom_list is None:
+            return
 
         ids = [int(x) - 1 for x in ids]
 
@@ -723,9 +730,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         )
         if hide:
             _cmd = "hide"
-        self.pymol.pymol_cmd(
-            f"{_cmd} spheres, id {atom_nr} and {mol_obj_name}"
-        )
+        self.pymol.pymol_cmd(f"{_cmd} spheres, id {atom_nr} and {mol_obj_name}")
         if not hide:
             self.pymol.pymol_cmd(
                 f"set sphere_scale, 0.3, id {atom_nr} and {mol_obj_name}"
@@ -1139,37 +1144,123 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         :return:
         """
 
-        if "pdb" in self.filepath.split(".")[-1]:
-            atoms = self.mol_obj.formatted_pdb
-        else:
+        is_pdb = "pdb" in self.filepath.split(".")[-1].lower()
+
+        if not is_pdb:
             self.ui.button_auto_freeze.setEnabled(False)
-            atoms = self.mol_obj.formatted_xyz
 
         for atom_list in [self.ui.list_model, self.ui.list_model_mv]:
-            for i in range(len(atoms)):
-                atom_list.insertItem(i, f"{i}  {atoms[i]}")
+            for atom_idx, atom in self.mol_obj.molecule.items():
+                i = atom_idx - 1  # Convert to 0-based index for display
 
-    def auto_freeze_atoms(self):
+                if is_pdb and hasattr(atom, "pdb_atom_name"):
+                    # For PDB files, show: index  atom_type  element  coordinates  (residue info)
+                    display_text = (
+                        f"{i}  {atom.pdb_atom_name:4s}  {atom.formatted_xyz_line}"
+                    )
+                    if hasattr(atom, "residue_name") and hasattr(atom, "residue_nr"):
+                        display_text += (
+                            f"  ({atom.residue_name.strip()}{atom.residue_nr})"
+                        )
+                else:
+                    # For XYZ files, show: index  element  coordinates
+                    display_text = f"{i}  {atom.formatted_xyz_line}"
+
+                atom_list.insertItem(i, display_text)
+
+    def auto_freeze_carbons(self):
         """
         Goes through PDB atoms and tries to figure out base on pdb atom names and distances what atoms
         are terminal/chopped region atoms that should be frozen.
         """
-        expected = ["CA", "C", "H", "N", "O"]
-        atoms = self.mol_obj.atoms
-        for atom in atoms:
-            pdb_name = atom.get_pdb_atom_name
-            if pdb_name in ["C", "N"]:
-                atoms.pop(0)
-                for next_atom in atoms:
-                    radius = atom_distance(
-                        atom.get_coordinate, next_atom.get_coordinate
-                    )
-                    if radius < 1.7:
-                        if next_atom.get_pdb_atom_name not in expected:
-                            atom_nr = next_atom.get_atom_index
-                            self.ui.list_freeze_atoms.insertItem(0, f"X {atom_nr} F")
-                            if self.pymol:
-                                self.pymol_spheres(atom_nr)
+        # Check if this is a PDB file
+        filetype = self.filepath.split(".")[-1].lower()
+        if filetype not in ["pdb"]:
+            self.react.append_text(
+                "Auto-freeze CA atoms only works with PDB files. XYZ files do not contain atom type information."
+            )
+            return
+
+        # Collect all CA atoms
+        ca_atoms = []
+        for atom_idx, atom in self.mol_obj.molecule.items():
+            # Check if this atom has pdb_atom_name attribute and if it's CA
+            if hasattr(atom, "pdb_atom_name") and atom.pdb_atom_name.strip() == "CA":
+                # Store 0-based index as per add_freeze_atoms convention
+                ca_atoms.append(atom.atom_index - 1)
+
+        if not ca_atoms:
+            self.react.append_text("No alpha carbons (CA) found in the PDB file.")
+            return
+
+        # Add each CA atom individually as user requested
+        for ca_index in ca_atoms:
+            constraint_str = f"Atom: {ca_index}"
+
+            # Check if already exists
+            already_exists = False
+            for i in range(self.ui.list_freeze_atoms.count()):
+                if self.ui.list_freeze_atoms.item(i).text() == constraint_str:
+                    already_exists = True
+                    break
+
+            if not already_exists:
+                self.ui.list_freeze_atoms.insertItem(0, constraint_str)
+
+                # Show spheres in pymol if available
+                if self.pymol:
+                    # Convert back to 1-based for pymol
+                    self.pymol_spheres(ca_index + 1)
+
+        self.react.append_text(
+            f"Added {len(ca_atoms)} alpha carbon atoms to freeze list."
+        )
+
+    def auto_freeze_hydrogens(self):
+        """
+        Goes through PDB atoms and tries to figure out base on pdb atom names and distances what atoms
+        are terminal/chopped region atoms that should be frozen.
+        """
+        # Check if this is a PDB file
+        filetype = self.filepath.split(".")[-1].lower()
+        if filetype not in ["pdb"]:
+            self.react.append_text(
+                "Auto-freeze HA atoms only works with PDB files. XYZ files do not contain atom type information."
+            )
+            return
+
+        # Collect all HA atoms
+        ha_atoms = []
+        for atom_idx, atom in self.mol_obj.molecule.items():
+            # Check if this atom has pdb_atom_name attribute and if it's HA
+            if hasattr(atom, "pdb_atom_name") and atom.pdb_atom_name.strip() == "HA":
+                # Store 0-based index as per add_freeze_atoms convention
+                ha_atoms.append(atom.atom_index - 1)
+
+        if not ha_atoms:
+            self.react.append_text("No hydrogen atoms (HA) found in the PDB file.")
+            return
+
+        # Add each HA atom individually as user requested
+        for ha_index in ha_atoms:
+            constraint_str = f"Atom: {ha_index}"
+
+            # Check if already exists
+            already_exists = False
+            for i in range(self.ui.list_freeze_atoms.count()):
+                if self.ui.list_freeze_atoms.item(i).text() == constraint_str:
+                    already_exists = True
+                    break
+
+            if not already_exists:
+                self.ui.list_freeze_atoms.insertItem(0, constraint_str)
+
+                # Show spheres in pymol if available
+                if self.pymol:
+                    # Convert back to 1-based for pymol
+                    self.pymol_spheres(ha_index + 1)
+
+        self.react.append_text(f"Added {len(ha_atoms)} hydrogen atoms to freeze list.")
 
     def add_item_to_list(self, Qtextinput, Qlist, job_list, block=False):
         """
