@@ -1773,14 +1773,14 @@ QPushButton:pressed
         <item row="2" column="1">
          <widget class="QPushButton" name="pushButton_add_carbons_freeze">
           <property name="text">
-           <string>Add all alpha-carbons to list</string>
+           <string>Add all CA to list</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QPushButton" name="pushButton_add_carbons_hydrogens_freeze">
+         <widget class="QPushButton" name="pushButton_add_hydrogens_freeze">
           <property name="text">
-           <string>Add all alpha-carbons and alpha-hydrogens to list</string>
+           <string>Add all HA to list</string>
           </property>
          </widget>
         </item>
