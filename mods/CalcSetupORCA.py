@@ -155,7 +155,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.button_add_freeze.clicked.connect(self.add_freeze_atoms)
         self.ui.button_delete_freeze.clicked.connect(self.remove_freeze_atoms)
         self.ui.pushButton_add_carbons_freeze.clicked.connect(self.auto_freeze_carbons)
-        self.ui.pushButton_add_carbons_hydrogens_freeze.clicked.connect(
+        self.ui.pushButton_add_hydrogens_freeze.clicked.connect(
             self.auto_freeze_hydrogens
         )
         self.ui.button_add_scan.clicked.connect(self.add_scan_atoms)

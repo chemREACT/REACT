@@ -206,6 +206,10 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.spinbox_mv_bonds.valueChanged.connect(
             lambda: self.on_spinbox_changed(self.ui.spinbox_mv_bonds)
         )
+        self.ui.pushButton_add_carbons_freeze.clicked.connect(self.auto_freeze_carbons)
+        self.ui.pushButton_add_hydrogens_freeze.clicked.connect(
+            self.auto_freeze_hydrogens
+        )
         self.move_bond = False
         self.atoms_mv = list()
         self.ui.Button_save_new_geometry.clicked.connect(self.save_geometry_to_file)
@@ -386,7 +390,8 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         except AttributeError:
             return
         freeze_type = {1: "Atom", 2: "Bond", 3: "Angle", 4: "Dihedral"}
-        self.ui.comboBox_freezetype.setCurrentText(freeze_type[len(indexes)])
+        if len(indexes) in freeze_type:
+            self.ui.comboBox_freezetype.setCurrentText(freeze_type[len(indexes)])
 
         self.selected_indexes = indexes
         self.ui.list_model.clearSelection()
@@ -401,6 +406,100 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.pymol.set_selection(
             atoms=atoms, sele_name="sele", object_name=object_name, group=group
         )
+
+    def auto_freeze_carbons(self):
+        """
+        Goes through PDB atoms and tries to figure out base on pdb atom names and distances what atoms
+        are terminal/chopped region atoms that should be frozen.
+        """
+        # Check if this is a PDB file
+        filetype = self.filepath.split(".")[-1].lower()
+        if filetype not in ["pdb"]:
+            self.react.append_text(
+                "Auto-freeze CA atoms only works with PDB files. XYZ files do not contain atom type information."
+            )
+            return
+
+        # Collect all CA atoms
+        ca_atoms = []
+        for atom_idx, atom in self.mol_obj.molecule.items():
+            # Check if this atom has pdb_atom_name attribute and if it's CA
+            if hasattr(atom, "pdb_atom_name") and atom.pdb_atom_name.strip() == "CA":
+                # Store 0-based index as per add_freeze_atoms convention
+                ca_atoms.append(atom.atom_index - 1)
+
+        if not ca_atoms:
+            self.react.append_text("No alpha carbons (CA) found in the PDB file.")
+            return
+
+        # Add each CA atom individually as user requested
+        for ca_index in ca_atoms:
+            constraint_str = f"X {ca_index}  F"
+
+            # Check if already exists
+            already_exists = False
+            for i in range(self.ui.list_freeze_atoms.count()):
+                if self.ui.list_freeze_atoms.item(i).text() == constraint_str:
+                    already_exists = True
+                    break
+
+            if not already_exists:
+                self.ui.list_freeze_atoms.insertItem(0, constraint_str)
+
+                # Show spheres in pymol if available
+                if self.pymol:
+                    # Convert back to 1-based for pymol
+                    self.pymol_spheres(ca_index + 1)
+
+        self.react.append_text(
+            f"Added {len(ca_atoms)} alpha carbon atoms to freeze list."
+        )
+
+    def auto_freeze_hydrogens(self):
+        """
+        Goes through PDB atoms and tries to figure out base on pdb atom names and distances what atoms
+        are terminal/chopped region atoms that should be frozen.
+        """
+        # Check if this is a PDB file
+        filetype = self.filepath.split(".")[-1].lower()
+        if filetype not in ["pdb"]:
+            self.react.append_text(
+                "Auto-freeze HA atoms only works with PDB files. XYZ files do not contain atom type information."
+            )
+            return
+
+        # Collect all HA atoms
+        ha_atoms = []
+        for atom_idx, atom in self.mol_obj.molecule.items():
+            # Check if this atom has pdb_atom_name attribute and if it's HA
+            if hasattr(atom, "pdb_atom_name") and atom.pdb_atom_name.strip() == "HA":
+                # Store 0-based index as per add_freeze_atoms convention
+                ha_atoms.append(atom.atom_index - 1)
+
+        if not ha_atoms:
+            self.react.append_text("No hydrogen atoms (HA) found in the PDB file.")
+            return
+
+        # Add each HA atom individually as user requested
+        for ha_index in ha_atoms:
+            constraint_str = f"X {ha_index}  F"
+
+            # Check if already exists
+            already_exists = False
+            for i in range(self.ui.list_freeze_atoms.count()):
+                if self.ui.list_freeze_atoms.item(i).text() == constraint_str:
+                    already_exists = True
+                    break
+
+            if not already_exists:
+                self.ui.list_freeze_atoms.insertItem(0, constraint_str)
+
+                # Show spheres in pymol if available
+                if self.pymol:
+                    # Convert back to 1-based for pymol
+                    self.pymol_spheres(ha_index + 1)
+
+        self.react.append_text(f"Added {len(ha_atoms)} hydrogen atoms to freeze list.")
 
     def add_freeze_atoms(self):
         """
