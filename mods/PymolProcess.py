@@ -392,7 +392,7 @@ class PymolSession(QObject):
         :return:
         """
         self.pymol_cmd("delete %s" % target_name)
-        self.pymol_cmd(\"create %s, %s\" % (target_name, sele))
+        self.pymol_cmd("create %s, %s" % (target_name, sele))
         if group:
             self.pymol_cmd("group %s, %s" % (group, target_name))
 
