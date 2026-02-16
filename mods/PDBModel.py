@@ -104,6 +104,7 @@ class ModelPDB(QtWidgets.QMainWindow):
             return
         if not file_:
             return
+        print(f"DEBUG: import_pdb_project_table - file_: {file_}")
         if not file_.split(".")[-1] == "pdb":
             warn = DialogMessage(self, "PDB file required")
             warn.show()
@@ -113,6 +114,9 @@ class ModelPDB(QtWidgets.QMainWindow):
             return
         # File is already loaded in PyMOL, get the object name
         pymol_object_name = file_.split("/")[-1].replace(".", "_")
+        print(
+            f"DEBUG: import_pdb_project_table - pymol_object_name: {pymol_object_name}"
+        )
         self.add_new_pdb(file_, pymol_object_name=pymol_object_name)
 
     def add_new_pdb(self, file_, pymol_object_name=None):
@@ -123,6 +127,13 @@ class ModelPDB(QtWidgets.QMainWindow):
         # Use provided object name or default to filename without extension
         if pymol_object_name is None:
             pymol_object_name = file_.split("/")[-1].split(".")[0]
+        print(f"DEBUG: add_new_pdb - file_: {file_}")
+        print(f"DEBUG: add_new_pdb - pymol_object_name: {pymol_object_name}")
+        print(
+            f"DEBUG: add_new_pdb - will try to create 'source' from '{pymol_object_name}'"
+        )
+        # List all objects in PyMOL for debugging
+        self.pymol.pymol_cmd("print('Available PyMOL objects:', cmd.get_object_list())")
         self.group_pdb_pymol(pdb_source=pymol_object_name, pdb_target="source")
         self.guess_highlight_ligand(pdb_file=file_, pymol_name="source")
         self.pymol.pymol_cmd("count_atoms source")
