@@ -1034,6 +1034,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         # ORCA only allows one %geom block and one Constraints section within it
         geom_block_content = ""
         constraints_list = []
+        other_content = []
 
         # Check if user manually added a %geom block
         manual_geom_block = self.blocks.get("geom", "")
