@@ -430,6 +430,9 @@ class PymolSession(QObject):
 
         for k in self.stdout_handler.keys():
             if k in stdout:
+                print(
+                    f"DEBUG PymolProcess: Found key '{k}' in stdout, clearing atoms_selected (had {len(self.atoms_selected)} atoms)"
+                )
                 self.atoms_selected.clear()
                 self.stdout_handler[k]["collect"] = True
 
@@ -449,12 +452,21 @@ class PymolSession(QObject):
         :param stdout:
         :return:
         """
+        print(
+            f"DEBUG PymolProcess: collect_iterate called, current atoms_selected length: {len(self.atoms_selected)}"
+        )
+        print(
+            f"DEBUG PymolProcess: stdout = {stdout[:200]}..."
+        )  # Print first 200 chars
         for junk in stdout.split():
             for atomnr in junk.split("\n"):
                 if atomnr.isnumeric():
                     self.atoms_selected.append(atomnr)
                 elif "atoms" in atomnr and len(self.atoms_selected) > 0:
                     del self.atoms_selected[-1]
+        print(
+            f"DEBUG PymolProcess: After processing, atoms_selected length: {len(self.atoms_selected)}"
+        )
 
     def collect_dihedral(self, stdout):
         if "get_dihedral " in stdout:
@@ -464,6 +476,12 @@ class PymolSession(QObject):
 
     @pyqtSlot()
     def return_sel_atomnr(self):
+        print(
+            f"DEBUG PymolProcess: return_sel_atomnr emitting {len(self.atoms_selected)} atoms"
+        )
+        print(
+            f"DEBUG PymolProcess: First 10 atoms: {self.atoms_selected[:10] if len(self.atoms_selected) > 0 else 'none'}"
+        )
         self.atomsSelectedSignal.emit(self.atoms_selected)
 
     @pyqtSlot()
