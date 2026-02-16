@@ -104,7 +104,6 @@ class ModelPDB(QtWidgets.QMainWindow):
             return
         if not file_:
             return
-        print(f"DEBUG: import_pdb_project_table - file_: {file_}")
         if not file_.split(".")[-1] == "pdb":
             warn = DialogMessage(self, "PDB file required")
             warn.show()
@@ -114,9 +113,6 @@ class ModelPDB(QtWidgets.QMainWindow):
             return
         # File is already loaded in PyMOL, get the object name
         pymol_object_name = file_.split("/")[-1].replace(".", "_")
-        print(
-            f"DEBUG: import_pdb_project_table - pymol_object_name: {pymol_object_name}"
-        )
         self.add_new_pdb(file_, pymol_object_name=pymol_object_name)
 
     def add_new_pdb(self, file_, pymol_object_name=None):
@@ -127,13 +123,6 @@ class ModelPDB(QtWidgets.QMainWindow):
         # Use provided object name or default to filename without extension
         if pymol_object_name is None:
             pymol_object_name = file_.split("/")[-1].split(".")[0]
-        print(f"DEBUG: add_new_pdb - file_: {file_}")
-        print(f"DEBUG: add_new_pdb - pymol_object_name: {pymol_object_name}")
-        print(
-            f"DEBUG: add_new_pdb - will try to create 'source' from '{pymol_object_name}'"
-        )
-        # List all objects in PyMOL for debugging
-        self.pymol.pymol_cmd("print('Available PyMOL objects:', cmd.get_object_list())")
         self.group_pdb_pymol(pdb_source=pymol_object_name, pdb_target="source")
         self.guess_highlight_ligand(pdb_file=file_, pymol_name="source")
         self.pymol.pymol_cmd("count_atoms source")
@@ -219,13 +208,8 @@ class ModelPDB(QtWidgets.QMainWindow):
         :return:
         """
         # Reset central atoms
-        print("DEBUG: set_central_atoms() called - resetting central and included")
-        print(
-            f"DEBUG: Before reset - central has {len(self.selected_atoms['central'])} atoms, included has {len(self.selected_atoms['included'])} atoms"
-        )
         self.selected_atoms["central"] = list()
         self.selected_atoms["included"] = list()
-        print("DEBUG: Calling pymol.get_selected_atoms()")
         self.pymol.get_selected_atoms()
 
     @pyqtSlot(list)
@@ -254,15 +238,10 @@ class ModelPDB(QtWidgets.QMainWindow):
         if self.model_tmp:
             self.fix_atoms = list()
             self.fix_atoms = atoms
-            print(f"DEBUG: model_tmp mode - fix_atoms set to {len(atoms)} atoms")
             return
 
         if len(self.selected_atoms["central"]) < 1:
-            print(f"DEBUG: Setting central atoms - storing {len(atoms)} atoms")
             self.selected_atoms["central"] = atoms
-            print(
-                f"DEBUG: self.selected_atoms['central'] now has {len(self.selected_atoms['central'])} atoms"
-            )
             self.pymol.set_selection(
                 atoms=atoms,
                 sele_name="central",
@@ -272,10 +251,8 @@ class ModelPDB(QtWidgets.QMainWindow):
             self.pymol.highlight_atoms(
                 atoms=atoms, color="lightmagenta", name="source", group="pdb_model"
             )
-            print(f"DEBUG: Calling update_inclusion_size()")
             self.update_inclusion_size()
         else:
-            print(f"DEBUG: Setting included atoms - storing {len(atoms)} atoms")
             self.selected_atoms["included"] = atoms
             self.pymol.set_selection(
                 atoms=atoms,

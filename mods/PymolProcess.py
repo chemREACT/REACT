@@ -277,9 +277,7 @@ class PymolSession(QObject):
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
         select_cmd = "select %s, %s and (%s)" % (sele_name, object_name, sel_str)
-        print(f"DEBUG PymolProcess: set_selection command: {select_cmd}")
         self.pymol_cmd(select_cmd)
-        self.pymol_cmd("print('Available selections:', cmd.get_names('selections'))")
         # Don't group selections - only objects can be grouped
 
     def expand_sele(
@@ -319,11 +317,7 @@ class PymolSession(QObject):
         if not include_solv:
             cmd += " and not sol."
 
-        print(f"DEBUG PymolProcess: expand_sele command: {cmd}")
         self.pymol_cmd(cmd)
-        self.pymol_cmd(
-            "print('Available selections after expand:', cmd.get_names('selections'))"
-        )
         # Don't group selections - only objects can be grouped
 
     def get_selected_atoms(self, sele="sele", type="ID"):
@@ -398,12 +392,7 @@ class PymolSession(QObject):
         :return:
         """
         self.pymol_cmd("delete %s" % target_name)
-        create_cmd = "create %s, %s" % (target_name, sele)
-        print(f"DEBUG PymolProcess: copy_sele_to_object command: {create_cmd}")
-        self.pymol_cmd(
-            "print('Available selections before create:', cmd.get_names('selections'))"
-        )
-        self.pymol_cmd(create_cmd)
+        self.pymol_cmd(\"create %s, %s\" % (target_name, sele))
         if group:
             self.pymol_cmd("group %s, %s" % (group, target_name))
 
@@ -457,9 +446,6 @@ class PymolSession(QObject):
 
         for k in self.stdout_handler.keys():
             if k in stdout:
-                print(
-                    f"DEBUG PymolProcess: Found key '{k}' in stdout, clearing atoms_selected (had {len(self.atoms_selected)} atoms)"
-                )
                 self.atoms_selected.clear()
                 self.stdout_handler[k]["collect"] = True
 
@@ -479,21 +465,12 @@ class PymolSession(QObject):
         :param stdout:
         :return:
         """
-        print(
-            f"DEBUG PymolProcess: collect_iterate called, current atoms_selected length: {len(self.atoms_selected)}"
-        )
-        print(
-            f"DEBUG PymolProcess: stdout = {stdout[:200]}..."
-        )  # Print first 200 chars
         for junk in stdout.split():
             for atomnr in junk.split("\n"):
                 if atomnr.isnumeric():
                     self.atoms_selected.append(atomnr)
                 elif "atoms" in atomnr and len(self.atoms_selected) > 0:
                     del self.atoms_selected[-1]
-        print(
-            f"DEBUG PymolProcess: After processing, atoms_selected length: {len(self.atoms_selected)}"
-        )
 
     def collect_dihedral(self, stdout):
         if "get_dihedral " in stdout:
@@ -503,12 +480,6 @@ class PymolSession(QObject):
 
     @pyqtSlot()
     def return_sel_atomnr(self):
-        print(
-            f"DEBUG PymolProcess: return_sel_atomnr emitting {len(self.atoms_selected)} atoms"
-        )
-        print(
-            f"DEBUG PymolProcess: First 10 atoms: {self.atoms_selected[:10] if len(self.atoms_selected) > 0 else 'none'}"
-        )
         self.atomsSelectedSignal.emit(self.atoms_selected)
 
     @pyqtSlot()
