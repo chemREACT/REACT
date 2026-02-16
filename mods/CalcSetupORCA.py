@@ -1043,16 +1043,44 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             lines = manual_geom_block.strip().split("\n")
             in_constraints = False
             other_content = []
+            constraint_depth = 0  # Track nesting level for END keywords
 
             for line in lines:
                 stripped = line.strip()
-                if stripped.lower() == "constraints":
+
+                # Check if this line starts the Constraints section
+                if stripped.lower() == "constraints" and not in_constraints:
                     in_constraints = True
-                elif stripped.lower() == "end":
-                    in_constraints = False
-                elif in_constraints:
+                    continue  # Skip the "Constraints" keyword itself
+
+                # Handle END keywords
+                if stripped.lower() == "end":
+                    if in_constraints and constraint_depth == 0:
+                        # This END closes the Constraints section
+                        in_constraints = False
+                        continue  # Skip this END keyword
+                    elif in_constraints:
+                        # This is a nested END within constraints, keep it
+                        constraint_depth -= 1
+                        if stripped and not stripped.startswith("#"):
+                            # Preserve original indentation for nested content
+                            constraints_list.append("    " + stripped)
+                    else:
+                        # END outside constraints section - keep as other content
+                        if stripped and not stripped.startswith("#"):
+                            other_content.append("  " + stripped)
+                    continue
+
+                # Process content lines
+                if in_constraints:
                     # This is a constraint from manual block
                     if stripped and not stripped.startswith("#"):
+                        # Check for opening braces or keywords that might contain nested ENDs
+                        if "{" in stripped:
+                            constraint_depth += stripped.count("{") - stripped.count(
+                                "}"
+                            )
+                        # Preserve the constraint line
                         constraints_list.append("    " + stripped)
                 else:
                     # This is other geom content (not constraints)
