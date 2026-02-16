@@ -284,7 +284,7 @@ class ModelPDB(QtWidgets.QMainWindow):
                 group="pdb_model",
             )
         self.pymol.pymol_cmd("count_atoms included")
-        self.pymol.pymol_cmd("count_atoms included not sol.")
+        self.pymol.pymol_cmd("count_atoms included and not sol.")
 
     @pyqtSlot(list)
     def update_nterm(self, resi):
