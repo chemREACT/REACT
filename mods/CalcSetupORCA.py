@@ -291,10 +291,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             atom_list = self.ui.list_model_mv
         if self.ui.tabWidget.currentIndex() == 2:
             atom_list = self.ui.list_model
-
-        # If not on a relevant tab, ignore the signal
-        if atom_list is None:
-            return
+        else:
+            atom_list = None
 
         ids = [int(x) - 1 for x in ids]
 
