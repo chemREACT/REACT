@@ -276,7 +276,10 @@ class PymolSession(QObject):
             return
         sel_str = "id "
         sel_str += " or id ".join([str(x) for x in atoms])
-        self.pymol_cmd("select %s, %s and (%s)" % (sele_name, object_name, sel_str))
+        select_cmd = "select %s, %s and (%s)" % (sele_name, object_name, sel_str)
+        print(f"DEBUG PymolProcess: set_selection command: {select_cmd}")
+        self.pymol_cmd(select_cmd)
+        self.pymol_cmd("print('Available selections:', cmd.get_names('selections'))")
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
     def expand_sele(
@@ -318,6 +321,9 @@ class PymolSession(QObject):
 
         print(f"DEBUG PymolProcess: expand_sele command: {cmd}")
         self.pymol_cmd(cmd)
+        self.pymol_cmd(
+            "print('Available selections after expand:', cmd.get_names('selections'))"
+        )
         self.pymol_cmd("group %s, %s" % (group, sele_name))
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
@@ -393,7 +399,12 @@ class PymolSession(QObject):
         :return:
         """
         self.pymol_cmd("delete %s" % target_name)
-        self.pymol_cmd("create %s, %s" % (target_name, sele))
+        create_cmd = "create %s, %s" % (target_name, sele)
+        print(f"DEBUG PymolProcess: copy_sele_to_object command: {create_cmd}")
+        self.pymol_cmd(
+            "print('Available selections before create:', cmd.get_names('selections'))"
+        )
+        self.pymol_cmd(create_cmd)
         if group:
             self.pymol_cmd("group %s, %s" % (group, target_name))
 
