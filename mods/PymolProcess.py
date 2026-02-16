@@ -298,16 +298,13 @@ class PymolSession(QObject):
         self.pymol_cmd("delete %s" % sele_name)
         cmd = "select %s, " % sele_name
 
-        # If object_name specified, scope the selection to that object
-        if object_name:
-            cmd += "%s and (" % object_name
-
         if by_res:
             cmd += "byres "
         cmd += "%s around %s" % (selection, str(radius))
 
+        # If object_name specified, scope the selection to that object
         if object_name:
-            cmd += ")"
+            cmd += " and %s" % object_name
 
         if not include_solv:
             cmd += " and not sol."
