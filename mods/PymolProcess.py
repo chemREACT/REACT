@@ -298,18 +298,27 @@ class PymolSession(QObject):
         self.pymol_cmd("delete %s" % sele_name)
         cmd = "select %s, " % sele_name
 
+        # Include the original selection plus atoms around it
         if by_res:
-            cmd += "byres "
-        cmd += "%s around %s" % (selection, str(radius))
+            cmd += "byres ("
 
-        # If object_name specified, scope the selection to that object
+        cmd += "%s or (%s around %s" % (selection, selection, str(radius))
+
+        # If object_name specified, scope the "around" part to that object
         if object_name:
             cmd += " and %s" % object_name
+
+        cmd += ")"
+
+        if by_res:
+            cmd += ")"
 
         if not include_solv:
             cmd += " and not sol."
 
+        print(f"DEBUG PymolProcess: expand_sele command: {cmd}")
         self.pymol_cmd(cmd)
+        self.pymol_cmd("group %s, %s" % (group, sele_name))
         self.pymol_cmd("group %s, %s" % (group, sele_name))
 
     def get_selected_atoms(self, sele="sele", type="ID"):
