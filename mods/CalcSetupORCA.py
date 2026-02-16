@@ -1010,14 +1010,6 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                 f"! {self.functional} {self.basis} {job_type} {' '.join(job_keywords)}"
             )
 
-        if self.blocks:
-            blocks_str += "\n" + ("\n").join(
-                [
-                    f"%{block_name}\n  {block_content}\nEND\n"
-                    for block_name, block_content in self.blocks.items()
-                ]
-            )
-
         # Molecule specification
         charge_value = self.charge
         if not self.charge or self.charge == "":
@@ -1038,11 +1030,41 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         molecule_str = f"* xyz {charge_value} {self.multiplicity}\n{coords_str}\n*"
 
-        # Geometry constraints (modredundant equivalent)
-        constraints_str = ""
+        # Handle %geom block and constraints
+        # ORCA only allows one %geom block and one Constraints section within it
+        geom_block_content = ""
+        constraints_list = []
+
+        # Check if user manually added a %geom block
+        manual_geom_block = self.blocks.get("geom", "")
+
+        if manual_geom_block:
+            # Parse the manual geom block to extract constraints and other content
+            lines = manual_geom_block.strip().split("\n")
+            in_constraints = False
+            other_content = []
+
+            for line in lines:
+                stripped = line.strip()
+                if stripped.lower() == "constraints":
+                    in_constraints = True
+                elif stripped.lower() == "end":
+                    in_constraints = False
+                elif in_constraints:
+                    # This is a constraint from manual block
+                    if stripped and not stripped.startswith("#"):
+                        constraints_list.append("    " + stripped)
+                else:
+                    # This is other geom content (not constraints)
+                    if stripped and not stripped.startswith("#"):
+                        other_content.append("  " + stripped)
+
+            # Add non-constraint content to geom block
+            if other_content:
+                geom_block_content = "\n".join(other_content) + "\n"
+
+        # Add constraints from freeze tab
         if self.ui.list_freeze_atoms.count() > 0:
-            constraints_str = "\n%geom\n"
-            constraints_str += "  Constraints\n"
             for i in range(self.ui.list_freeze_atoms.count()):
                 item = self.ui.list_freeze_atoms.item(i).text()
                 # Parse format: "Constraint_type: 1, 2, 3"
@@ -1058,20 +1080,40 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                         constraint_name.strip(), "C"
                     )
 
-                    # Extract atom numbers before parentheses
+                    # Extract atom numbers
                     atom_indices = []
                     for atom_str in atoms_part.split(","):
                         atom_str = atom_str.strip()
-
                         atom_indices.append(atom_str)
 
                     if atom_indices:
-                        constraints_str += (
-                            f"    {{ {constraint_type} {' '.join(atom_indices)} C }}\n"
+                        constraints_list.append(
+                            f"    {{ {constraint_type} {' '.join(atom_indices)} C }}"
                         )
-            constraints_str += "  END\nEND\n"
 
-        return f"{simple_input}\n{blocks_str}\n{molecule_str}\n{constraints_str}\n"
+        # Build final %geom block if there's any content
+        if geom_block_content or constraints_list:
+            blocks_str += "\n%geom\n"
+            if geom_block_content:
+                blocks_str += geom_block_content
+            if constraints_list:
+                blocks_str += "  Constraints\n"
+                blocks_str += "\n".join(constraints_list) + "\n"
+                blocks_str += "  END\n"
+            blocks_str += "END\n"
+
+        # Add other blocks (excluding geom which we already handled)
+        if self.blocks:
+            other_blocks = {k: v for k, v in self.blocks.items() if k.lower() != "geom"}
+            if other_blocks:
+                blocks_str += "\n" + ("\n").join(
+                    [
+                        f"%{block_name}\n  {block_content}\nEND\n"
+                        for block_name, block_content in other_blocks.items()
+                    ]
+                )
+
+        return f"{simple_input}\n{blocks_str}\n{molecule_str}\n"
 
     def _make_file(self, filename, file_content):
         """
