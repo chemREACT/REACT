@@ -1040,56 +1040,44 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         if manual_geom_block:
             # Parse the manual geom block to extract constraints and other content
-            lines = manual_geom_block.strip().split("\n")
-            in_constraints = False
-            other_content = []
-            constraint_depth = 0  # Track nesting level for END keywords
+            # Use regex to handle various formats (single line or multi-line)
+            import re
 
-            for line in lines:
-                stripped = line.strip()
+            # Find Constraints blocks with pattern: Constraints ... END (case-insensitive)
+            # This handles both single-line and multi-line formats
+            constraints_pattern = re.compile(
+                r"\bConstraints\b(.*?)\bEND\b", re.IGNORECASE | re.DOTALL
+            )
 
-                # Check if this line starts the Constraints section
-                if stripped.lower() == "constraints" and not in_constraints:
-                    in_constraints = True
-                    continue  # Skip the "Constraints" keyword itself
-
-                # Handle END keywords
-                if stripped.lower() == "end":
-                    if in_constraints and constraint_depth == 0:
-                        # This END closes the Constraints section
-                        in_constraints = False
-                        continue  # Skip this END keyword
-                    elif in_constraints:
-                        # This is a nested END within constraints, keep it
-                        constraint_depth -= 1
-                        if stripped and not stripped.startswith("#"):
-                            # Preserve original indentation for nested content
-                            constraints_list.append("    " + stripped)
-                    else:
-                        # END outside constraints section - keep as other content
-                        if stripped and not stripped.startswith("#"):
-                            other_content.append("  " + stripped)
-                    continue
-
-                # Process content lines
-                if in_constraints:
-                    # This is a constraint from manual block
+            # Extract all constraints blocks
+            for match in constraints_pattern.finditer(manual_geom_block):
+                constraint_content = match.group(1).strip()
+                # Parse individual constraint lines from the extracted content
+                for line in constraint_content.split("\n"):
+                    stripped = line.strip()
                     if stripped and not stripped.startswith("#"):
-                        # Check for opening braces or keywords that might contain nested ENDs
-                        if "{" in stripped:
-                            constraint_depth += stripped.count("{") - stripped.count(
-                                "}"
-                            )
-                        # Preserve the constraint line
+                        # Add constraint line
                         constraints_list.append("    " + stripped)
-                else:
-                    # This is other geom content (not constraints)
-                    if stripped and not stripped.startswith("#"):
-                        other_content.append("  " + stripped)
 
-            # Add non-constraint content to geom block
-            if other_content:
-                geom_block_content = "\n".join(other_content) + "\n"
+            # Remove all Constraints blocks from manual geom block to get other content
+            remaining_content = constraints_pattern.sub("", manual_geom_block).strip()
+
+            # Parse remaining content for any standalone constraint lines and other geom settings
+            if remaining_content:
+                for line in remaining_content.split("\n"):
+                    stripped = line.strip()
+                    if stripped and not stripped.startswith("#"):
+                        # Check if this is a constraint line without Constraints wrapper
+                        if stripped.startswith("{") and stripped.endswith("}"):
+                            # Constraint line, add to constraints
+                            constraints_list.append("    " + stripped)
+                        else:
+                            # Other geom content
+                            other_content.append("  " + stripped)
+
+                # Add non-constraint content to geom block
+                if other_content:
+                    geom_block_content = "\n".join(other_content) + "\n"
 
         # Add constraints from freeze tab
         if self.ui.list_freeze_atoms.count() > 0:
