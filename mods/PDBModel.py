@@ -111,16 +111,19 @@ class ModelPDB(QtWidgets.QMainWindow):
                 "%s is not recognised as a pdb file." % (file_.split("/")[-1])
             )
             return
-        self.add_new_pdb(file_)
+        # File is already loaded in PyMOL, get the object name
+        pymol_object_name = file_.split("/")[-1].replace(".", "_")
+        self.add_new_pdb(file_, pymol_object_name=pymol_object_name)
 
-    def add_new_pdb(self, file_):
+    def add_new_pdb(self, file_, pymol_object_name=None):
         self.ui.list_model_summary.clear()
         for i in range(8):
             self.ui.list_model_summary.insertItem(i, "")
         self.ui.lineEdit_pdb_file.setText(file_)
-        self.group_pdb_pymol(
-            pdb_source=file_.split("/")[-1].split(".")[0], pdb_target="source"
-        )
+        # Use provided object name or default to filename without extension
+        if pymol_object_name is None:
+            pymol_object_name = file_.split("/")[-1].split(".")[0]
+        self.group_pdb_pymol(pdb_source=pymol_object_name, pdb_target="source")
         self.guess_highlight_ligand(pdb_file=file_, pymol_name="source")
         self.pymol.pymol_cmd("count_atoms source")
         self.pymol.pymol_cmd("count_atoms source and not sol.")
