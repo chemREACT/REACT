@@ -208,8 +208,13 @@ class ModelPDB(QtWidgets.QMainWindow):
         :return:
         """
         # Reset central atoms
+        print("DEBUG: set_central_atoms() called - resetting central and included")
+        print(
+            f"DEBUG: Before reset - central has {len(self.selected_atoms['central'])} atoms, included has {len(self.selected_atoms['included'])} atoms"
+        )
         self.selected_atoms["central"] = list()
         self.selected_atoms["included"] = list()
+        print("DEBUG: Calling pymol.get_selected_atoms()")
         self.pymol.get_selected_atoms()
 
     @pyqtSlot(list)
@@ -219,20 +224,34 @@ class ModelPDB(QtWidgets.QMainWindow):
         :param: atoms list of atom numbers (str)
         :return:
         """
+        print(f"DEBUG: update_selected_atoms called with {len(atoms)} atoms")
+        print(f"DEBUG: atoms received: {atoms}")
+
         if len(atoms) == 0:
             print("No atoms selected")
             self.react.append_text("No atoms selected")
             return
 
         # Remove duplicates (maybe not necessary):
+        atoms_before_dedup = len(atoms)
         atoms = list(dict.fromkeys(atoms))
+        print(
+            f"DEBUG: After deduplication: {len(atoms)} atoms (removed {atoms_before_dedup - len(atoms)} duplicates)"
+        )
+        print(f"DEBUG: atoms after dedup: {atoms}")
+
         if self.model_tmp:
             self.fix_atoms = list()
             self.fix_atoms = atoms
+            print(f"DEBUG: model_tmp mode - fix_atoms set to {len(atoms)} atoms")
             return
 
         if len(self.selected_atoms["central"]) < 1:
+            print(f"DEBUG: Setting central atoms - storing {len(atoms)} atoms")
             self.selected_atoms["central"] = atoms
+            print(
+                f"DEBUG: self.selected_atoms['central'] now has {len(self.selected_atoms['central'])} atoms"
+            )
             self.pymol.set_selection(
                 atoms=atoms,
                 sele_name="central",
@@ -242,8 +261,10 @@ class ModelPDB(QtWidgets.QMainWindow):
             self.pymol.highlight_atoms(
                 atoms=atoms, color="lightmagenta", name="source", group="pdb_model"
             )
+            print(f"DEBUG: Calling update_inclusion_size()")
             self.update_inclusion_size()
         else:
+            print(f"DEBUG: Setting included atoms - storing {len(atoms)} atoms")
             self.selected_atoms["included"] = atoms
             self.pymol.set_selection(
                 atoms=atoms,
