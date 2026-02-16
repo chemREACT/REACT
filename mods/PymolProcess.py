@@ -268,7 +268,7 @@ class PymolSession(QObject):
         :param atoms: list of atom numbers
         :param sele_name: what to call selection (rather than (sele))
         :param object_name: What object to select from in pymol
-        :param group: what group object belongs to
+        :param group: what group object belongs to (not used for selections)
         :return:
         """
         self.pymol_cmd("delete %s" % sele_name)
@@ -280,7 +280,7 @@ class PymolSession(QObject):
         print(f"DEBUG PymolProcess: set_selection command: {select_cmd}")
         self.pymol_cmd(select_cmd)
         self.pymol_cmd("print('Available selections:', cmd.get_names('selections'))")
-        self.pymol_cmd("group %s, %s" % (group, sele_name))
+        # Don't group selections - only objects can be grouped
 
     def expand_sele(
         self,
@@ -324,8 +324,7 @@ class PymolSession(QObject):
         self.pymol_cmd(
             "print('Available selections after expand:', cmd.get_names('selections'))"
         )
-        self.pymol_cmd("group %s, %s" % (group, sele_name))
-        self.pymol_cmd("group %s, %s" % (group, sele_name))
+        # Don't group selections - only objects can be grouped
 
     def get_selected_atoms(self, sele="sele", type="ID"):
         """
