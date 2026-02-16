@@ -287,19 +287,30 @@ class PymolSession(QObject):
         radius=5,
         by_res=True,
         include_solv=True,
+        object_name=None,
     ):
         """
         :param selection:
         :param radius: radius around selection to select
+        :param object_name: limit selection to this object (avoids selecting across multiple states)
         :return:
         """
         self.pymol_cmd("delete %s" % sele_name)
         cmd = "select %s, " % sele_name
+
+        # If object_name specified, scope the selection to that object
+        if object_name:
+            cmd += "%s and (" % object_name
+
         if by_res:
             cmd += "byres "
-        cmd += "%s around %s " % (selection, str(radius))
+        cmd += "%s around %s" % (selection, str(radius))
+
+        if object_name:
+            cmd += ")"
+
         if not include_solv:
-            cmd += "and not sol."
+            cmd += " and not sol."
 
         self.pymol_cmd(cmd)
         self.pymol_cmd("group %s, %s" % (group, sele_name))

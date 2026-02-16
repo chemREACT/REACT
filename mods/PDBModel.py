@@ -388,6 +388,7 @@ class ModelPDB(QtWidgets.QMainWindow):
                 radius=expand_radius,
                 by_res=self.ui.select_byres.isChecked(),
                 include_solv=self.ui.include_solvent.isChecked(),
+                object_name="source",
             )
             # Delay this in case user does rappid changes...
             self.timer = QtCore.QTimer()
