@@ -294,6 +294,10 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         else:
             atom_list = None
 
+        # If not on a relevant tab, ignore the signal
+        if atom_list is None:
+            return
+
         ids = [int(x) - 1 for x in ids]
 
         # Effective when len(ids) > len(self.selected_ids)
@@ -728,6 +732,20 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         )
         if hide:
             _cmd = "hide"
+
+        # Debug: check what objects are available and how many atoms
+        print(
+            f"DEBUG CalcSetupORCA: Trying to {_cmd} sphere for atom {atom_nr} in object '{mol_obj_name}'"
+        )
+        self.pymol.pymol_cmd("print('Available objects:', cmd.get_names('objects'))")
+        self.pymol.pymol_cmd(
+            f"print('Atom count in {mol_obj_name}:', cmd.count_atoms('{mol_obj_name}'))"
+        )
+        self.pymol.pymol_cmd(
+            f"print('Atom {atom_nr} exists:', cmd.count_atoms('id {atom_nr} and {mol_obj_name}'))"
+        )
+
+        # Only try to show/hide if atom exists
         self.pymol.pymol_cmd(f"{_cmd} spheres, id {atom_nr} and {mol_obj_name}")
         if not hide:
             self.pymol.pymol_cmd(
