@@ -116,17 +116,8 @@ class ORCAOutputFile(Properties):
 
         # Dictionary to map ORCA output patterns to data extraction
         # Format: "search_string": {"property_name": (split_index, type)}
-        self.orca_reader = {
-            "FINAL SINGLE POINT ENERGY": {"SCF Done": (4, float)},
-            "Total Energy       :": {"SCF Done": (3, float)},
-            "CPCM Solvation Model": {"Solvent": (0, str)},  # Will need special handling
-            "Zero point energy": {"Zero-point correction": (4, float)},
-            "Total thermal energy": {"Thermal correction to Energy": (4, float)},
-            "Total Enthalpy": {"Thermal correction to Enthalpy": (3, float)},
-            "Final Gibbs free energy": {
-                "Thermal correction to Gibbs Free Energy": (5, float)
-            },
-        }
+        # Note: We don't use orca_reader for all values as some need special handling
+        self.orca_reader = {}
 
         # Convergence criteria for geometry optimization
         self.convergence_keys = {
@@ -158,72 +149,203 @@ class ORCAOutputFile(Properties):
     def read_orcafile(self):
         """
         Reads through ORCA output file and assigns values to self.orca_outdata
+        ORCA output format based on actual examples:
+        - Charge: 'Total Charge           Charge          ....   -1' OR '*xyz 0 1' in input section
+        - Multiplicity: 'Multiplicity           Mult            ....    1' OR '*xyz 0 1' in input section
+        - SCF Energy: 'FINAL SINGLE POINT ENERGY         -123.00' (avoid QM/MM or MM variants)
+        - Thermochemistry: 'Zero point energy', 'Total thermal energy', 'Total Enthalpy', 'Final Gibbs free energy'
+        - Convergence: Table with 'Energy change', 'RMS gradient', etc. with YES/NO
         """
         with open(self._filepath) as f:
             for line in f:
-                # Extract charge and multiplicity
-                if "Total Charge" in line:
-                    parts = line.split()
+                # Extract charge and multiplicity from input section: '*xyz 0 1'
+                if line.strip().startswith("*xyz") or line.strip().startswith("* xyz"):
+                    parts = line.strip().split()
                     try:
-                        charge_idx = parts.index("Charge") + 1
-                        if charge_idx < len(parts):
-                            # Handle case where Multiplicity is on same line
-                            self._charge = parts[charge_idx]
-                            if "Multiplicity" in line:
-                                mult_idx = parts.index("Multiplicity") + 1
-                                if mult_idx < len(parts):
-                                    self._multiplicity = parts[mult_idx]
+                        if len(parts) >= 3:
+                            # Format: *xyz charge multiplicity
+                            self._charge = int(parts[1])
+                            self._multiplicity = int(parts[2])
                     except (ValueError, IndexError):
                         pass
 
-                # Check for multiplicity on separate line
-                if line.strip().startswith("Multiplicity"):
+                # Extract charge: 'Total Charge           Charge          ....   -1'
+                if "Total Charge" in line and "Charge" in line:
                     parts = line.split()
-                    if len(parts) >= 2:
-                        self._multiplicity = parts[1]
+                    try:
+                        charge_idx = parts.index("Charge")
+                        # Find the numeric value after '....'
+                        for i in range(charge_idx + 1, len(parts)):
+                            if parts[i] != "....":
+                                try:
+                                    self._charge = int(parts[i])
+                                    break
+                                except ValueError:
+                                    pass
+                    except (ValueError, IndexError):
+                        pass
 
-                # Check if line contains any orca_reader keys
-                for orca_key in self.orca_reader.keys():
-                    if orca_key in line:
-                        for out_name in self.orca_reader[orca_key].keys():
-                            split_int, type_ = self.orca_reader[orca_key][out_name][0:2]
+                # Extract multiplicity: 'Multiplicity           Mult            ....    1'
+                if "Multiplicity" in line and "Mult" in line:
+                    parts = line.split()
+                    try:
+                        mult_idx = parts.index("Mult")
+                        # Find the numeric value after '....'
+                        for i in range(mult_idx + 1, len(parts)):
+                            if parts[i] != "....":
+                                try:
+                                    self._multiplicity = int(parts[i])
+                                    break
+                                except ValueError:
+                                    pass
+                    except (ValueError, IndexError):
+                        pass
+
+                # Extract SCF energy (only QM, not QM/MM or MM)
+                # Format: 'FINAL SINGLE POINT ENERGY         -123.00'
+                if (
+                    "FINAL SINGLE POINT ENERGY" in line
+                    and "(QM/MM)" not in line
+                    and "(MM)" not in line
+                ):
+                    parts = line.split()
+                    try:
+                        # Last element should be the energy
+                        energy = float(parts[-1])
+                        self.orca_outdata["SCF Done"] = energy
+                    except (ValueError, IndexError):
+                        pass
+
+                # Extract Zero point energy
+                # Format: 'Zero point energy                ...      0.10746477 Eh'
+                if "Zero point energy" in line and "..." in line:
+                    parts = line.split()
+                    try:
+                        # Look for the numeric value before 'Eh'
+                        if "Eh" in parts:
+                            eh_idx = parts.index("Eh")
+                            zpe = float(parts[eh_idx - 1])
+                            self.orca_outdata["Zero-point correction"] = zpe
+                    except (ValueError, IndexError):
+                        pass
+
+                # Extract Total thermal energy (this is E + thermal corrections)
+                # Format: 'Total thermal energy                   -157.07337829 Eh'
+                if "Total thermal energy" in line and "Eh" in line:
+                    parts = line.split()
+                    try:
+                        if "Eh" in parts:
+                            eh_idx = parts.index("Eh")
+                            thermal_e = float(parts[eh_idx - 1])
+                            # This is the total E with thermal correction
+                            # We need to calculate the correction: thermal_e - SCF_energy
+                            if "SCF Done" in self.orca_outdata:
+                                self.orca_outdata["Thermal correction to Energy"] = (
+                                    thermal_e - self.orca_outdata["SCF Done"]
+                                )
+                    except (ValueError, IndexError):
+                        pass
+
+                # Extract Total Enthalpy
+                # Format: 'Total Enthalpy                    ...   -157.07243408 Eh'
+                if (
+                    "Total Enthalpy" in line
+                    and "..." in line
+                    and "Total entropy" not in line
+                ):
+                    parts = line.split()
+                    try:
+                        if "Eh" in parts:
+                            eh_idx = parts.index("Eh")
+                            enthalpy = float(parts[eh_idx - 1])
+                            # Calculate correction: enthalpy - SCF_energy
+                            if "SCF Done" in self.orca_outdata:
+                                self.orca_outdata["Thermal correction to Enthalpy"] = (
+                                    enthalpy - self.orca_outdata["SCF Done"]
+                                )
+                    except (ValueError, IndexError):
+                        pass
+
+                # Extract Final Gibbs free energy
+                # Format: 'Final Gibbs free energy         ...   -157.10597083 Eh'
+                if "Final Gibbs free energy" in line and "..." in line:
+                    parts = line.split()
+                    try:
+                        if "Eh" in parts:
+                            eh_idx = parts.index("Eh")
+                            gibbs = float(parts[eh_idx - 1])
+                            # Calculate correction: gibbs - SCF_energy
+                            if "SCF Done" in self.orca_outdata:
+                                self.orca_outdata[
+                                    "Thermal correction to Gibbs Free Energy"
+                                ] = gibbs - self.orca_outdata["SCF Done"]
+                    except (ValueError, IndexError):
+                        pass
+
+                # Check for convergence criteria in geometry optimization table
+                # Format: 'Energy change      -0.0000044470            0.0000010000      NO'
+                for conv_key, conv_name in self.convergence_keys.items():
+                    if conv_key in line:
+                        parts = line.split()
+                        # ORCA prints "YES" or "NO" as last element in convergence table
+                        if "YES" in line:
+                            self.orca_outdata[conv_name] = True
+                            # Also store the value and threshold
                             try:
-                                if type_ is bool:
-                                    line_value = bool(
-                                        strtobool(line.split()[split_int])
-                                    )
-                                else:
-                                    line_value = type_(line.split()[split_int])
-                                self.orca_outdata[out_name] = line_value
+                                # Format: criterion value threshold YES/NO
+                                if len(parts) >= 4:
+                                    value_key = conv_key + " Value"
+                                    threshold_key = conv_key + " Threshold"
+                                    # Find numeric values
+                                    numeric_vals = []
+                                    for p in parts:
+                                        try:
+                                            numeric_vals.append(float(p))
+                                        except ValueError:
+                                            pass
+                                    if len(numeric_vals) >= 2:
+                                        self.orca_outdata[value_key] = numeric_vals[0]
+                                        self.orca_outdata[threshold_key] = numeric_vals[
+                                            1
+                                        ]
+                            except (ValueError, IndexError):
+                                pass
+                        elif "NO" in line:
+                            self.orca_outdata[conv_name] = False
+                            # Also store the value and threshold
+                            try:
+                                if len(parts) >= 4:
+                                    value_key = conv_key + " Value"
+                                    threshold_key = conv_key + " Threshold"
+                                    numeric_vals = []
+                                    for p in parts:
+                                        try:
+                                            numeric_vals.append(float(p))
+                                        except ValueError:
+                                            pass
+                                    if len(numeric_vals) >= 2:
+                                        self.orca_outdata[value_key] = numeric_vals[0]
+                                        self.orca_outdata[threshold_key] = numeric_vals[
+                                            1
+                                        ]
                             except (ValueError, IndexError):
                                 pass
 
-                # Check for convergence flags (YES/NO in ORCA optimization output)
-                for conv_key, conv_name in self.convergence_keys.items():
-                    if conv_key in line:
-                        # ORCA prints "YES" or "NO" for convergence
-                        if "YES" in line:
-                            self.orca_outdata[conv_name] = True
-                        elif "NO" in line:
-                            self.orca_outdata[conv_name] = False
-
-                # Special handling for solvent
-                if "Solvent:" in line or "SMDsolvent" in line:
-                    parts = line.split()
-                    try:
-                        solvent_idx = parts.index("Solvent:") + 1
-                        if solvent_idx < len(parts):
-                            self.orca_outdata["Solvent"] = parts[solvent_idx].strip('"')
-                    except (ValueError, IndexError):
-                        pass
+                # Check for solvation models
+                # SMD: 'Your calculation utilizes the SMD solvation module'
+                # or: 'Total Energy after SMD CDS correction'
+                if "SMD solvation" in line or "SMD CDS" in line:
+                    self.orca_outdata["Solvent"] = "SMD"
+                # CPCM check
+                elif "CPCM" in line:
+                    self.orca_outdata["Solvent"] = "CPCM"
 
     def is_converged(self):
         """
         Set self.converged True if geometry optimization convergence criteria are met
         ORCA typically checks: Energy change, MAX gradient, RMS gradient, MAX step, RMS step
+        Returns False if no convergence data found (single point calculation)
         """
-        converged = None
-
         converge_terms = list()
         for entry in self.orca_outdata.keys():
             if "Converged?" in entry:
@@ -232,11 +354,12 @@ class ORCAOutputFile(Properties):
         # ORCA optimization is converged if all criteria are met
         if len(converge_terms) > 0:
             if all(converged_ is True for converged_ in converge_terms):
-                converged = True
+                return True
             else:
-                converged = False
+                return False
 
-        return converged
+        # No convergence data found - likely a single point calculation
+        return False
 
     def get_energy(self):
         """
@@ -262,19 +385,21 @@ class ORCAOutputFile(Properties):
 
         with open(self.filepath) as out:
             for line in out:
-                # Extract SCF energies
-                if "FINAL SINGLE POINT ENERGY" in line:
+                # Extract SCF energies (only QM, not QM/MM or MM)
+                # Format: 'FINAL SINGLE POINT ENERGY         -123.00'
+                if (
+                    "FINAL SINGLE POINT ENERGY" in line
+                    and "(QM/MM)" not in line
+                    and "(MM)" not in line
+                ):
                     try:
-                        scf_data["SCF Done"].append(float(line.split()[4]))
-                    except (ValueError, IndexError):
-                        pass
-                elif "Total Energy       :" in line:
-                    try:
-                        scf_data["SCF Done"].append(float(line.split()[3]))
+                        energy = float(line.split()[-1])
+                        scf_data["SCF Done"].append(energy)
                     except (ValueError, IndexError):
                         pass
 
-                # Extract convergence criteria values
+                # Extract convergence criteria values from geometry optimization table
+                # Format: 'Energy change      -0.0000044470            0.0000010000      NO'
                 for criterion in [
                     "Energy change",
                     "MAX gradient",
@@ -282,18 +407,18 @@ class ORCAOutputFile(Properties):
                     "MAX step",
                     "RMS step",
                 ]:
-                    if criterion in line:
+                    if criterion in line and ("YES" in line or "NO" in line):
                         try:
-                            # ORCA format: "criterion  ...  value  ...  threshold  ...  YES/NO"
                             parts = line.split()
-                            # Find the numeric value (typically after the criterion name)
-                            for i, part in enumerate(parts):
+                            # Find the first numeric value (the actual value, not threshold)
+                            numeric_vals = []
+                            for p in parts:
                                 try:
-                                    value = float(part)
-                                    scf_data[criterion].append(value)
-                                    break
+                                    numeric_vals.append(float(p))
                                 except ValueError:
-                                    continue
+                                    pass
+                            if numeric_vals:
+                                scf_data[criterion].append(numeric_vals[0])
                         except (ValueError, IndexError):
                             pass
 
@@ -400,11 +525,11 @@ class ORCAFrequenciesOut(ORCAOutputFile):
         """
         Read ORCA output file and store frequencies to self.freq_inten[freq] = IR intensity
         ORCA format:
-        VIBRATIONAL FREQUENCIES
-        Mode    freq (cm**-1)   IR-intensity
-          0:         0.00           0.000000
-          1:      1234.56           1.234567
+        VIBRATIONAL FREQUENCIES - lists all modes including translations/rotations
+        IR SPECTRUM - contains actual IR intensities (km/mol) for vibrational modes only
         """
+        # First pass: read all frequencies from VIBRATIONAL FREQUENCIES section
+        freq_list = {}
         with open(self.filepath, "r") as frq:
             in_freq_section = False
             for line in frq:
@@ -414,33 +539,87 @@ class ORCAFrequenciesOut(ORCAOutputFile):
                     continue
 
                 if in_freq_section:
-                    # Skip header lines
-                    if "Mode" in line and "freq" in line:
+                    # Skip header and separator lines
+                    if "Mode" in line or "Scaling factor" in line or "---" in line:
                         continue
-                    if "---" in line:
+                    # Skip lines that don't have the mode number format
+                    if ":" not in line:
                         continue
 
                     # End of frequency section
-                    if not line.strip() or "NORMAL MODES" in line:
+                    if (
+                        not line.strip()
+                        or "NORMAL MODES" in line
+                        or "IR SPECTRUM" in line
+                    ):
                         in_freq_section = False
+                        break
+
+                    # Parse frequency line: "  0:      1234.56 cm**-1"
+                    # Format: "   6:      1623.45 cm**-1   ***imaginary mode***"
+                    parts = line.split()
+                    try:
+                        # First part should be mode number with colon
+                        if not parts[0].endswith(":"):
+                            continue
+
+                        mode_num = int(parts[0].rstrip(":"))
+                        freq = float(parts[1])
+
+                        # ORCA marks imaginary frequencies with "***imaginary mode***" comment
+                        if "imaginary" in line.lower():
+                            freq = -abs(freq)  # Make negative for imaginary
+
+                        # Store with default intensity 0.0
+                        freq_list[mode_num] = freq
+                        self.freq_inten[freq] = 0.0
+                    except (ValueError, IndexError):
+                        pass
+
+        # Second pass: read IR intensities from IR SPECTRUM section
+        with open(self.filepath, "r") as frq:
+            in_ir_section = False
+            for line in frq:
+                # Look for IR SPECTRUM section
+                if "IR SPECTRUM" in line:
+                    in_ir_section = True
+                    continue
+
+                if in_ir_section:
+                    # Skip header and separator lines
+                    if "Mode" in line or "freq" in line or "---" in line or "*" in line:
                         continue
 
-                    # Parse frequency line: "  0:      1234.56         1.234567"
+                    # End of IR section (empty line or next section)
+                    if not line.strip() or "RAMAN" in line or "THERMOCHEMISTRY" in line:
+                        in_ir_section = False
+                        break
+
+                    # Parse IR line: "  7:     14.03   0.000475    2.40  0.010558  ( 0.002172  0.012368  0.101983)"
+                    # Format: mode: freq eps Int T**2 ...
                     parts = line.split()
-                    if len(parts) >= 3 and ":" in parts[0]:
-                        try:
-                            freq = float(parts[1])
-                            # ORCA marks imaginary frequencies with "***imaginary mode***" comment
-                            if "imaginary" in line.lower():
-                                freq = -abs(freq)  # Make negative for imaginary
-                            intensity = float(parts[2]) if len(parts) > 2 else 0.0
+                    try:
+                        if not parts[0].endswith(":"):
+                            continue
+
+                        mode_num = int(parts[0].rstrip(":"))
+                        freq = float(parts[1])
+                        # IR intensity is in column 3 (index 3) in km/mol
+                        if len(parts) >= 4:
+                            intensity = float(parts[3])
+                            # Update the intensity for this frequency
                             self.freq_inten[freq] = intensity
-                        except (ValueError, IndexError):
-                            pass
+                    except (ValueError, IndexError):
+                        pass
 
     def get_displacement(self, frequency):
         """
         Make Geometries object with displacements for X,Y,Z for all atoms as "coordinates"
+        ORCA format: NORMAL MODES section has rows organized as:
+        row 0 = atom 1 X, row 1 = atom 1 Y, row 2 = atom 1 Z
+        row 3 = atom 2 X, row 4 = atom 2 Y, row 5 = atom 2 Z, etc.
+        Columns represent different normal modes (0, 1, 2, ...)
+
         :param frequency: selected frequency to extract displacements from
         :return: self.freq_displacement[frequency]
         """
@@ -448,74 +627,122 @@ class ORCAFrequenciesOut(ORCAOutputFile):
         if frequency in self.freq_displacement.keys():
             return self.freq_displacement[frequency]
 
-        # ORCA-specific extraction of frequency displacement vectors
-        found_frequency = False
-        found_displacement = False
-        atoms = list()
-
+        # First, find which mode number corresponds to this frequency
+        freq_to_mode = {}
         with open(self.filepath, "r") as frq:
-            current_freqs = []
-            freq_index = -1
+            in_freq_section = False
+            for line in frq:
+                if "VIBRATIONAL FREQUENCIES" in line:
+                    in_freq_section = True
+                    continue
+
+                if in_freq_section:
+                    if ":" not in line or not line.strip():
+                        if "NORMAL MODES" in line:
+                            break
+                        continue
+
+                    parts = line.split()
+                    try:
+                        if parts[0].endswith(":"):
+                            mode_num = int(parts[0].rstrip(":"))
+                            freq = float(parts[1])
+                            if "imaginary" in line.lower():
+                                freq = -abs(freq)
+                            freq_to_mode[freq] = mode_num
+                    except (ValueError, IndexError):
+                        pass
+
+        # Find the mode number for the requested frequency
+        target_mode = None
+        for freq, mode in freq_to_mode.items():
+            if abs(abs(freq) - abs(float(frequency))) < 0.01:
+                target_mode = mode
+                break
+
+        if target_mode is None:
+            return None
+
+        # Now extract displacement vectors from NORMAL MODES section
+        with open(self.filepath, "r") as frq:
+            in_normal_modes = False
+            reading_data = False
+            mode_columns = []  # Which columns in current block?
+            target_column_idx = None
+            displacement_rows = []
 
             for line in frq:
-                # Look for frequency values
-                if "VIBRATIONAL FREQUENCIES" in line:
-                    # Start of frequency section
-                    continue
-
-                # Look for normal modes section
                 if "NORMAL MODES" in line:
-                    found_displacement = True
+                    in_normal_modes = True
                     continue
 
-                if found_displacement and not found_frequency:
-                    # ORCA prints frequencies in normal modes section
-                    # Format: "  0:         0.00 cm**-1"
-                    if ":" in line and "cm**-1" in line:
-                        parts = line.split()
+                if not in_normal_modes:
+                    continue
+
+                # Skip description lines
+                if "Cartesian" in line or "normalized" in line or "orthogonal" in line:
+                    continue
+
+                # End of normal modes section
+                if "IR SPECTRUM" in line or "RAMAN" in line:
+                    break
+
+                # Check for column header line (mode numbers)
+                if line.strip() and line.split()[0].isdigit() and ":" not in line:
+                    # This is a header line with mode numbers
+                    mode_columns = [int(x) for x in line.split()]
+                    # Check if our target mode is in this block
+                    if target_mode in mode_columns:
+                        target_column_idx = mode_columns.index(target_mode)
+                        reading_data = True
+                        displacement_rows = []
+                    else:
+                        reading_data = False
+                    continue
+
+                if reading_data:
+                    # Data line: row_num  value1  value2  ...
+                    parts = line.split()
+                    if len(parts) > 1 and parts[0].isdigit():
                         try:
-                            freq = float(parts[1])
-                            if abs(abs(freq) - abs(float(frequency))) < 0.01:
-                                found_frequency = True
-                                continue
+                            row_num = int(parts[0])
+                            # Get the displacement value for our target column
+                            # +1 because first column is row number
+                            if len(parts) > target_column_idx + 1:
+                                disp_value = float(parts[target_column_idx + 1])
+                                displacement_rows.append(disp_value)
                         except (ValueError, IndexError):
                             pass
+                    elif not line.strip():
+                        # Empty line might end this block
+                        if displacement_rows:
+                            # We have data, check if next line is new mode header
+                            pass
 
-                if found_frequency:
-                    # Parse displacement vectors
-                    # ORCA format shows atom displacements in columns
-                    if line.strip() and not line.startswith("---"):
-                        parts = line.split()
-                        if len(parts) >= 4:
-                            try:
-                                atom_num = int(parts[0])
-                                x, y, z = (
-                                    float(parts[1]),
-                                    float(parts[2]),
-                                    float(parts[3]),
-                                )
-                                # Create atom with displacement as coordinates
-                                atoms.append(
-                                    Atom(
-                                        f"H",  # placeholder element
-                                        str(x),
-                                        str(y),
-                                        str(z),
-                                        atom_num,
-                                    )
-                                )
-                            except (ValueError, IndexError):
-                                pass
-                    elif not line.strip() and atoms:
-                        # End of this mode
-                        self.freq_displacement[frequency] = Geometries(
-                            molecules=[atoms]
-                        )
-                        return self.freq_displacement[frequency]
+        # Convert displacement rows to atoms
+        # Format: row 0=atom1_X, row 1=atom1_Y, row 2=atom1_Z, row 3=atom2_X, ...
+        if displacement_rows:
+            atoms = []
+            num_atoms = len(displacement_rows) // 3
+            for i in range(num_atoms):
+                x = displacement_rows[i * 3]
+                y = displacement_rows[i * 3 + 1]
+                z = displacement_rows[i * 3 + 2]
+                atoms.append(
+                    Atom(
+                        "H",  # placeholder element
+                        str(x),
+                        str(y),
+                        str(z),
+                        i + 1,
+                    )
+                )
 
-        if atoms:
-            self.freq_displacement[frequency] = Geometries(molecules=[atoms])
-        return self.freq_displacement.get(frequency, None)
+            if atoms:
+                self.freq_displacement[frequency] = Geometries(molecules=[atoms])
+                return self.freq_displacement[frequency]
+
+        return None
 
     @property
     def get_img_frq(self):
