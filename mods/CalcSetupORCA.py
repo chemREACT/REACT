@@ -226,8 +226,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
             return
 
         self.scan_bond.invert_atoms()
-        self.ui.lineEdit_freeze.setText(str(self.scan_bond.atom1_idx))
-        self.ui.lineEdit_move.setText(str(self.scan_bond.atom2_idx))
+        self.ui.lineEdit_freeze.setText(str(self.scan_bond.atom1_idx - 1))
+        self.ui.lineEdit_move.setText(str(self.scan_bond.atom2_idx - 1))
         self.update_scan()
 
     def on_move_both_changed(self):
@@ -522,8 +522,8 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         # list_item = QtWidgets.QListWidgetItem(freeze)
         # self.ui.list_scan_bonds.addItem(list_item)
         # self.ui.list_scan_bonds.setCurrentItem(list_item)
-        self.ui.lineEdit_freeze.setText(str(atoms[0]))
-        self.ui.lineEdit_move.setText(str(atoms[1]))
+        self.ui.lineEdit_freeze.setText(str(atoms[0] - 1))
+        self.ui.lineEdit_move.setText(str(atoms[1] - 1))
 
         self.update_scan()
 
@@ -1079,6 +1079,18 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
                 # Add non-constraint content to geom block
                 if other_content:
                     geom_block_content = "\n".join(other_content) + "\n"
+
+        # Add scan bond constraint if bond_obj is provided
+        if bond_obj:
+            if self.ui.checkBox_switchXB.isChecked():
+                # Freeze both atoms individually
+                constraints_list.append(f"    {{ C {bond_obj.atom1_idx - 1} C }}")
+                constraints_list.append(f"    {{ C {bond_obj.atom2_idx - 1} C }}")
+            else:
+                # Freeze the bond
+                constraints_list.append(
+                    f"    {{ B {bond_obj.atom1_idx - 1} {bond_obj.atom2_idx - 1} C }}"
+                )
 
         # Add constraints from freeze tab
         if self.ui.list_freeze_atoms.count() > 0:

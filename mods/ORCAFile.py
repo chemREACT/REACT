@@ -114,20 +114,6 @@ class ORCAOutputFile(Properties):
 
         super().__init__(filetype="ORCA", filepath=filepath, geometries=molecules)
 
-        # Dictionary to map ORCA output patterns to data extraction
-        # Format: "search_string": {"property_name": (split_index, type)}
-        # Note: We don't use orca_reader for all values as some need special handling
-        self.orca_reader = {}
-
-        # Convergence criteria for geometry optimization
-        self.convergence_keys = {
-            "Energy change": "Energy Change Converged?",
-            "MAX gradient": "Maximum Gradient Converged?",
-            "RMS gradient": "RMS Gradient Converged?",
-            "MAX step": "Maximum Step Converged?",
-            "RMS step": "RMS Step Converged?",
-        }
-
         # This will store data from output file
         self.orca_outdata = dict()
 
@@ -164,8 +150,8 @@ class ORCAOutputFile(Properties):
                     try:
                         if len(parts) >= 3:
                             # Format: *xyz charge multiplicity
-                            self._charge = int(parts[1])
-                            self._multiplicity = int(parts[2])
+                            self._charge = parts[1]
+                            self._multiplicity = parts[2]
                     except (ValueError, IndexError):
                         pass
 
@@ -178,7 +164,9 @@ class ORCAOutputFile(Properties):
                         for i in range(charge_idx + 1, len(parts)):
                             if parts[i] != "....":
                                 try:
-                                    self._charge = int(parts[i])
+                                    # Keep as string for GUI compatibility
+                                    int(parts[i])  # Validate it's a number
+                                    self._charge = parts[i]
                                     break
                                 except ValueError:
                                     pass
@@ -194,7 +182,9 @@ class ORCAOutputFile(Properties):
                         for i in range(mult_idx + 1, len(parts)):
                             if parts[i] != "....":
                                 try:
-                                    self._multiplicity = int(parts[i])
+                                    # Keep as string for GUI compatibility
+                                    int(parts[i])  # Validate it's a number
+                                    self._multiplicity = parts[i]
                                     break
                                 except ValueError:
                                     pass
@@ -282,55 +272,6 @@ class ORCAOutputFile(Properties):
                     except (ValueError, IndexError):
                         pass
 
-                # Check for convergence criteria in geometry optimization table
-                # Format: 'Energy change      -0.0000044470            0.0000010000      NO'
-                for conv_key, conv_name in self.convergence_keys.items():
-                    if conv_key in line:
-                        parts = line.split()
-                        # ORCA prints "YES" or "NO" as last element in convergence table
-                        if "YES" in line:
-                            self.orca_outdata[conv_name] = True
-                            # Also store the value and threshold
-                            try:
-                                # Format: criterion value threshold YES/NO
-                                if len(parts) >= 4:
-                                    value_key = conv_key + " Value"
-                                    threshold_key = conv_key + " Threshold"
-                                    # Find numeric values
-                                    numeric_vals = []
-                                    for p in parts:
-                                        try:
-                                            numeric_vals.append(float(p))
-                                        except ValueError:
-                                            pass
-                                    if len(numeric_vals) >= 2:
-                                        self.orca_outdata[value_key] = numeric_vals[0]
-                                        self.orca_outdata[threshold_key] = numeric_vals[
-                                            1
-                                        ]
-                            except (ValueError, IndexError):
-                                pass
-                        elif "NO" in line:
-                            self.orca_outdata[conv_name] = False
-                            # Also store the value and threshold
-                            try:
-                                if len(parts) >= 4:
-                                    value_key = conv_key + " Value"
-                                    threshold_key = conv_key + " Threshold"
-                                    numeric_vals = []
-                                    for p in parts:
-                                        try:
-                                            numeric_vals.append(float(p))
-                                        except ValueError:
-                                            pass
-                                    if len(numeric_vals) >= 2:
-                                        self.orca_outdata[value_key] = numeric_vals[0]
-                                        self.orca_outdata[threshold_key] = numeric_vals[
-                                            1
-                                        ]
-                            except (ValueError, IndexError):
-                                pass
-
                 # Check for solvation models
                 # SMD: 'Your calculation utilizes the SMD solvation module'
                 # or: 'Total Energy after SMD CDS correction'
@@ -340,25 +281,26 @@ class ORCAOutputFile(Properties):
                 elif "CPCM" in line:
                     self.orca_outdata["Solvent"] = "CPCM"
 
+                # Check for explicit convergence message
+                # ORCA prints: "***THE OPTIMIZATION HAS CONVERGED***"
+                if "THE OPTIMIZATION HAS CONVERGED" in line or "HURRAY" in line:
+                    self.orca_outdata["Optimization Converged"] = True
+
     def is_converged(self):
         """
-        Set self.converged True if geometry optimization convergence criteria are met
-        ORCA typically checks: Energy change, MAX gradient, RMS gradient, MAX step, RMS step
-        Returns False if no convergence data found (single point calculation)
+        Check if ORCA geometry optimization has converged.
+
+        ORCA determines convergence using its own logic - not all criteria need to be YES.
+        The only reliable way to check is looking for the explicit message:
+        "***THE OPTIMIZATION HAS CONVERGED***" preceded by "HURRAY"
+
+        Returns False if no convergence message found (single point calculation or not converged)
         """
-        converge_terms = list()
-        for entry in self.orca_outdata.keys():
-            if "Converged?" in entry:
-                converge_terms.append(self.orca_outdata[entry])
+        # Check for ORCA's explicit convergence message
+        if self.orca_outdata.get("Optimization Converged", False):
+            return True
 
-        # ORCA optimization is converged if all criteria are met
-        if len(converge_terms) > 0:
-            if all(converged_ is True for converged_ in converge_terms):
-                return True
-            else:
-                return False
-
-        # No convergence data found - likely a single point calculation
+        # No convergence message - likely a single point calculation or optimization still running
         return False
 
     def get_energy(self):
@@ -371,16 +313,16 @@ class ORCAOutputFile(Properties):
 
     def get_scf_convergence(self):
         """
-        Reads output file and returns all SCF energies and convergence info
-        :return: dict with SCF Done energies and convergence criteria
+        Reads output file and returns all SCF energies and convergence criteria throughout optimization
+        Maps ORCA convergence criteria names to Gaussian-style names for compatibility with plotting
+        :return: dict with SCF energies and convergence values
         """
         scf_data = {
             "SCF Done": list(),
-            "Energy change": list(),
-            "MAX gradient": list(),
-            "RMS gradient": list(),
-            "MAX step": list(),
-            "RMS step": list(),
+            "Maximum Force": list(),
+            "RMS     Force": list(),
+            "Maximum Displacement": list(),
+            "RMS     Displacement": list(),
         }
 
         with open(self.filepath) as out:
@@ -398,29 +340,37 @@ class ORCAOutputFile(Properties):
                     except (ValueError, IndexError):
                         pass
 
-                # Extract convergence criteria values from geometry optimization table
-                # Format: 'Energy change      -0.0000044470            0.0000010000      NO'
-                for criterion in [
-                    "Energy change",
-                    "MAX gradient",
-                    "RMS gradient",
-                    "MAX step",
-                    "RMS step",
-                ]:
-                    if criterion in line and ("YES" in line or "NO" in line):
-                        try:
-                            parts = line.split()
-                            # Find the first numeric value (the actual value, not threshold)
-                            numeric_vals = []
-                            for p in parts:
-                                try:
-                                    numeric_vals.append(float(p))
-                                except ValueError:
-                                    pass
-                            if numeric_vals:
-                                scf_data[criterion].append(numeric_vals[0])
-                        except (ValueError, IndexError):
-                            pass
+                # Extract convergence criteria from ORCA convergence table
+                # Map ORCA names to Gaussian names for plotting compatibility
+                # Format: 'MAX gradient        0.0002064432            0.0003000000      YES'
+                if "MAX gradient" in line and ("YES" in line or "NO" in line):
+                    try:
+                        parts = line.split()
+                        value = float(parts[2])
+                        scf_data["Maximum Force"].append(value)
+                    except (ValueError, IndexError):
+                        pass
+                elif "RMS gradient" in line and ("YES" in line or "NO" in line):
+                    try:
+                        parts = line.split()
+                        value = float(parts[2])
+                        scf_data["RMS     Force"].append(value)
+                    except (ValueError, IndexError):
+                        pass
+                elif "MAX step" in line and ("YES" in line or "NO" in line):
+                    try:
+                        parts = line.split()
+                        value = float(parts[2])
+                        scf_data["Maximum Displacement"].append(value)
+                    except (ValueError, IndexError):
+                        pass
+                elif "RMS step" in line and ("YES" in line or "NO" in line):
+                    try:
+                        parts = line.split()
+                        value = float(parts[2])
+                        scf_data["RMS     Displacement"].append(value)
+                    except (ValueError, IndexError):
+                        pass
 
         return scf_data
 
