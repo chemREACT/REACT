@@ -52,10 +52,10 @@ class State:
             file_class = self.file_types[file_class_key]
         else:
             # Fallback: if we can't determine, try generic types
-            print(
-                f"Warning: Unknown file type combination ({software_type}, {filetype})"
+            self.parent.append_text(
+                f"Warning: Unknown file type combination (software: {software_type}, extension: {filetype})"
             )
-            print(f"Attempting to load as {software_type} file...")
+            self.parent.append_text(f"Attempting to load as {software_type} file...")
 
             # Try to infer from software type
             if software_type == "Gaussian":
@@ -101,7 +101,7 @@ class State:
             try:
                 self.files.pop(f)
             except KeyError:
-                print(
+                self.parent.append_text(
                     f'File "{f}" not found. Please check if the file has been moved or deleted.'
                 )
 

@@ -350,6 +350,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.get_selected_filepath
         )
 
+        if not mol_obj or mol_obj is False:
+            self.append_text("ERROR: File not found or failed to load!")
+            return
+
         delete_after = True
         xyz_list = mol_obj.all_geometries_formatted
 
@@ -402,6 +406,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         mol_obj = self.states[self.state_index].get_molecule_object(
             self.tabWidget.currentWidget().currentItem().text()
         )
+
+        if not mol_obj or mol_obj is False:
+            self.append_text("ERROR: File not found or failed to load!")
+            return
 
         if mol_obj.faulty:
             self.append_text("ERROR: not possible for broken file!")
@@ -473,8 +481,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # path = os.getcwd()  # wordkdir TODO set this as global at some point
         path = self.settings.workdir
         filter_type = (
-            "Gaussian output files (*.out);; Gaussian input files (*.com *.inp);; "
-            "Geometry files (*.pdb *.xyz)"
+            "All files (*.*);;Gaussian output files (*.out);;Gaussian input files (*.com *.inp);;"
+            "Geometry files (*.pdb *.xyz);;ORCA output files (*.out)"
         )
         title_ = "Import File"
 
@@ -488,6 +496,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Remove file types not accepted by REACT
         accepted_files = ["inp", "com", "out", "xyz", "pdb"]
+
+        # if file type not accepted, remove from list:
+        if not all([x.split(".")[-1] in accepted_files for x in files_path]):
+            self.append_text(
+                "Some files were not added, because of unsupported file type. Supported file types: %s"
+                % ", ".join(accepted_files)
+            )
+
         files_path = [x for x in files_path if x.split(".")[-1] in accepted_files]
 
         # Where to start inserting files in project list:
@@ -1139,6 +1155,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         mol_obj = self.states[self.state_index].get_molecule_object(
             self.tabWidget.currentWidget().currentItem().text()
         )
+
+        if not mol_obj or mol_obj is False:
+            self.append_text("ERROR: File not found or failed to load!")
+            return
 
         if mol_obj.faulty:
             self.append_text("ERROR: Calculation setup not possible for broken file!")

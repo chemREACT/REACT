@@ -107,7 +107,7 @@ class CalcSetupWindowORCA(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.blocks_available = copy.deepcopy(
             self.settings._orca_settings.get("blocks_available", {})
         )
-        self.solvents = ["CPM", "SMD"]
+        self.solvents = ["CPCM", "SMD"]
 
         self.opt_freq_details = {"checked": False, "keywords": []}
         self.num_files = 1
