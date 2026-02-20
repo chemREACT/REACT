@@ -426,6 +426,20 @@ class Settings:
         self._orca_settings = copy.deepcopy(self.default_settings["orca_settings"])
 
     def load_custom_settings(self, settings):
+        # Check if this is an old settings file (missing the "software" key)
+        if "software" not in settings:
+            if self.react:
+                self.react.append_text(
+                    "\n" + "=" * 60 + "\n"
+                    "WARNING: Your .custom_settings.json file is from an older version of REACT.\n\n"
+                    "REACT now supports both Gaussian and ORCA calculations.\n"
+                    "Using default settings with Gaussian as the default software.\n\n"
+                    "To update to new settings format, delete:\n"
+                    f"  {self.settingspath}\n"
+                    "and restart REACT.\n"
+                    "=" * 60 + "\n"
+                )
+
         # Validate ORCA settings format before loading
         if "orca_settings" in settings:
             orca_funcs = settings["orca_settings"].get("functional_options")
@@ -474,7 +488,17 @@ class Settings:
                 self._orca_settings = item
         except KeyError:
             # Key doesn't exist in settings file, use defaults
-            if key == "gaussian_settings":
+            if key == "workdir":
+                self.workdir = os.path.expanduser("~")
+            elif key == "pymolpath":
+                self.pymolpath = None
+            elif key == "pymol_at_launch":
+                self.pymol_at_launch = True
+            elif key == "UI_mode":
+                self.UI_mode = True
+            elif key == "software":
+                self.software = "Gaussian"  # Default to Gaussian for old settings files
+            elif key == "gaussian_settings":
                 self._gaussian_settings = copy.deepcopy(
                     self.default_settings["gaussian_settings"]
                 )
@@ -707,7 +731,16 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
         self.ui.comboBox_funct_orca.addItems(list(self.orca_functional_options.keys()))
         self.ui.basis1_comboBox_orca.addItems([x for x in self.orca_basis_options])
         self.ui.job_type_comboBox_orca.addItems(
-            ["Opt", "OptTS", "NEB-TS", "Freq", "NumFreq", "IRC", "Single point"]
+            [
+                "Opt",
+                "LooseOpt",
+                "OptTS",
+                "NEB-TS",
+                "Freq",
+                "NumFreq",
+                "IRC",
+                "Single point",
+            ]
         )
         self.ui.job_type_comboBox_orca.setCurrentText(
             self.settings._orca_settings["job_type"]

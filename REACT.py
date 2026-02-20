@@ -1170,10 +1170,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
             self.setup_window.raise_()
         else:
-            if self.settings.software == "Gaussian":
+            # Ensure software type is set - detect from file if needed
+            software_type = self.settings.software
+            if not software_type or software_type not in ["Gaussian", "ORCA"]:
+                self.append_text(
+                    "\nSoftware type not set in settings. Lets assume you want to prepare a Gaussian calculation ..."
+                )
                 self.setup_window = CalcSetupWindowGaussian(self, self.current_file)
                 self.setup_window.show()
-            elif self.settings.software == "ORCA":
+
+            if software_type == "Gaussian":
+                self.setup_window = CalcSetupWindowGaussian(self, self.current_file)
+                self.setup_window.show()
+            elif software_type == "ORCA":
                 self.setup_window = CalcSetupWindowORCA(self, self.current_file)
                 self.setup_window.show()
 
