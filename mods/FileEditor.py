@@ -132,35 +132,7 @@ class FileEditor(QtWidgets.QMainWindow):
             else:
                 job = f"{s.job_type} "
 
-        if s.basis_diff and not s.basis_diff.isspace():
-            tmp = list(s.basis)
-            if tmp[-1] == "G":
-                tmp[-1] = s.basis_diff
-                tmp.append("G")
-            else:
-                tmp.append(s.basis_diff)
-            basis = "".join(tmp)
-        else:
-            basis = s.basis
-
-        if (
-            s.basis_pol1
-            and not s.basis_pol1.isspace
-            and s.basis_pol2
-            and not s.basis_pol2.isspace()
-        ):
-            basis_pol = f"({s.basis_pol1},{s.basis_pol2})"
-        elif s.basis_pol1 and not s.basis_pol1.isspace():
-            basis_pol = f"({s.basis_pol1})"
-        elif s.basis_pol2 and not s.basis_pol2.isspace():
-            basis_pol = f"({s.basis_pol2})"
-        else:
-            basis_pol = False
-
-        if basis_pol:
-            basis = f"{basis}{basis_pol}"
-        else:
-            basis = f"{basis}"
+        basis = s.basis
 
         route_str = f"#p {job}{s.functional}/{basis} " + " ".join(s.additional_keys)
 

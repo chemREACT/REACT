@@ -90,9 +90,6 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         # So that we dont change the attributes in Settings object
         self.functional = copy.deepcopy(self.settings.functional)
         self.basis = copy.deepcopy(self.settings.basis)
-        self.basis_diff = copy.deepcopy(self.settings.basis_diff)
-        self.basis_pol1 = copy.deepcopy(self.settings.basis_pol1)
-        self.basis_pol2 = copy.deepcopy(self.settings.basis_pol2)
         # -2 = low (#t), -3 = normal (# or #n), -4 = high (#p)
         self.output_print = "#"  # TODO add this to settings class?
         self.additional_keys = copy.deepcopy(self.settings.additional_keys)
@@ -157,9 +154,6 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
             )
         )
         self.ui.comboBox_basis1.currentIndexChanged.connect(self.update_basis1)
-        self.ui.comboBox_basis2.currentIndexChanged.connect(self.update_basis2)
-        self.ui.comboBox_basis3.currentIndexChanged.connect(self.update_basis3)
-        self.ui.comboBox_basis4.currentIndexChanged.connect(self.update_basis4)
         self.ui.comboBox_funct.currentTextChanged.connect(self.update_functional)
         self.ui.comboBox_job_type.currentTextChanged.connect(self.update_job_details)
         self.ui.ComboBox_files.currentTextChanged.connect(self.update_preview_combobox)
@@ -789,32 +783,11 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
 
         # Get software-specific options
         functional_options = self.settings.functional_options
-        basis_options_dict = self.settings.basis_options
+        basis_options = self.settings.basis_options
 
         self.ui.comboBox_funct.addItems(functional_options)
-        self.ui.comboBox_basis1.addItems(list(basis_options_dict.keys()))
+        self.ui.comboBox_basis1.addItems(basis_options)
 
-        # Ensure the current basis exists in basis_options with proper structure
-        basis_options_dict = self.settings.basis_options
-        if self.basis not in basis_options_dict:
-            if self.settings.software == "ORCA":
-                # ORCA basis sets don't use separate pol/diff
-                basis_options_dict[self.basis] = {
-                    "pol1": [""],
-                    "pol2": [""],
-                    "diff": [""],
-                }
-            else:
-                # Gaussian basis sets
-                basis_options_dict[self.basis] = {
-                    "pol1": ["", "d", "2d", "3d"],
-                    "pol2": ["", "p", "2p", "3p"],
-                    "diff": ["", "+", "++"],
-                }
-
-        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
-        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
-        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
         self.ui.List_add_job_2.addItems(self.additional_keys)
         self.ui.comboBox_job_type.addItems(self.job_options)
         self.ui.List_add_job.addItems(
@@ -825,9 +798,6 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         self.ui.comboBox_job_type.setCurrentText(self.settings.job_type)
         self.ui.comboBox_funct.setCurrentText(self.functional)
         self.ui.comboBox_basis1.setCurrentText(self.basis)
-        self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
-        self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
-        self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
         self.ui.radioButton_2.setChecked(True)
         self.ui.lineEdit_charge.setText(self.charge)
         self.ui.lineEdit_multiplicity.setText(self.multiplicity)
@@ -1153,35 +1123,7 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
         else:
             job_str = f"{job_type} {freq}"
 
-        if self.basis_diff and not self.basis_diff.isspace():
-            tmp = list(self.basis)
-            if tmp[-1] == "G":
-                tmp[-1] = self.basis_diff
-                tmp.append("G")
-            else:
-                tmp.append(self.basis_diff)
-            basis = "".join(tmp)
-        else:
-            basis = self.basis
-
-        if (
-            self.basis_pol1
-            and not self.basis_pol1.isspace()
-            and self.basis_pol2
-            and not self.basis_pol2.isspace()
-        ):
-            basis_pol = f"({self.basis_pol1},{self.basis_pol2})"
-        elif self.basis_pol1 and not self.basis_pol1.isspace():
-            basis_pol = f"({self.basis_pol1})"
-        elif self.basis_pol2 and not self.basis_pol2.isspace():
-            basis_pol = f"({self.basis_pol2})"
-        else:
-            basis_pol = False
-
-        if basis_pol:
-            basis_str = f"{basis}{basis_pol}"
-        else:
-            basis_str = f"{basis}"
+        basis_str = self.basis
 
         # solvent
         solvent = ""
@@ -1262,60 +1204,10 @@ class CalcSetupWindowGaussian(QtWidgets.QMainWindow, Ui_SetupWindow):
 
     def update_basis1(self):
         """
-        Updates self.basis1 according to basis selected by user
-        On update of main basis comboBox, update all other basis comboBoxes
-
-        :return:
+        Updates self.basis according to basis selected by user.
+        Gaussian basis sets are full names - no separate modifiers (diff, pol1, pol2).
         """
         self.basis = self.ui.comboBox_basis1.currentText()
-
-        self.ui.comboBox_basis2.clear()
-        self.ui.comboBox_basis3.clear()
-        self.ui.comboBox_basis4.clear()
-
-        # Ensure the basis exists in basis_options with proper structure
-        basis_options_dict = self.settings.basis_options
-        if self.basis not in basis_options_dict:
-            if self.settings.software == "ORCA":
-                # ORCA basis sets don't use separate pol/diff
-                basis_options_dict[self.basis] = {
-                    "pol1": [""],
-                    "pol2": [""],
-                    "diff": [""],
-                }
-            else:
-                # Gaussian basis sets
-                basis_options_dict[self.basis] = {
-                    "pol1": ["", "d", "2d", "3d"],
-                    "pol2": ["", "p", "2p", "3p"],
-                    "diff": ["", "+", "++"],
-                }
-
-        self.ui.comboBox_basis2.addItems(basis_options_dict[self.basis]["diff"])
-        self.ui.comboBox_basis3.addItems(basis_options_dict[self.basis]["pol1"])
-        self.ui.comboBox_basis4.addItems(basis_options_dict[self.basis]["pol2"])
-
-        # self.ui.comboBox_basis2.setCurrentText(self.basis_diff)
-        # self.ui.comboBox_basis3.setCurrentText(self.basis_pol1)
-        # self.ui.comboBox_basis4.setCurrentText(self.basis_pol2)
-
-    def update_basis2(self):
-        """
-        Update basis attribute self.basis_diff
-        """
-        self.basis_diff = self.ui.comboBox_basis2.currentText()
-
-    def update_basis3(self):
-        """
-        Update basis attribute self.basis_pol1
-        """
-        self.basis_pol1 = self.ui.comboBox_basis3.currentText()
-
-    def update_basis4(self):
-        """
-        Update basis attribute self.basis_pol2
-        """
-        self.basis_pol2 = self.ui.comboBox_basis4.currentText()
 
     def filename_update(self):
         self.filename = self.ui.lineEdit_filename.text()

@@ -81,21 +81,6 @@ class Settings:
         return self._gaussian_settings.get("basis", "6-31G")
 
     @property
-    def basis_diff(self):
-        # Gaussian only
-        return self._gaussian_settings.get("basis_diff")
-
-    @property
-    def basis_pol1(self):
-        # Gaussian only
-        return self._gaussian_settings.get("basis_pol1", "d")
-
-    @property
-    def basis_pol2(self):
-        # Gaussian only
-        return self._gaussian_settings.get("basis_pol2", "p")
-
-    @property
     def functional(self):
         if self.software == "ORCA":
             return self._orca_settings.get("functional", "B3LYP")
@@ -198,21 +183,6 @@ class Settings:
         else:
             self._gaussian_settings["basis"] = value
 
-    @basis_diff.setter
-    def basis_diff(self, value):
-        # Gaussian only
-        self._gaussian_settings["basis_diff"] = value
-
-    @basis_pol1.setter
-    def basis_pol1(self, value):
-        # Gaussian only
-        self._gaussian_settings["basis_pol1"] = value
-
-    @basis_pol2.setter
-    def basis_pol2(self, value):
-        # Gaussian only
-        self._gaussian_settings["basis_pol2"] = value
-
     @job_mem.setter
     def job_mem(self, value):
         if type(value) == int:
@@ -254,9 +224,6 @@ class Settings:
             "gaussian_settings": {
                 "functional": "B3LYP",
                 "basis": "6-31G",
-                "basis_diff": None,
-                "basis_pol1": "d",
-                "basis_pol2": "p",
                 "job_type": "Opt",
                 "additional_keys": ["empiricaldispersion=gd3"],
                 "job_mem": 6,
@@ -270,27 +237,51 @@ class Settings:
                     "Single point": [],
                 },
                 "link0_options": ["chk", "mem=6GB"],
-                "basis_options": {
-                    "3-21G": {"pol1": [""], "pol2": [""], "diff": ["", "+"]},
-                    "6-21G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-                    "4-31G": {"pol1": ["", "d"], "pol2": ["", "p"], "diff": [""]},
-                    "6-31G": {
-                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                        "diff": ["", "+", "++"],
-                    },
-                    "6-311G": {
-                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                        "diff": ["", "+", "++"],
-                    },
-                    "D95": {
-                        "pol1": ["", "d", "2d", "3d", "df", "2df", "3df", "3d2f"],
-                        "pol2": ["", "p", "2p", "3p", "pd", "2pd", "3pd", "3p2d"],
-                        "diff": ["", "+", "++"],
-                    },
-                },
-                "functional_options": ["B3LYP", "rB3LYP", "M062X"],
+                "basis_options": [
+                    # Gaussian basis sets - full names, same style as ORCA's list
+                    "Def2SVP",
+                    "Def2SVPP",
+                    "Def2TZVP",
+                    "Def2TZVPP",
+                    "Def2QZVP",
+                    "Def2QZVPP",
+                    "cc-pVDZ",
+                    "cc-pVTZ",
+                    "cc-pVQZ",
+                    "cc-pV5Z",
+                    "aug-cc-pVDZ",
+                    "aug-cc-pVTZ",
+                    "aug-cc-pVQZ",
+                    "STO-3G",
+                    "3-21G",
+                    "3-21+G",
+                    "6-31G",
+                    "6-31G(d)",
+                    "6-31G(d,p)",
+                    "6-31+G",
+                    "6-31+G(d)",
+                    "6-31+G(d,p)",
+                    "6-31++G",
+                    "6-31++G(d)",
+                    "6-31++G(d,p)",
+                    "6-311G",
+                    "6-311G(d)",
+                    "6-311G(d,p)",
+                    "6-311+G",
+                    "6-311+G(d)",
+                    "6-311+G(d,p)",
+                    "6-311++G",
+                    "6-311++G(d)",
+                    "6-311++G(d,p)",
+                ],
+                "functional_options": [
+                    "B3LYP",
+                    "PBE1PBE",
+                    "M062X",
+                    "wB97XD",
+                    "B97D",
+                    "TPSSTPSS",
+                ],
             },
             "orca_settings": {
                 "functional": "B3LYP",
@@ -435,6 +426,23 @@ class Settings:
                         "\n" + "=" * 60 + "\n"
                         "ERROR: Your .custom_settings.json file is incompatible with this version of REACT.\n"
                         "The ORCA settings format has changed.\n\n"
+                        "Please delete the .custom_settings.json file from your REACT directory\n"
+                        "and restart REACT to use the new default settings.\n"
+                        "=" * 60 + "\n"
+                    )
+                # Use defaults instead
+                self.set_default_settings()
+                return
+
+        # Validate Gaussian settings format before loading
+        if "gaussian_settings" in settings:
+            gaussian_basis = settings["gaussian_settings"].get("basis_options")
+            if gaussian_basis is not None and not isinstance(gaussian_basis, list):
+                if self.react:
+                    self.react.append_text(
+                        "\n" + "=" * 60 + "\n"
+                        "ERROR: Your .custom_settings.json file is incompatible with this version of REACT.\n"
+                        "The Gaussian settings format has changed.\n\n"
                         "Please delete the .custom_settings.json file from your REACT directory\n"
                         "and restart REACT to use the new default settings.\n"
                         "=" * 60 + "\n"
@@ -673,21 +681,6 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
                 self.ui.basis1_comboBox_gauss, "basis", "gaussian"
             )
         )
-        self.ui.basis2_comboBox_gauss.textActivated.connect(
-            lambda: self.combobox_update(
-                self.ui.basis2_comboBox_gauss, "diff", "gaussian"
-            )
-        )
-        self.ui.basis3_comboBox_gauss.textActivated.connect(
-            lambda: self.combobox_update(
-                self.ui.basis3_comboBox_gauss, "pol1", "gaussian"
-            )
-        )
-        self.ui.basis4_comboBox_gauss.textActivated.connect(
-            lambda: self.combobox_update(
-                self.ui.basis4_comboBox_gauss, "pol2", "gaussian"
-            )
-        )
         self.ui.job_type_comboBox_gauss.textActivated.connect(
             lambda: self.combobox_update(
                 self.ui.job_type_comboBox_gauss, "job type", "gaussian"
@@ -748,19 +741,6 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
             self.settings._gaussian_settings["basis"]
         )
 
-        # Update basis options for Gaussian
-        self.update_basis_options(self.settings._gaussian_settings["basis"], "gaussian")
-
-        self.ui.basis2_comboBox_gauss.setCurrentText(
-            self.settings._gaussian_settings["basis_diff"]
-        )
-        self.ui.basis3_comboBox_gauss.setCurrentText(
-            self.settings._gaussian_settings["basis_pol1"]
-        )
-        self.ui.basis4_comboBox_gauss.setCurrentText(
-            self.settings._gaussian_settings["basis_pol2"]
-        )
-
         self.ui.add_DFT_list1_gauss.addItems(
             self.settings._gaussian_settings["additional_keys"]
         )
@@ -819,21 +799,8 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
                     functional_options.append(text)
 
         elif key == "basis":
-            if software == "gaussian":
-                if text not in basis_options:
-                    basis_options[text] = {"pol1": [""], "pol2": [""], "diff": [""]}
-                self.update_basis_options(text, software)
-            # ORCA basis_options is a list, no modification needed
-
-        elif key in ["diff", "pol1", "pol2"] and software == "gaussian":
-            basis = self.ui.basis1_comboBox_gauss.currentText()
-            try:
-                if text and text not in basis_options[basis][key]:
-                    basis_options[basis][key].append(text)
-            except KeyError:
-                self.react.append_text(
-                    f"ERROR: cannot add custom options before basis {basis} has been properly added to REACT"
-                )
+            if text not in basis_options:
+                basis_options.append(text)
 
     def add_item_to_list(self, Qtextinput, Qlist, DFT_key, software):
         """Adds text input to list widget"""
@@ -883,41 +850,6 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
                 except ValueError:
                     pass
 
-    def update_basis_options(self, basis, software):
-        """Updates polarization and diffuse functions available for basis set"""
-        if software != "gaussian":
-            return
-
-        self.block_gaussian_combo_signals(True)
-
-        self.ui.basis2_comboBox_gauss.clear()
-        self.ui.basis3_comboBox_gauss.clear()
-        self.ui.basis4_comboBox_gauss.clear()
-
-        try:
-            self.ui.basis2_comboBox_gauss.addItems(
-                self.gaussian_basis_options[basis]["diff"]
-            )
-            self.ui.basis3_comboBox_gauss.addItems(
-                self.gaussian_basis_options[basis]["pol1"]
-            )
-            self.ui.basis4_comboBox_gauss.addItems(
-                self.gaussian_basis_options[basis]["pol2"]
-            )
-        except KeyError:
-            pass
-
-        self.block_gaussian_combo_signals(False)
-
-    def block_gaussian_combo_signals(self, bool_):
-        """Block/unblock signals for Gaussian comboboxes"""
-        self.ui.comboBox_funct_gauss.blockSignals(bool_)
-        self.ui.basis1_comboBox_gauss.blockSignals(bool_)
-        self.ui.job_type_comboBox_gauss.blockSignals(bool_)
-        self.ui.basis2_comboBox_gauss.blockSignals(bool_)
-        self.ui.basis3_comboBox_gauss.blockSignals(bool_)
-        self.ui.basis4_comboBox_gauss.blockSignals(bool_)
-
     def save_settings(self):
         """Save all settings to custom_settings.json"""
         # Save software selection
@@ -947,48 +879,10 @@ class SettingsTheWindow(QtWidgets.QMainWindow):
             self.gaussian_functional_options.append(gaussian_functional)
 
         if gaussian_basis and gaussian_basis not in self.gaussian_basis_options:
-            self.gaussian_basis_options[gaussian_basis] = {
-                "pol1": ["", "d", "2d", "3d"],
-                "pol2": ["", "p", "2p", "3p"],
-                "diff": ["", "+", "++"],
-            }
-
-        # Update Gaussian basis polarization/diffuse if custom values
-        gaussian_diff = self.ui.basis2_comboBox_gauss.currentText()
-        gaussian_pol1 = self.ui.basis3_comboBox_gauss.currentText()
-        gaussian_pol2 = self.ui.basis4_comboBox_gauss.currentText()
-
-        if gaussian_basis in self.gaussian_basis_options:
-            if (
-                gaussian_diff
-                and gaussian_diff
-                not in self.gaussian_basis_options[gaussian_basis]["diff"]
-            ):
-                self.gaussian_basis_options[gaussian_basis]["diff"].append(
-                    gaussian_diff
-                )
-            if (
-                gaussian_pol1
-                and gaussian_pol1
-                not in self.gaussian_basis_options[gaussian_basis]["pol1"]
-            ):
-                self.gaussian_basis_options[gaussian_basis]["pol1"].append(
-                    gaussian_pol1
-                )
-            if (
-                gaussian_pol2
-                and gaussian_pol2
-                not in self.gaussian_basis_options[gaussian_basis]["pol2"]
-            ):
-                self.gaussian_basis_options[gaussian_basis]["pol2"].append(
-                    gaussian_pol2
-                )
+            self.gaussian_basis_options.append(gaussian_basis)
 
         self.settings._gaussian_settings["functional"] = gaussian_functional
         self.settings._gaussian_settings["basis"] = gaussian_basis
-        self.settings._gaussian_settings["basis_diff"] = gaussian_diff
-        self.settings._gaussian_settings["basis_pol1"] = gaussian_pol1
-        self.settings._gaussian_settings["basis_pol2"] = gaussian_pol2
         self.settings._gaussian_settings["job_type"] = (
             self.ui.job_type_comboBox_gauss.currentText()
         )
